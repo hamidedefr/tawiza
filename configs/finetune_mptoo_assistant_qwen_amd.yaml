@@ -1,0 +1,77 @@
+# Fine-tuning Configuration for MPtoO Assistant
+# Model: Qwen2.5-Coder-7B
+# Hardware: AMD GPU (ROCm)
+# Method: LoRA
+# Purpose: Specialized MPtoO platform assistant
+
+### Model Configuration
+model_name_or_path: Qwen/Qwen2.5-Coder-7B-Instruct
+# Alternative smaller model: Qwen/Qwen2.5-Coder-3B-Instruct
+
+### Dataset Configuration
+dataset: mptoo_assistant
+dataset_dir: ./datasets
+template: qwen  # Qwen chat template
+
+### Training Method
+stage: sft  # Supervised Fine-Tuning
+do_train: true
+finetuning_type: lora  # LoRA for efficiency
+
+### LoRA Parameters
+lora_rank: 16  # Higher rank for better quality (vs 8)
+lora_alpha: 32  # 2x rank
+lora_dropout: 0.05
+lora_target: all  # Target all linear layers for maximum adaptation
+
+### Training Hyperparameters
+# Optimized for AMD GPU (12GB VRAM assumed)
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8  # Effective batch size = 16
+learning_rate: 5.0e-5  # Slightly higher for instruction tuning
+num_train_epochs: 5  # More epochs for small dataset
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+
+### Optimization
+fp16: true  # Mixed precision for AMD GPU (ROCm supports fp16)
+optim: adamw_torch  # Standard optimizer
+max_grad_norm: 1.0
+weight_decay: 0.01
+
+### Sequence Length
+cutoff_len: 2048  # Maximum context length
+max_samples: 1000  # Limit if dataset is larger
+
+### Logging & Evaluation
+output_dir: ./output/mptoo_assistant_qwen_lora
+logging_steps: 10
+save_steps: 100
+eval_steps: 100
+eval_strategy: steps
+save_strategy: steps
+save_total_limit: 3  # Keep only 3 best checkpoints
+
+### Validation
+val_size: 0.1  # 10% for validation
+per_device_eval_batch_size: 2
+
+### Advanced Options
+gradient_checkpointing: true  # Save memory
+ddp_timeout: 180000000  # Prevent timeout on slow AMD GPU
+report_to: mlflow  # Track in MLflow
+
+### AMD GPU Specific (ROCm)
+# These are set via environment variables, documented below
+# HSA_OVERRIDE_GFX_VERSION will be set in launch script
+# PYTORCH_ROCM_ARCH will be set in launch script
+
+### Generation Config (for evaluation)
+do_sample: true
+temperature: 0.7
+top_p: 0.9
+max_new_tokens: 512
+
+### Preprocessing
+preprocessing_num_workers: 1  # Disabled multiprocessing to avoid Docker permission issues
+overwrite_cache: false

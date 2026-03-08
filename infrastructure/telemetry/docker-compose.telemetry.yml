@@ -1,0 +1,167 @@
+services:
+  # NOTE: Langfuse requires external hosting due to Docker-in-LXC (Proxmox VE) issues
+  # For LLM tracing, use Langfuse Cloud (free tier) or run on a VM/dedicated host
+  # Python SDK integration: src/infrastructure/agents/tajine/telemetry/providers.py
+  #
+  # langfuse-db:
+  #   image: postgres:15
+  #   container_name: tajine-langfuse-db
+  #   environment:
+  #     POSTGRES_DB: langfuse
+  #     POSTGRES_USER: langfuse
+  #     POSTGRES_PASSWORD: langfuse
+  #   networks:
+  #     - tajine-telemetry
+  #   restart: unless-stopped
+
+  # NOTE: Langfuse has compatibility issues with Docker-in-LXC (Proxmox VE)
+  # For now, use direct Langfuse integration in Python code instead
+  # See: src/infrastructure/agents/tajine/telemetry/providers.py
+  #
+  # langfuse:
+  #   image: langfuse/langfuse:2
+  #   container_name: tajine-langfuse
+  #   init: true
+  #   depends_on:
+  #     langfuse-db:
+  #       condition: service_healthy
+  #   ports:
+  #     - "3002:3000"
+  #   environment:
+  #     DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+  #     NEXTAUTH_SECRET: changeme-random-secret-at-least-32-characters-long
+  #     NEXTAUTH_URL: http://localhost:3002
+  #     SALT: changeme-random-salt-at-least-32-characters
+  #     ENCRYPTION_KEY: changeme-random-encryption-key-32-chars
+  #     TELEMETRY_ENABLED: "false"
+  #   networks:
+  #     - tajine-telemetry
+  #   restart: unless-stopped
+
+  # Prometheus - Metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tajine-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-remote-write-receiver'
+    networks:
+      - tajine-telemetry
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Grafana - Visualization platform
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tajine-grafana
+    ports:
+      - "3003:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./config/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: tajine
+      GF_USERS_ALLOW_SIGN_UP: "true"
+      GF_SERVER_ROOT_URL: http://localhost:3003
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      # Authentik OIDC SSO
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+      GF_AUTH_GENERIC_OAUTH_NAME: Authentik
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: grafana
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: 7JJnIOHVmmelM1RsZFUwPNi0aiPPcR7ilqRDTQtEl86IQzorNKWHF8fEwrleVryw7caJd68A4wC4WdpzQYtSCsBqr79xOo7s4Kw7yEcvrzDxWrK5dYWT9TFdggn3MNC7
+      GF_AUTH_GENERIC_OAUTH_SCOPES: openid email profile
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: https://auth.tawiza.fr/application/o/authorize/
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: https://auth.tawiza.fr/application/o/token/
+      GF_AUTH_GENERIC_OAUTH_API_URL: https://auth.tawiza.fr/application/o/userinfo/
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups[*], 'admin') && 'Admin' || 'Editor'"
+      GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN: "false"
+      GF_AUTH_SIGNOUT_REDIRECT_URL: https://auth.tawiza.fr/application/o/grafana/end-session/
+    networks:
+      - tajine-telemetry
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - loki
+
+  # Loki - Log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: tajine-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - tajine-telemetry
+    restart: unless-stopped
+
+  # OpenTelemetry Collector - Telemetry data pipeline
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: tajine-otel-collector
+    ports:
+      - "4327:4317"  # OTLP gRPC receiver (host 4327 -> container 4317)
+      - "4328:4318"  # OTLP HTTP receiver (host 4328 -> container 4318)
+      - "8888:8888"  # Prometheus metrics exposed by the collector
+      - "8889:8889"  # Prometheus exporter metrics
+    volumes:
+      - ./config/otel-collector.yml:/etc/otel-collector-config.yml:ro
+    command: ["--config=/etc/otel-collector-config.yml"]
+    networks:
+      - tajine-telemetry
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - loki
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Alertmanager - Alert routing
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: tajine-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    networks:
+      - tajine-telemetry
+    restart: unless-stopped
+
+networks:
+  tajine-telemetry:
+    name: tajine-telemetry
+    driver: bridge
+
+volumes:
+  # langfuse-db-data:  # Disabled - Langfuse requires external hosting
+  #   name: tajine-langfuse-db-data
+  prometheus-data:
+    name: tajine-prometheus-data
+  grafana-data:
+    name: tajine-grafana-data
+  loki-data:
+    name: tajine-loki-data

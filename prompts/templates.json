@@ -1,0 +1,137 @@
+{
+  "templates": [
+    {
+      "name": "browser_navigation",
+      "format": "browser",
+      "template": "Navigate to {url} and {action}",
+      "variables": [
+        "action",
+        "url"
+      ],
+      "description": "Navigation et action sur une page web",
+      "version": "1.0",
+      "metadata": {
+        "category": "browser",
+        "use_case": "automation"
+      },
+      "usage_count": 0,
+      "created_at": "2025-11-15T01:54:11.192014",
+      "updated_at": "2025-11-15T01:54:11.192018"
+    },
+    {
+      "name": "browser_task_detailed",
+      "format": "browser",
+      "template": "Go to {url}\nTask: {task}\n{context}\nPlease complete this task step by step.",
+      "variables": [
+        "context",
+        "url",
+        "task"
+      ],
+      "description": "Tâche browser détaillée avec contexte",
+      "version": "1.0",
+      "metadata": {
+        "category": "browser",
+        "use_case": "automation"
+      },
+      "usage_count": 0,
+      "created_at": "2025-11-15T01:54:11.192282",
+      "updated_at": "2025-11-15T01:54:11.192282"
+    },
+    {
+      "name": "text_classification",
+      "format": "alpaca",
+      "template": "### Instruction:\nClassify the following text into one of these categories: {categories}\n\n### Input:\n{text}\n\n### Response:\n",
+      "variables": [
+        "categories",
+        "text"
+      ],
+      "description": "Classification de texte",
+      "version": "1.0",
+      "metadata": {
+        "category": "classification",
+        "use_case": "ml"
+      },
+      "usage_count": 0,
+      "created_at": "2025-11-15T01:54:11.192370",
+      "updated_at": "2025-11-15T01:54:11.192371"
+    },
+    {
+      "name": "chat_simple",
+      "format": "system_user",
+      "template": "System: {system_prompt}\n\nUser: {user_message}",
+      "variables": [
+        "system_prompt",
+        "user_message"
+      ],
+      "description": "Chat simple avec system prompt",
+      "version": "1.0",
+      "metadata": {
+        "category": "chat",
+        "use_case": "conversation"
+      },
+      "usage_count": 0,
+      "created_at": "2025-11-15T01:54:11.192428",
+      "updated_at": "2025-11-15T01:54:11.192428"
+    },
+    {
+      "name": "named_entity_recognition",
+      "format": "alpaca",
+      "template": "### Instruction:\nExtract named entities from the following text. Return entities in JSON format with their types.\n\n### Input:\n{text}\n\n### Response:\n",
+      "variables": [
+        "text"
+      ],
+      "description": "Extraction d'entités nommées",
+      "version": "1.0",
+      "metadata": {
+        "category": "ner",
+        "use_case": "ml"
+      },
+      "usage_count": 0,
+      "created_at": "2025-11-15T01:54:11.192475",
+      "updated_at": "2025-11-15T01:54:11.192475"
+    },
+    {
+      "name": "text_summarization",
+      "format": "system_user",
+      "template": "System: You are a helpful assistant that summarizes text concisely.\n\nUser: Please summarize the following text in {max_words} words or less:\n\n{text}",
+      "variables": [
+        "max_words",
+        "text"
+      ],
+      "description": "Résumé de texte",
+      "version": "1.0",
+      "metadata": {
+        "category": "summarization",
+        "use_case": "ml"
+      },
+      "usage_count": 0,
+      "created_at": "2025-11-15T01:54:11.192542",
+      "updated_at": "2025-11-15T01:54:11.192543"
+    },
+    {
+      "name": "code_generation",
+      "format": "system_user",
+      "template": "System: You are an expert programmer. Write clean, well-documented code.\n\nUser: Write a {language} function to {task}.\nRequirements: {requirements}",
+      "variables": [
+        "task",
+        "language",
+        "requirements"
+      ],
+      "description": "Génération de code",
+      "version": "1.0",
+      "metadata": {
+        "category": "code",
+        "use_case": "development"
+      },
+      "usage_count": 0,
+      "created_at": "2025-11-15T01:54:11.192649",
+      "updated_at": "2025-11-15T01:54:11.192649"
+    }
+  ],
+  "stats": {
+    "total_renders": 0,
+    "renders_by_template": {},
+    "renders_by_format": {}
+  },
+  "saved_at": "2025-11-15T01:54:11.193001"
+}

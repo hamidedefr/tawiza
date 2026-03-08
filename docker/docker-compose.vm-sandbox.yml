@@ -1,0 +1,187 @@
+# Docker Compose pour VM Sandbox OpenManus
+# Configuration pour exécuter des machines virtuelles isolées
+
+services:
+  # Service principal VM Sandbox Manager
+  vm-sandbox-manager:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.vm-sandbox
+    container_name: mptoo-vm-sandbox
+    hostname: vm-sandbox
+    privileged: true  # Nécessaire pour KVM
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vm-storage:/var/lib/mptoo/vm-storage
+      - vm-images:/var/lib/mptoo/vm-images
+      - vm-logs:/app/logs
+      - ../src:/app/src:ro
+      - ../configs:/app/configs:ro
+    environment:
+      - VM_PROVIDER=${VM_PROVIDER:-docker}
+      - MAX_VMS=${MAX_VMS:-5}
+      - VM_TIMEOUT=${VM_TIMEOUT:-3600}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - E2B_API_KEY=${E2B_API_KEY:-}
+      - GPU_ENABLED=${GPU_ENABLED:-true}
+      - GPU_DEVICE=${GPU_DEVICE:-cuda:0}
+    ports:
+      - "8095:8085"  # API VM Sandbox (8085 utilisé par Label Studio)
+      - "5900-5902:5900-5902"  # VNC ports (reduced from 11 to 3)
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Registry local pour images VM
+  vm-registry:
+    image: registry:2
+    container_name: mptoo-vm-registry
+    hostname: vm-registry
+    volumes:
+      - vm-registry-data:/var/lib/registry
+    ports:
+      - "5000:5000"
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+    environment:
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
+
+  # Service VNC pour accès graphique aux VMs
+  vm-vnc-proxy:
+    image: nginx:alpine
+    container_name: mptoo-vm-vnc-proxy
+    hostname: vm-vnc
+    privileged: true  # Required for socketpair() - kernel capability needed
+    volumes:
+      - ./vnc-nginx.conf:/etc/nginx/nginx.conf:ro
+      - vm-logs:/var/log/nginx
+    ports:
+      - "8086:80"  # VNC web proxy
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+    depends_on:
+      - vm-sandbox-manager
+
+  # Monitoring des VMs
+  vm-monitor:
+    image: prom/prometheus:latest
+    container_name: mptoo-vm-monitor
+    hostname: vm-monitor
+    volumes:
+      - ./prometheus-vm.yml:/etc/prometheus/prometheus.yml:ro
+      - vm-prometheus-data:/prometheus
+    ports:
+      - "9091:9090"
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  # Base de données pour métriques VM
+  vm-metrics-db:
+    image: influxdb:2.7
+    container_name: mptoo-vm-metrics
+    hostname: vm-metrics
+    volumes:
+      - vm-influxdb-data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USER:-admin}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD:-admin123}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-mptoo}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-vm-metrics}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN:-mptoo-token}
+    ports:
+      - "8087:8086"
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+
+  # Dashboard Grafana pour VMs
+  vm-grafana:
+    image: grafana/grafana:latest
+    container_name: mptoo-vm-grafana
+    hostname: vm-grafana
+    volumes:
+      - vm-grafana-data:/var/lib/grafana
+      - ./grafana-vm-dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana-vm-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3005:3000"
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+    depends_on:
+      - vm-monitor
+      - vm-metrics-db
+
+  # Service Redis pour coordination VM
+  vm-redis:
+    image: redis:7-alpine
+    container_name: mptoo-vm-redis
+    hostname: vm-redis
+    volumes:
+      - vm-redis-data:/data
+    ports:
+      - "6380:6379"
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Service de découverte pour VMs
+  vm-consul:
+    image: hashicorp/consul:1.15
+    container_name: mptoo-vm-consul
+    hostname: vm-consul
+    volumes:
+      - vm-consul-data:/consul/data
+    ports:
+      - "8501:8500"
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0
+
+volumes:
+  vm-storage:
+    driver: local
+  vm-images:
+    driver: local
+  vm-logs:
+    driver: local
+  vm-registry-data:
+    driver: local
+  vm-prometheus-data:
+    driver: local
+  vm-influxdb-data:
+    driver: local
+  vm-grafana-data:
+    driver: local
+  vm-redis-data:
+    driver: local
+  vm-consul-data:
+    driver: local
+
+networks:
+  mptoo-network:
+    external: true
+    name: mptoo-network

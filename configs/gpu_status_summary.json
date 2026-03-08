@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-11-17T04:52:40.647250",
+  "hardware": {
+    "gpu_detected": true,
+    "devices": [
+      "0000:07:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M] (rev c8)"
+    ]
+  },
+  "ollama": {
+    "running": true,
+    "models_count": 5,
+    "models": [
+      "mptoo-assistant:latest",
+      "qwen3:14b",
+      "qwen3-coder:30b",
+      "llava:13b",
+      "mistral:latest"
+    ],
+    "gpu_layers": 0,
+    "gpu_active": false
+  },
+  "agents": {
+    "found": [
+      "openmanus",
+      "skyvern"
+    ],
+    "gpu_configured": []
+  },
+  "pytorch": {
+    "available": true,
+    "version": "2.9.1+cu128",
+    "gpu_available": false
+  },
+  "overall_status": "detected_inactive"
+}

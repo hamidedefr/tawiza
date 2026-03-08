@@ -1,0 +1,11 @@
+{
+  "uri": "bolt://localhost:7687",
+  "user": "neo4j",
+  "password": "mptoo_secret_2024",
+  "database": "neo4j",
+  "sync": {
+    "batch_size": 100,
+    "flush_interval_seconds": 5.0,
+    "max_queue_size": 10000
+  }
+}

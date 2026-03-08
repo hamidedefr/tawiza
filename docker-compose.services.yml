@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Chroma DB - Vector database for embeddings
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: mptoo-chromadb-new
+    privileged: true
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./data/chromadb:/chroma/chroma
+    networks:
+      - mptoo-v2_mptoo-network
+
+  # Skyvern - AI-powered web automation
+  skyvern-api:
+    image: skyvern/skyvern:latest
+    container_name: mptoo-skyvern-new
+    environment:
+      - DATABASE_URL=postgresql://mptoo:mptoo_password@mptoo-postgres:5432/mptoo
+      - REDIS_URL=redis://mptoo-redis:6379/1
+      - API_PORT=8501
+    ports:
+      - "8501:8501"
+    networks:
+      - mptoo-v2_mptoo-network
+    depends_on:
+      - chromadb
+
+networks:
+  mptoo-v2_mptoo-network:
+    external: true

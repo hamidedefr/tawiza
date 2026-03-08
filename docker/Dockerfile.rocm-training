@@ -1,0 +1,87 @@
+# Dockerfile for MPtoO Fine-Tuning with ROCm 7.1
+# Based on Ubuntu 24.04 with ROCm 7.1 installation
+
+FROM ubuntu:24.04
+
+# Set working directory
+WORKDIR /workspace
+
+# Set environment variables for ROCm
+ENV ROCM_PATH=/opt/rocm
+ENV HIP_PLATFORM=amd
+ENV HSA_OVERRIDE_GFX_VERSION=11.0.0
+ENV PYTORCH_ROCM_ARCH=gfx1100
+ENV PATH=$ROCM_PATH/bin:$PATH
+ENV LD_LIBRARY_PATH=$ROCM_PATH/lib:$LD_LIBRARY_PATH
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    vim \
+    build-essential \
+    gnupg2 \
+    ca-certificates \
+    software-properties-common \
+    python3.12 \
+    python3.12-dev \
+    python3.12-venv \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add ROCm GPG key
+RUN mkdir -p /etc/apt/keyrings && \
+    wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /etc/apt/keyrings/rocm.gpg
+
+# Add ROCm repository
+RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/7.1 jammy main" > /etc/apt/sources.list.d/rocm.list && \
+    echo 'Package: *' > /etc/apt/preferences.d/rocm-pin-600 && \
+    echo 'Pin: release o=repo.radeon.com' >> /etc/apt/preferences.d/rocm-pin-600 && \
+    echo 'Pin-Priority: 600' >> /etc/apt/preferences.d/rocm-pin-600
+
+# Update and install ROCm 7.1
+RUN apt-get update && \
+    apt-get install -y rocm-hip-sdk rocm-smi-lib && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create Python virtual environment to avoid conflicts with system packages
+RUN python3.12 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Upgrade pip in virtual environment
+RUN pip install --upgrade pip setuptools wheel
+
+# Install PyTorch with ROCm support
+RUN pip install --no-cache-dir \
+    torch==2.7.0 \
+    torchvision==0.22.0 \
+    torchaudio==2.7.0 \
+    --index-url https://download.pytorch.org/whl/rocm6.3
+
+# Install LLaMA-Factory and all dependencies
+RUN pip install --no-cache-dir \
+    transformers \
+    datasets \
+    accelerate \
+    peft \
+    trl \
+    mlflow \
+    scipy \
+    ipython \
+    jupyter \
+    tensorboard \
+    llamafactory
+
+# Create symlink for python
+RUN ln -s /opt/venv/bin/python /usr/local/bin/python
+
+# Create directories
+RUN mkdir -p /workspace/output /workspace/datasets /workspace/configs
+
+# Set Python to unbuffered mode for real-time logging
+ENV PYTHONUNBUFFERED=1
+
+# Default command
+CMD ["/bin/bash"]

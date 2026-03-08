@@ -1,0 +1,140 @@
+# Docker Compose pour Ollama avec GPU ROCm
+# Intégration GPU complète avec les agents
+
+services:
+  ollama-gpu:
+    image: ollama/ollama:latest
+    container_name: ollama-gpu-rocm
+
+    # GPU access for AMD ROCm
+    devices:
+      - /dev/kfd
+      - /dev/dri
+
+    # Security options for GPU access
+    security_opt:
+      - seccomp:unconfined
+
+    # Group access for GPU
+    group_add:
+      - "44"    # video group
+      - "993"   # render group
+
+    # Environment variables for ROCm GPU
+    environment:
+      - OLLAMA_GPU_LAYERS=-1  # Auto-detect optimal GPU layers
+      - OLLAMA_GPU_MEMORY_FRACTION=0.9
+      - HIP_VISIBLE_DEVICES=0
+      - ROCR_VISIBLE_DEVICES=0
+      - HSA_OVERRIDE_GFX_VERSION=11.0.0
+      - OLLAMA_PARALLEL=4
+      - OLLAMA_KEEP_ALIVE=24h
+
+    # GPU runtime specification (using default runtime with device access)
+
+    # Port mapping
+    ports:
+      - "11435:11434"  # Different port to avoid conflict with host Ollama
+
+    # Volume for models
+    volumes:
+      - ollama_gpu_data:/root/.ollama
+
+    # Resource limits and reservations
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: amd
+              count: 1
+              capabilities: [gpu]
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Logging
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Agent service with GPU access
+  mptoo-agent-gpu:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent-gpu
+    container_name: mptoo-agent-gpu
+
+    # GPU access
+    devices:
+      - /dev/kfd
+      - /dev/dri
+
+    security_opt:
+      - seccomp:unconfined
+
+    group_add:
+      - "44"
+      - "993"
+
+    environment:
+      - GPU_ENABLED=true
+      - GPU_DEVICE=cuda:0
+      - OLLAMA_HOST=http://ollama-gpu:11434
+      - PYTORCH_ROCM_ARCH=gfx1100
+      - HIP_VISIBLE_DEVICES=0
+
+    depends_on:
+      ollama-gpu:
+        condition: service_healthy
+
+    volumes:
+      - ../src:/app/src
+      - ../configs:/app/configs
+      - ../output:/app/output
+
+    network_mode: host
+
+    restart: unless-stopped
+
+  # Monitoring service
+  gpu-monitor:
+    image: rocm/rocm-terminal:latest
+    container_name: gpu-monitor
+
+    devices:
+      - /dev/kfd
+      - /dev/dri
+
+    command: >
+      bash -c "
+        echo 'GPU Monitoring Started...' &&
+        while true; do
+          echo '=== GPU Status ===' &&
+          rocm-smi --showtemp --showpower --showuse --showmeminfo vram 2>/dev/null || echo 'ROCm SMI unavailable' &&
+          echo '=== Memory Usage ===' &&
+          free -h &&
+          echo '=== Process GPU ===' &&
+          ps aux | grep -E '(ollama|python)' | grep -v grep &&
+          echo '' &&
+          sleep 30
+        done
+      "
+
+    volumes:
+      - ./gpu_monitoring:/logs
+
+    restart: unless-stopped
+
+volumes:
+  ollama_gpu_data:
+    driver: local

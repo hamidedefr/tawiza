@@ -1,0 +1,63 @@
+<!--
+  Label Studio Template for Instruction Tuning Data
+  Use this template to annotate/create instruction-response pairs for fine-tuning
+-->
+<View>
+  <Header value="MPtoO Instruction Tuning Annotation"/>
+
+  <!-- Instruction Section -->
+  <View style="box-shadow: 2px 2px 8px #999; padding: 20px; margin-top: 10px; border-radius: 5px; background: #f9f9f9">
+    <Header value="Instruction (User Question/Command)"/>
+    <TextArea name="instruction" toName="text"
+              placeholder="Enter the user's question or instruction..."
+              rows="3" maxSubmissions="1" editable="true"/>
+  </View>
+
+  <!-- Optional Input/Context Section -->
+  <View style="box-shadow: 2px 2px 8px #999; padding: 20px; margin-top: 10px; border-radius: 5px; background: #f0f8ff">
+    <Header value="Input/Context (Optional)"/>
+    <TextArea name="input" toName="text"
+              placeholder="Additional context if needed (code snippet, error message, etc.)..."
+              rows="3" maxSubmissions="1" editable="true"/>
+  </View>
+
+  <!-- Response Section -->
+  <View style="box-shadow: 2px 2px 8px #999; padding: 20px; margin-top: 10px; border-radius: 5px; background: #f0fff0">
+    <Header value="Response (Assistant Answer)"/>
+    <TextArea name="output" toName="text"
+              placeholder="Enter the expected assistant response..."
+              rows="8" maxSubmissions="1" editable="true"/>
+  </View>
+
+  <!-- Category -->
+  <View style="margin-top: 15px;">
+    <Header value="Category"/>
+    <Choices name="category" toName="text" choice="single-radio">
+      <Choice value="commands" hint="CLI commands and usage"/>
+      <Choice value="troubleshooting" hint="Fixing errors and issues"/>
+      <Choice value="configuration" hint="Setup and config"/>
+      <Choice value="concepts" hint="Explaining concepts"/>
+      <Choice value="finetuning" hint="Fine-tuning related"/>
+      <Choice value="other" hint="Other topics"/>
+    </Choices>
+  </View>
+
+  <!-- Language -->
+  <View style="margin-top: 15px;">
+    <Header value="Language"/>
+    <Choices name="language" toName="text" choice="single-radio">
+      <Choice value="en" hint="English"/>
+      <Choice value="fr" hint="French"/>
+      <Choice value="mixed" hint="Mixed languages"/>
+    </Choices>
+  </View>
+
+  <!-- Quality Rating -->
+  <View style="margin-top: 15px;">
+    <Header value="Quality Rating"/>
+    <Rating name="quality" toName="text" maxRating="5"/>
+  </View>
+
+  <!-- Hidden text field (required by Label Studio) -->
+  <Text name="text" value="$text" hidden="true"/>
+</View>

@@ -1,0 +1,61 @@
+# Dockerfile for LLaMA-Factory WebUI with ROCm
+# Based on official ROCm PyTorch image - optimized for AMD RX 7900 XTX (gfx1100)
+
+FROM rocm/pytorch:rocm6.2_ubuntu22.04_py3.10_pytorch_release_2.3.0
+
+LABEL maintainer="MPtoO Team"
+LABEL description="LLaMA-Factory WebUI with AMD ROCm support"
+
+# Environment variables
+ENV HSA_OVERRIDE_GFX_VERSION=11.0.0
+ENV PYTORCH_ROCM_ARCH=gfx1100
+ENV HIP_VISIBLE_DEVICES=0
+ENV GRADIO_SERVER_NAME=0.0.0.0
+ENV GRADIO_SERVER_PORT=7860
+ENV PYTHONUNBUFFERED=1
+ENV USE_MODELSCOPE_HUB=0
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip install --upgrade pip setuptools wheel
+
+# Copy pre-cloned LLaMA-Factory source
+COPY llamafactory-src /app
+
+WORKDIR /app
+
+# Install LLaMA-Factory with basic extras (avoid vllm/bitsandbytes compilation issues on ROCm)
+RUN pip install --no-cache-dir -e ".[torch,metrics]"
+
+# Install additional required dependencies
+RUN pip install --no-cache-dir \
+    gradio>=4.0.0 \
+    transformers>=4.45.0 \
+    datasets \
+    accelerate \
+    peft>=0.12.0 \
+    trl \
+    scipy \
+    tensorboard \
+    sentencepiece \
+    protobuf \
+    tiktoken \
+    einops
+
+# Create directories
+RUN mkdir -p /app/saves /app/data/mptoo /app/models
+
+# Expose ports
+EXPOSE 7860 6006
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:7860 || exit 1
+
+# Default command - start WebUI
+CMD ["llamafactory-cli", "webui"]

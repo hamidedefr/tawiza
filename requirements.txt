@@ -1,0 +1,92 @@
+# Core dependencies
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+
+# API & Web
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+httpx>=0.27.0
+cachetools>=5.3.0
+
+# Database
+sqlalchemy[asyncio]>=2.0.0
+alembic>=1.13.0
+aiosqlite>=0.19.0
+
+# Data Processing
+pandas>=2.2.0
+numpy>=1.26.0
+feedparser>=6.0.0
+
+# Graph Analytics
+networkx>=3.2
+
+# Monitoring
+prometheus-client>=0.19.0
+
+# CLI Core
+typer>=0.9.0
+rich>=13.7.0
+plotext>=5.2.8
+inquirer>=3.1.0
+questionary>=2.0.0
+tenacity>=8.2.0
+psutil>=5.9.0
+loguru>=0.7.0
+
+# CLI UX Enhancements
+iterfzf>=1.8.0              # Fuzzy finder interface
+InquirerPy>=0.3.4           # Advanced interactive prompts
+alive-progress>=3.1.0       # Animated progress bars
+pyperclip>=1.8.0            # Clipboard support
+plyer>=2.1.0                # Desktop notifications
+thefuzz>=0.20.0             # Fuzzy string matching
+
+# Additional for ML (optional, lighter versions)
+mlflow>=2.10.0
+
+# Object Storage (MinIO S3-compatible)
+minio>=7.2.0
+
+# Annotation
+label-studio-sdk>=0.0.30
+
+# Development & Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+pytest-httpx>=0.30.0
+
+# TUI Advanced
+textual>=0.50.0
+textual-dev>=1.3.0
+
+# Export & Reporting
+jinja2>=3.1.0
+tabulate>=0.9.0
+markdown>=3.5.0
+
+# WebSocket
+websockets>=12.0
+
+# Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.0
+python-multipart>=0.0.6
+keyring>=25.6.0
+
+# Browser Automation
+browser-use>=0.9.5
+playwright>=1.56.0
+
+# LLM Providers
+ollama>=0.6.0
+anthropic>=0.37.0
+openai>=1.109.0
+litserve>=0.2.0  # LLM serving optimization (Phase 3)
+
+# Code Execution
+e2b>=2.6.0
+e2b-code-interpreter>=2.3.0

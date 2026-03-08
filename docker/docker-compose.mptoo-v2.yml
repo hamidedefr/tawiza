@@ -1,0 +1,192 @@
+services:
+  # ============ DATABASES (Only Qdrant & MinIO - PostgreSQL & Redis use host) ============
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: mptoo-qdrant
+    privileged: true
+    init: true
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    networks:
+      - mptoo-network
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: mptoo-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-mptoo}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-changeme}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    command: server /data --console-address ":9001"
+    networks:
+      - mptoo-network
+
+  # ============ BACKEND ============
+  fastapi:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: mptoo-api
+    privileged: true
+    environment:
+      # Use host PostgreSQL and Redis
+      DATABASE_URL: postgresql://mptoo:${POSTGRES_PASSWORD:-changeme}@host.docker.internal:5432/mptoo
+      REDIS_URL: redis://host.docker.internal:6379
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333 # à verifier
+      OLLAMA_URL: http://host.docker.internal:11434
+      MINIO_ENDPOINT: minio:9000
+    ports:
+      - "8010:8000"
+    depends_on:
+      qdrant:
+        condition: service_started
+    networks:
+      - mptoo-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============ STREAMLIT APPS ============
+  streamlit-evaluator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.streamlit
+      args:
+        APP_NAME: evaluator
+    container_name: mptoo-evaluator
+    privileged: true
+    environment:
+      API_URL: http://fastapi:8000
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      LLM_MODEL: qwen3-coder:30b
+    ports:
+      - "8511:8501"
+    depends_on:
+      - fastapi
+    networks:
+      - mptoo-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  streamlit-admin:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.streamlit
+      args:
+        APP_NAME: admin
+    container_name: mptoo-admin
+    privileged: true
+    environment:
+      API_URL: http://fastapi:8000
+    ports:
+      - "8512:8501"
+    depends_on:
+      - fastapi
+    networks:
+      - mptoo-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  streamlit-ml:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.streamlit
+      args:
+        APP_NAME: ml
+    container_name: mptoo-ml
+    privileged: true
+    environment:
+      API_URL: http://fastapi:8000
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      LLAMA_FACTORY_URL: ${LLAMA_FACTORY_URL:-http://host.docker.internal:7860}
+    ports:
+      - "8513:8501"
+    depends_on:
+      - fastapi
+    networks:
+      - mptoo-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============ OPTIONAL SERVICES ============
+  label-studio:
+    image: heartexlabs/label-studio:latest
+    container_name: mptoo-label-studio
+    environment:
+      LABEL_STUDIO_HOST: http://localhost:8085
+      DJANGO_DB: default
+      POSTGRE_HOST: host.docker.internal
+      POSTGRE_PORT: 5432
+      POSTGRE_NAME: label_studio
+      POSTGRE_USER: mptoo
+      POSTGRE_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - label_studio_data:/label-studio/data
+    ports:
+      - "8086:8080"
+    networks:
+      - mptoo-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - ml
+
+  skyvern:
+    image: skyvern/skyvern:latest
+    container_name: mptoo-skyvern
+    ports:
+      - "8080:8080"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      SKYVERN_API_KEY: ${SKYVERN_API_KEY:-}
+    networks:
+      - mptoo-network
+    profiles:
+      - crawler
+
+  # ============ LANGFUSE - LLM Observability (v2 - simpler setup) ============
+  langfuse:
+    image: langfuse/langfuse:2
+    container_name: mptoo-langfuse
+    environment:
+      # Use direct host IP for PostgreSQL connection
+      DATABASE_URL: postgresql://mptoo:${POSTGRES_PASSWORD:-changeme}@${POSTGRES_HOST:-host.docker.internal}:5432/langfuse
+      NEXTAUTH_URL: http://localhost:3150  # Matcher LANGFUSE_HOST dans .env
+      NEXTAUTH_SECRET: ${LANGFUSE_SECRET:-mptoo-langfuse-secret-key-2024}
+      SALT: ${LANGFUSE_SALT:-mptoo-salt-2024}
+      TELEMETRY_ENABLED: "false"
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: "true"
+      # Auto-initialization for self-hosted
+      LANGFUSE_INIT_ORG_ID: "mptoo-org"
+      LANGFUSE_INIT_ORG_NAME: "MPtoO Organization"
+      LANGFUSE_INIT_PROJECT_ID: "mptoo-project"
+      LANGFUSE_INIT_PROJECT_NAME: "MPtoO Agents"
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: "pk-lf-mptoo-agents-2024"
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: "sk-lf-mptoo-agents-secret-2024"
+      LANGFUSE_INIT_USER_EMAIL: "admin@mptoo.local"
+      LANGFUSE_INIT_USER_NAME: "MPtoO Admin"
+      LANGFUSE_INIT_USER_PASSWORD: "mptoo-admin-2024"
+    ports:
+      - "3150:3000"  # Port 3150: evite conflit avec Loki (3100), matcher .env LANGFUSE_HOST
+    networks:
+      - mptoo-network
+    privileged: true
+
+volumes:
+  qdrant_data:
+  minio_data:
+  label_studio_data:
+
+networks:
+  mptoo-network:
+    driver: bridge

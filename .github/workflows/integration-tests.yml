@@ -1,0 +1,176 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, mvp-local, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'  # Run nightly at 2 AM UTC
+
+jobs:
+  integration-tests:
+    name: Integration Tests with Services
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: mptoo
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: mptoo_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov pytest-timeout httpx asyncpg
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 60 bash -c 'until pg_isready -h localhost -p 5432 -U mptoo; do sleep 1; done'
+
+          echo "Waiting for Redis..."
+          timeout 60 bash -c 'until nc -z localhost 6379; do sleep 1; done'
+
+          echo "All services are ready!"
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql+asyncpg://mptoo:test_password@localhost:5432/mptoo_test
+        run: |
+          alembic upgrade head
+
+      - name: Run integration tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          DATABASE_URL: postgresql+asyncpg://mptoo:test_password@localhost:5432/mptoo_test
+          REDIS_URL: redis://localhost:6379/0
+          TEST_ENV: "true"
+        run: |
+          pytest tests/integration/ \
+            -v \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --timeout=300 \
+            -m "integration"
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: integration
+          name: codecov-integration
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            htmlcov/
+            coverage.xml
+
+  cli-integration-tests:
+    name: CLI Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: mptoo
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: mptoo_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Start API server
+        env:
+          DATABASE_URL: postgresql+asyncpg://mptoo:test_password@localhost:5432/mptoo_test
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          uvicorn src.interfaces.api.main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+          curl http://localhost:8000/health
+
+      - name: Run CLI integration tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/integration/test_cli_commands.py \
+            -v \
+            --cov=src/cli \
+            --cov-report=xml \
+            --timeout=60
+
+      - name: Upload CLI test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-test-results
+          path: coverage.xml

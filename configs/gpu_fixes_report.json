@@ -1,0 +1,191 @@
+{
+  "timestamp": "2025-11-17T05:22:12.699241",
+  "fixes_applied": [
+    {
+      "timestamp": "2025-11-17T05:21:23.871411",
+      "component": "ROCm Drivers",
+      "fix": "Commande r\u00e9ussie: echo deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/7.1 jammy main",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:21:24.797472",
+      "component": "ROCm Drivers",
+      "fix": "Commande r\u00e9ussie: apt install",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:21:56.850530",
+      "component": "ROCm Drivers",
+      "fix": "Commande r\u00e9ussie: apt install",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:21:57.021471",
+      "component": "ROCm Drivers",
+      "fix": "Commande r\u00e9ussie: apt install",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.165332",
+      "component": "ROCm Drivers",
+      "fix": "Commande r\u00e9ussie: apt install",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.165512",
+      "component": "Ollama GPU",
+      "fix": "Configuration cr\u00e9\u00e9e: /etc/ollama/config.json",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.361560",
+      "component": "Ollama GPU",
+      "fix": "Service systemd mis \u00e0 jour et red\u00e9marr\u00e9",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.361785",
+      "component": "Environment Variables",
+      "fix": "Script cr\u00e9\u00e9: /etc/profile.d/mptoo-gpu.sh",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.361810",
+      "component": "Environment Variables",
+      "fix": "Variables GPU appliqu\u00e9es",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.362291",
+      "component": "File Permissions",
+      "fix": "Permissions corrig\u00e9es: /dev/kfd",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.362738",
+      "component": "File Permissions",
+      "fix": "Permissions corrig\u00e9es: /dev/dri/renderD128",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.363161",
+      "component": "File Permissions",
+      "fix": "Permissions 644: src/cli/main.py",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.363576",
+      "component": "File Permissions",
+      "fix": "Permissions 644: docker/docker-compose.rocm-training.yml",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.364011",
+      "component": "File Permissions",
+      "fix": "Permissions 644: pyproject.toml",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.364390",
+      "component": "File Permissions",
+      "fix": "Permissions 644: requirements.txt",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.364467",
+      "component": "Agents GPU",
+      "fix": "Configuration cr\u00e9\u00e9e: src/infrastructure/agents/openmanus/gpu_config.py",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.364522",
+      "component": "Agents GPU",
+      "fix": "Configuration cr\u00e9\u00e9e: src/infrastructure/agents/skyvern/gpu_config.py",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.364570",
+      "component": "Agents GPU",
+      "fix": "Configuration cr\u00e9\u00e9e: src/infrastructure/agents/browser_use/gpu_config.py",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:04.373128",
+      "component": "Docker GPU",
+      "fix": "Conteneur ROCm d\u00e9j\u00e0 actif",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:08.207947",
+      "component": "Docker GPU",
+      "fix": "GPU accessible dans conteneur ROCm",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:08.208019",
+      "component": "Performance",
+      "fix": "Optimisations Ollama appliqu\u00e9es",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:08.310626",
+      "component": "Verification",
+      "fix": "\u2705 ROCm Drivers: OK",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:08.316790",
+      "component": "Verification",
+      "fix": "\u2705 Ollama GPU: OK",
+      "status": "success"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:12.699189",
+      "component": "Verification",
+      "fix": "\u2705 Docker GPU: OK",
+      "status": "success"
+    }
+  ],
+  "errors": [
+    {
+      "timestamp": "2025-11-17T05:11:45.676009",
+      "component": "ROCm Drivers",
+      "error": "Commande \u00e9chou\u00e9e: \nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nWarning: https://d"
+    },
+    {
+      "timestamp": "2025-11-17T05:11:45.758294",
+      "component": "ROCm Drivers",
+      "error": "Commande \u00e9chou\u00e9e: \nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nError: Unable to l"
+    },
+    {
+      "timestamp": "2025-11-17T05:21:23.870780",
+      "component": "ROCm Drivers",
+      "error": "Commande \u00e9chou\u00e9e: gpg: no valid OpenPGP data found.\ngpg: dearmoring failed: File exists\n"
+    },
+    {
+      "timestamp": "2025-11-17T05:21:24.627419",
+      "component": "ROCm Drivers",
+      "error": "Commande \u00e9chou\u00e9e: \nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nWarning: OpenPGP s"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:08.245284",
+      "component": "Performance",
+      "error": "Erreur optimisation PyTorch: python3: can't open file '/root/MPtoO-V2/optimize_pytorch.py': [Errno 2] No such file or directory\n"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:09.006231",
+      "component": "Verification",
+      "error": "\u26a0\ufe0f  PyTorch GPU: V\u00e9rification \u00e9chou\u00e9e"
+    },
+    {
+      "timestamp": "2025-11-17T05:22:09.007548",
+      "component": "Verification",
+      "error": "\u26a0\ufe0f  Environment Variables: V\u00e9rification \u00e9chou\u00e9e"
+    }
+  ],
+  "statistics": {
+    "total_fixes": 24,
+    "total_errors": 7,
+    "success_rate": 77.41935483870968
+  }
+}

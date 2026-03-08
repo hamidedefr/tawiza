@@ -1,0 +1,3091 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAJINE - Intelligence Territoriale</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
+</head>
+<body>
+    <!-- Geometric Pattern Background -->
+    <div class="pattern-overlay"></div>
+
+    <!-- Animated Zellige Background -->
+    <div class="zellige-background">
+        <div class="zellige-layer-1"></div>
+        <div class="zellige-layer-2"></div>
+        <div class="zellige-layer-3"></div>
+    </div>
+
+    <!-- Tajine Background Silhouette -->
+    <div class="tajine-bg-container">
+        <svg class="tajine-bg-svg" viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Steam -->
+            <g class="tajine-steam" opacity="0.4">
+                <path d="M100 5 Q105 10, 100 18 Q95 10, 100 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round">
+                    <animate attributeName="d" dur="3s" repeatCount="indefinite" values="M100 5 Q105 10, 100 18 Q95 10, 100 5;M100 2 Q108 12, 100 20 Q92 12, 100 2;M100 5 Q105 10, 100 18 Q95 10, 100 5"/>
+                </path>
+                <path d="M90 12 Q95 18, 90 28" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round">
+                    <animate attributeName="d" dur="2.5s" repeatCount="indefinite" values="M90 12 Q95 18, 90 28;M88 8 Q96 20, 88 32;M90 12 Q95 18, 90 28"/>
+                </path>
+                <path d="M110 12 Q105 18, 110 28" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round">
+                    <animate attributeName="d" dur="2.8s" repeatCount="indefinite" values="M110 12 Q105 18, 110 28;M112 8 Q104 20, 112 32;M110 12 Q105 18, 110 28"/>
+                </path>
+            </g>
+            <!-- Lid knob -->
+            <ellipse cx="100" cy="32" rx="8" ry="5" fill="currentColor" opacity="0.3"/>
+            <!-- Conical lid -->
+            <path d="M100 35 L155 110 Q160 118, 152 122 L48 122 Q40 118, 45 110 L100 35Z" fill="currentColor" opacity="0.08"/>
+            <path d="M100 35 L155 110 Q160 118, 152 122 L48 122 Q40 118, 45 110 L100 35Z" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.15"/>
+            <!-- Decorative bands -->
+            <path d="M60 90 Q100 85, 140 90" stroke="currentColor" stroke-width="1" fill="none" opacity="0.1"/>
+            <path d="M52 105 Q100 100, 148 105" stroke="currentColor" stroke-width="1" fill="none" opacity="0.08"/>
+            <!-- Geometric pattern -->
+            <g opacity="0.1">
+                <path d="M100 50 L108 65 L100 80 L92 65 Z" fill="currentColor"/>
+                <path d="M80 70 L88 85 L80 100 L72 85 Z" fill="currentColor"/>
+                <path d="M120 70 L128 85 L120 100 L112 85 Z" fill="currentColor"/>
+            </g>
+            <!-- Base plate -->
+            <ellipse cx="100" cy="130" rx="70" ry="15" fill="currentColor" opacity="0.05"/>
+            <ellipse cx="100" cy="130" rx="70" ry="15" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.12"/>
+            <!-- Base shadow -->
+            <ellipse cx="100" cy="145" rx="60" ry="10" fill="currentColor" opacity="0.03"/>
+        </svg>
+    </div>
+
+    <!-- Floating Geometric Particles -->
+    <div class="particles-container">
+        <div class="particle particle-diamond"></div>
+        <div class="particle particle-star-6"></div>
+        <div class="particle particle-hexagon"></div>
+        <div class="particle particle-star-8"></div>
+        <div class="particle particle-diamond"></div>
+        <div class="particle particle-star-6"></div>
+        <div class="particle particle-hexagon"></div>
+        <div class="particle particle-star-8"></div>
+        <div class="particle particle-diamond"></div>
+        <div class="particle particle-star-6"></div>
+        <div class="particle particle-hexagon"></div>
+        <div class="particle particle-star-8"></div>
+    </div>
+
+    <!-- Navigation Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Steam wisps -->
+                        <g class="steam" opacity="0.6">
+                            <path d="M50 8 Q53 5, 50 2 Q47 5, 50 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                            <path d="M44 12 Q47 8, 44 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                            <path d="M56 12 Q53 8, 56 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                        </g>
+                        <!-- Lid handle -->
+                        <ellipse cx="50" cy="15" rx="4" ry="3" fill="currentColor"/>
+                        <!-- Conical lid -->
+                        <path d="M50 18 L78 58 Q80 62, 76 64 L24 64 Q20 62, 22 58 L50 18Z" fill="currentColor" opacity="0.2"/>
+                        <path d="M50 18 L78 58 Q80 62, 76 64 L24 64 Q20 62, 22 58 L50 18Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <!-- Decorative bands -->
+                        <path d="M32 50 Q50 48, 68 50" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+                        <!-- Geometric pattern -->
+                        <g opacity="0.3">
+                            <path d="M50 28 L54 34 L50 40 L46 34 Z" fill="currentColor"/>
+                            <path d="M42 38 L46 44 L42 50 L38 44 Z" fill="currentColor"/>
+                            <path d="M58 38 L62 44 L58 50 L54 44 Z" fill="currentColor"/>
+                        </g>
+                        <!-- Base plate -->
+                        <ellipse cx="50" cy="68" rx="35" ry="8" fill="currentColor" opacity="0.15"/>
+                        <ellipse cx="50" cy="68" rx="35" ry="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <span class="logo-text">TAJINE</span>
+            </div>
+            <p class="tagline">Intelligence Territoriale Anti-Hallucination</p>
+        </div>
+
+        <div class="nav-section">
+            <h3 class="nav-title">Vue d'ensemble</h3>
+            <ul class="nav-links">
+                <li><a href="#introduction" class="active" data-section="introduction">Introduction</a></li>
+                <li><a href="#architecture" data-section="architecture">Architecture</a></li>
+                <li><a href="#cognitive" data-section="cognitive">Processus Cognitif</a></li>
+            </ul>
+        </div>
+
+        <div class="nav-section">
+            <h3 class="nav-title">Cognitive Engine</h3>
+            <ul class="nav-links">
+                <li><a href="#cognitive-engine" data-section="cognitive-engine">Vue d'ensemble</a></li>
+                <li><a href="#discovery" data-section="discovery">1. Discovery</a></li>
+                <li><a href="#causal" data-section="causal">2. Causal Reasoning</a></li>
+                <li><a href="#scenarios" data-section="scenarios">3. Scenarios</a></li>
+                <li><a href="#strategy" data-section="strategy">4. Strategy</a></li>
+                <li><a href="#theoretical" data-section="theoretical">5. Theoretical</a></li>
+            </ul>
+        </div>
+
+        <div class="nav-section">
+            <h3 class="nav-title">Technique</h3>
+            <ul class="nav-links">
+                <li><a href="#tech-stack" data-section="tech-stack">Stack Technique</a></li>
+                <li><a href="#algorithm" data-section="algorithm">Algorithme</a></li>
+                <li><a href="#agents" data-section="agents">Mapping Agents</a></li>
+            </ul>
+        </div>
+
+        <div class="nav-section">
+            <h3 class="nav-title">Donn&eacute;es & Strat&eacute;gie</h3>
+            <ul class="nav-links">
+                <li><a href="#stakeholders" data-section="stakeholders">Stakeholders</a></li>
+                <li><a href="#github" data-section="github">Ressources GitHub</a></li>
+                <li><a href="#lessons" data-section="lessons">Lecons du Monde Reel</a></li>
+            </ul>
+        </div>
+
+        <div class="nav-section">
+            <h3 class="nav-title">Documentation</h3>
+            <ul class="nav-links">
+                <li><a href="#documentation" data-section="documentation">Index Central</a></li>
+                <li><a href="#interface" data-section="interface">Interface & Rapports</a></li>
+                <li><a href="#use-cases" data-section="use-cases">Cas d'Usage</a></li>
+                <li><a href="#metrics" data-section="metrics">M&eacute;triques</a></li>
+                <li><a href="#integration" data-section="integration">Int&eacute;gration MPtoO</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="version-badge">v5.0.0</div>
+            <p class="copyright">MPtoO-V2 Project</p>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-toggle" id="mobileToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Hero Section -->
+        <section id="introduction" class="section hero-section">
+            <div class="hero-pattern"></div>
+            <div class="hero-content">
+                <div class="badge">Documentation Officielle</div>
+                <h1 class="hero-title">
+                    <span class="title-accent">T</span>erritorial
+                    <span class="title-accent">A</span>nalysis &
+                    <span class="title-accent">J</span>udgment with
+                    <span class="title-accent">I</span>ntelligent
+                    <span class="title-accent">N</span>etworked
+                    <span class="title-accent">E</span>ngine
+                </h1>
+                <p class="hero-description">
+                    Systeme d'intelligence territoriale multi-agents avec <strong>Cognitive Engine</strong> :
+                    decouverte de signaux caches, raisonnement causal, scenarios probabilises
+                    et recommandations actionnables. Concu pour les agents de collectivites,
+                    evaluateurs publics et services de l'Etat.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value counter" data-target="66">0</span>
+                        <span class="stat-label">Theories v5.0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value counter" data-target="13">0</span>
+                        <span class="stat-label">Domaines Scientifiques</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value counter" data-target="12">0</span>
+                        <span class="stat-label">Documents</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value counter" data-target="5">0</span>
+                        <span class="stat-label">Agents Specialises</span>
+                    </div>
+                </div>
+                <div class="hero-stats secondary-stats">
+                    <div class="stat">
+                        <span class="stat-value">5</span>
+                        <span class="stat-label">Niveaux Cognitifs</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">28M</span>
+                        <span class="stat-label">Etablissements SIRENE</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">3</span>
+                        <span class="stat-label">Scenarios Projetes</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">100%</span>
+                        <span class="stat-label">Tracabilite</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="section">
+            <div class="section-header">
+                <span class="section-number">01</span>
+                <h2>Architecture TAJINE</h2>
+            </div>
+
+            <div class="content-grid">
+                <div class="card feature-card">
+                    <div class="card-icon terracotta">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h3>Meta-Orchestrateur</h3>
+                    <p>Coordonne les agents CAMEL existants avec les nouveaux modules TAJINE pour une analyse territoriale complete.</p>
+                </div>
+
+                <div class="card feature-card">
+                    <div class="card-icon cobalt">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Knowledge Graph</h3>
+                    <p>Ontologie territoriale avec Neo4j + Owlready2 pour integrer entreprises, territoires, evenements et signaux.</p>
+                </div>
+
+                <div class="card feature-card">
+                    <div class="card-icon emerald">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22,4 12,14.01 9,11.01"/>
+                        </svg>
+                    </div>
+                    <h3>Anti-Hallucination</h3>
+                    <p>MAPIE Conformal Prediction + ValidatorAgent pour des predictions avec intervalles de confiance calibres.</p>
+                </div>
+
+                <div class="card feature-card">
+                    <div class="card-icon gold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 20V10M12 20V4M6 20v-6"/>
+                        </svg>
+                    </div>
+                    <h3>Signaux Faibles</h3>
+                    <p>BERTrend + BERTopic pour detecter les tendances emergentes avant qu'elles ne deviennent evidentes.</p>
+                </div>
+            </div>
+
+            <div class="architecture-diagram">
+                <div class="diagram-title">Pipeline Multi-Agents</div>
+                <div class="pipeline">
+                    <div class="pipeline-stage">
+                        <div class="stage-icon">1</div>
+                        <div class="stage-content">
+                            <h4>Collecte</h4>
+                            <ul>
+                                <li>DataAgent</li>
+                                <li>VeilleAgent</li>
+                                <li>WebAgent</li>
+                                <li>GeoAgent</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow"></div>
+                    <div class="pipeline-stage">
+                        <div class="stage-icon">2</div>
+                        <div class="stage-content">
+                            <h4>Integration KG</h4>
+                            <ul>
+                                <li>KnowledgeGraphAgent</li>
+                                <li>Neo4j + Owlready2</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow"></div>
+                    <div class="pipeline-stage">
+                        <div class="stage-icon">3</div>
+                        <div class="stage-content">
+                            <h4>Analyse</h4>
+                            <ul>
+                                <li>AnalystAgent</li>
+                                <li>FinanceAgent</li>
+                                <li>SignalDetectionAgent</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow"></div>
+                    <div class="pipeline-stage">
+                        <div class="stage-icon">4</div>
+                        <div class="stage-content">
+                            <h4>Prediction</h4>
+                            <ul>
+                                <li>SimulationAgent</li>
+                                <li>UncertaintyAgent</li>
+                                <li>MAPIE</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow"></div>
+                    <div class="pipeline-stage highlight">
+                        <div class="stage-icon">5</div>
+                        <div class="stage-content">
+                            <h4>Validation</h4>
+                            <ul>
+                                <li>ValidatorAgent</li>
+                                <li>Chain of Evidence</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cognitive Process Section -->
+        <section id="cognitive" class="section">
+            <div class="section-header">
+                <span class="section-number">02</span>
+                <h2>Processus Cognitif</h2>
+            </div>
+
+            <div class="cognitive-flow">
+                <div class="flow-item">
+                    <div class="flow-number">A</div>
+                    <div class="flow-content">
+                        <h3>Acquisition</h3>
+                        <p>Collecte multi-sources : SIRENE, BODACC, DVF, INSEE, news locales, donnees satellites.</p>
+                    </div>
+                </div>
+                <div class="flow-item">
+                    <div class="flow-number">I</div>
+                    <div class="flow-content">
+                        <h3>Integration</h3>
+                        <p>Fusion dans le Knowledge Graph avec resolution des conflits et enrichissement semantique.</p>
+                    </div>
+                </div>
+                <div class="flow-item">
+                    <div class="flow-number">R</div>
+                    <div class="flow-content">
+                        <h3>Raisonnement</h3>
+                        <p>Analyse causale, detection de patterns, identification de signaux faibles avec BERTrend.</p>
+                    </div>
+                </div>
+                <div class="flow-item">
+                    <div class="flow-number">P</div>
+                    <div class="flow-content">
+                        <h3>Prediction</h3>
+                        <p>Projections multi-horizons (1-3 ans) avec quantification d'incertitude MAPIE.</p>
+                    </div>
+                </div>
+                <div class="flow-item">
+                    <div class="flow-number">V</div>
+                    <div class="flow-content">
+                        <h3>Validation</h3>
+                        <p>Verification sources, consensus multi-agents, chain of evidence auditable.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="confidence-levels">
+                <h3>Niveaux de Confiance</h3>
+                <div class="levels-grid">
+                    <div class="level very-high">
+                        <span class="level-score">&ge;0.85</span>
+                        <span class="level-label">Tres Haute</span>
+                        <span class="level-action">Publication auto</span>
+                    </div>
+                    <div class="level high">
+                        <span class="level-score">0.70-0.84</span>
+                        <span class="level-label">Haute</span>
+                        <span class="level-action">Avec mention</span>
+                    </div>
+                    <div class="level medium">
+                        <span class="level-score">0.50-0.69</span>
+                        <span class="level-label">Moyenne</span>
+                        <span class="level-action">Avec warning</span>
+                    </div>
+                    <div class="level low">
+                        <span class="level-score">0.30-0.49</span>
+                        <span class="level-label">Basse</span>
+                        <span class="level-action">Revue humaine</span>
+                    </div>
+                    <div class="level very-low">
+                        <span class="level-score">&lt;0.30</span>
+                        <span class="level-label">Tres Basse</span>
+                        <span class="level-action">Rejet</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cognitive Engine Overview Section -->
+        <section id="cognitive-engine" class="section">
+            <div class="section-header">
+                <span class="section-number">03</span>
+                <h2>TAJINE Cognitive Engine v2.0</h2>
+            </div>
+
+            <div class="cognitive-engine-intro">
+                <p class="engine-tagline">De la description a la decision : un moteur qui pense, anticipe et recommande.</p>
+
+                <div class="engine-pipeline">
+                    <div class="pipeline-level">
+                        <div class="level-icon discovery-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                        </div>
+                        <div class="level-content">
+                            <h4>1. Discovery</h4>
+                            <p>Ou sont les signaux caches ?</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-connector"></div>
+                    <div class="pipeline-level">
+                        <div class="level-icon causal-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        <div class="level-content">
+                            <h4>2. Causal Reasoning</h4>
+                            <p>Pourquoi ca se passe ?</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-connector"></div>
+                    <div class="pipeline-level">
+                        <div class="level-icon scenario-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                        </div>
+                        <div class="level-content">
+                            <h4>3. Scenario Planning</h4>
+                            <p>Que va-t-il se passer ?</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-connector"></div>
+                    <div class="pipeline-level">
+                        <div class="level-icon strategy-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                            </svg>
+                        </div>
+                        <div class="level-content">
+                            <h4>4. Strategy Synthesis</h4>
+                            <p>Que faire concretement ?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="engine-comparison">
+                <div class="comparison-card old">
+                    <h4>Avant (v1)</h4>
+                    <ul>
+                        <li>Decrit les donnees</li>
+                        <li>Projection lineaire</li>
+                        <li>Recommandations generiques</li>
+                        <li>"L'attractivite baisse"</li>
+                    </ul>
+                </div>
+                <div class="comparison-arrow">→</div>
+                <div class="comparison-card new">
+                    <h4>Apres (v2 Cognitive)</h4>
+                    <ul>
+                        <li>Comprend les causes</li>
+                        <li>3 scenarios probabilises</li>
+                        <li>Actions budgetees + KPIs</li>
+                        <li>"Guichet unique: 45k€ → +6 creations"</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Discovery Engine Section -->
+        <section id="discovery" class="section">
+            <div class="section-header">
+                <span class="section-number">03.1</span>
+                <h2>Niveau 1 : Discovery Engine</h2>
+            </div>
+
+            <div class="discovery-intro">
+                <div class="question-badge">Ou sont les signaux caches ?</div>
+                <p>Decouvre les signaux economiques <strong>avant</strong> qu'ils n'apparaissent dans les bases officielles.</p>
+            </div>
+
+            <div class="sources-grid">
+                <div class="source-card">
+                    <div class="source-icon web">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <h4>Web Crawler</h4>
+                    <p>Sites entreprises, actualites locales</p>
+                    <span class="source-freq">Hebdomadaire</span>
+                </div>
+                <div class="source-card">
+                    <div class="source-icon social">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                            <rect x="2" y="9" width="4" height="12"/>
+                            <circle cx="4" cy="4" r="2"/>
+                        </svg>
+                    </div>
+                    <h4>Social Listener</h4>
+                    <p>LinkedIn, Twitter, presse RH</p>
+                    <span class="source-freq">Quotidien</span>
+                </div>
+                <div class="source-card">
+                    <div class="source-icon patent">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16,17 21,12 16,7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </div>
+                    <h4>Patent Monitor</h4>
+                    <p>INPI, EPO, Google Patents</p>
+                    <span class="source-freq">Mensuel</span>
+                </div>
+                <div class="source-card">
+                    <div class="source-icon tender">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="12" y1="18" x2="12" y2="12"/>
+                            <line x1="9" y1="15" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <h4>Tender Tracker</h4>
+                    <p>BOAMP, marches publics</p>
+                    <span class="source-freq">Quotidien</span>
+                </div>
+            </div>
+
+            <div class="anomaly-detection">
+                <h3>Detection d'Anomalies</h3>
+                <p>Ce qui <strong>devrait exister</strong> mais n'existe pas :</p>
+                <div class="anomaly-examples">
+                    <div class="anomaly-item">
+                        <span class="anomaly-icon warning">!</span>
+                        <span>Site web disparu → possible cessation</span>
+                    </div>
+                    <div class="anomaly-item">
+                        <span class="anomaly-icon warning">!</span>
+                        <span>Aucune activite LinkedIn 6 mois → verifier</span>
+                    </div>
+                    <div class="anomaly-item">
+                        <span class="anomaly-icon warning">!</span>
+                        <span>Ecart anormal vs tendance secteur</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="signal-scoring">
+                <h3>Scoring des Signaux</h3>
+                <div class="score-formula">
+                    <code>Score = Impact × Fiabilite × Urgence × Actionnabilite</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Causal Reasoning Section -->
+        <section id="causal" class="section">
+            <div class="section-header">
+                <span class="section-number">03.2</span>
+                <h2>Niveau 2 : Causal Reasoning</h2>
+            </div>
+
+            <div class="causal-intro">
+                <div class="question-badge">Pourquoi ca se passe ?</div>
+                <p>Comprendre les <strong>causes profondes</strong>, pas juste decrire les correlations.</p>
+            </div>
+
+            <div class="causal-example">
+                <div class="example-before">
+                    <h4>Sans raisonnement causal</h4>
+                    <p class="quote">"Les creations d'entreprises ont baisse de 15%"</p>
+                    <span class="verdict bad">Descriptif uniquement</span>
+                </div>
+                <div class="example-after">
+                    <h4>Avec raisonnement causal</h4>
+                    <p class="quote">"La baisse des creations (-15%) s'explique par la hausse des taux BCE (+2 pts), reduisant l'acces au credit. Ce facteur est NATIONAL - la baisse locale est conforme a la moyenne regionale (-14%)."</p>
+                    <span class="verdict good">Explicatif + Actionnable</span>
+                </div>
+            </div>
+
+            <div class="five-whys">
+                <h3>Methode des "5 Pourquoi" Automatisee</h3>
+                <div class="why-chain">
+                    <div class="why-step">
+                        <span class="why-label">Observation</span>
+                        <span class="why-content">Creations -15%</span>
+                    </div>
+                    <div class="why-arrow">↓ Pourquoi ?</div>
+                    <div class="why-step">
+                        <span class="why-label">Cause 1</span>
+                        <span class="why-content">Moins de financements bancaires</span>
+                    </div>
+                    <div class="why-arrow">↓ Pourquoi ?</div>
+                    <div class="why-step">
+                        <span class="why-label">Cause 2</span>
+                        <span class="why-content">Taux d'interet +2 points</span>
+                    </div>
+                    <div class="why-arrow">↓ Pourquoi ?</div>
+                    <div class="why-step root">
+                        <span class="why-label">RACINE</span>
+                        <span class="why-content">Politique BCE anti-inflation (hors controle local)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cause-types">
+                <h3>Classification des Causes</h3>
+                <div class="cause-grid">
+                    <div class="cause-type">
+                        <span class="cause-level macro">MACRO</span>
+                        <span class="cause-name">Taux BCE, inflation</span>
+                        <span class="cause-action">Non actionnable</span>
+                    </div>
+                    <div class="cause-type">
+                        <span class="cause-level sector">SECTEUR</span>
+                        <span class="cause-name">Crise automobile</span>
+                        <span class="cause-action">Reconversion</span>
+                    </div>
+                    <div class="cause-type">
+                        <span class="cause-level local">LOCAL</span>
+                        <span class="cause-name">Foncier, fiscalite</span>
+                        <span class="cause-action">Actionnable</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scenario Planning Section -->
+        <section id="scenarios" class="section">
+            <div class="section-header">
+                <span class="section-number">03.3</span>
+                <h2>Niveau 3 : Scenario Planning</h2>
+            </div>
+
+            <div class="scenario-intro">
+                <div class="question-badge">Que va-t-il se passer ?</div>
+                <p>Projeter <strong>plusieurs futurs possibles</strong> avec probabilites, pas une seule prediction lineaire.</p>
+            </div>
+
+            <div class="scenarios-display">
+                <div class="scenario pessimiste">
+                    <div class="scenario-header">
+                        <span class="scenario-emoji">🔴</span>
+                        <h4>Pessimiste</h4>
+                        <span class="scenario-prob">15%</span>
+                    </div>
+                    <div class="scenario-value">85 creations</div>
+                    <div class="scenario-impact">-350 emplois</div>
+                    <ul class="scenario-hypotheses">
+                        <li>Taux BCE a 6%</li>
+                        <li>Suppression aides</li>
+                        <li>Recession nationale</li>
+                    </ul>
+                </div>
+                <div class="scenario base">
+                    <div class="scenario-header">
+                        <span class="scenario-emoji">🟡</span>
+                        <h4>Base</h4>
+                        <span class="scenario-prob">55%</span>
+                    </div>
+                    <div class="scenario-value">112 creations</div>
+                    <div class="scenario-impact">+50 emplois</div>
+                    <ul class="scenario-hypotheses">
+                        <li>Taux stable 4.5%</li>
+                        <li>Aides maintenues</li>
+                        <li>Croissance 0.5%</li>
+                    </ul>
+                </div>
+                <div class="scenario optimiste">
+                    <div class="scenario-header">
+                        <span class="scenario-emoji">🟢</span>
+                        <h4>Optimiste</h4>
+                        <span class="scenario-prob">30%</span>
+                    </div>
+                    <div class="scenario-value">142 creations</div>
+                    <div class="scenario-impact">+280 emplois</div>
+                    <ul class="scenario-hypotheses">
+                        <li>Baisse taux a 3%</li>
+                        <li>Nouvelles aides</li>
+                        <li>Ouverture ZAE Nord</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tipping-points">
+                <h3>Points de Bascule a Surveiller</h3>
+                <div class="tipping-list">
+                    <div class="tipping-item">
+                        <span class="tipping-icon alert">⚠️</span>
+                        <div class="tipping-content">
+                            <strong>Si taux > 5.5%</strong>
+                            <span>→ Scenario pessimiste probable</span>
+                        </div>
+                        <span class="tipping-monitor">Surveiller BCE</span>
+                    </div>
+                    <div class="tipping-item">
+                        <span class="tipping-icon alert">⚠️</span>
+                        <div class="tipping-content">
+                            <strong>Si Entreprise X ferme</strong>
+                            <span>→ Effet domino 450 emplois</span>
+                        </div>
+                        <span class="tipping-monitor">Surveiller carnet</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sensitivity-table">
+                <h3>Sensibilite aux Variables</h3>
+                <div class="sensitivity-grid">
+                    <div class="sensitivity-row">
+                        <span class="var-name">Taux BCE</span>
+                        <span class="var-impact">-8 creations par +0.5 pt</span>
+                        <span class="var-control">Non controlable</span>
+                    </div>
+                    <div class="sensitivity-row controllable">
+                        <span class="var-name">Aides locales</span>
+                        <span class="var-impact">+3 creations par +10k€</span>
+                        <span class="var-control">Controlable</span>
+                    </div>
+                    <div class="sensitivity-row controllable">
+                        <span class="var-name">Delai permis</span>
+                        <span class="var-impact">-1 creation par +1 mois</span>
+                        <span class="var-control">Controlable</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Strategy Synthesis Section -->
+        <section id="strategy" class="section">
+            <div class="section-header">
+                <span class="section-number">03.4</span>
+                <h2>Niveau 4 : Strategy Synthesis</h2>
+            </div>
+
+            <div class="strategy-intro">
+                <div class="question-badge">Que faire concretement ?</div>
+                <p>Des <strong>actions budgetees et mesurables</strong>, pas des conseils generiques.</p>
+            </div>
+
+            <div class="strategy-comparison">
+                <div class="strat-before">
+                    <h4>Recommandation generique</h4>
+                    <p>"Il faut renforcer l'attractivite du territoire"</p>
+                    <span class="strat-verdict">Inutile</span>
+                </div>
+                <div class="strat-after">
+                    <h4>Recommandation TAJINE</h4>
+                    <p>"Guichet unique urbanisme: 45k€, 6 mois, +6 creations/an, KPI: delai < 2 mois"</p>
+                    <span class="strat-verdict">Actionnable</span>
+                </div>
+            </div>
+
+            <div class="prioritization-matrix">
+                <h3>Matrice de Priorisation</h3>
+                <div class="matrix-visual">
+                    <div class="matrix-axis-y">IMPACT</div>
+                    <div class="matrix-grid">
+                        <div class="matrix-quadrant quick-win">
+                            <span class="quadrant-label">QUICK WIN ⭐</span>
+                            <span class="quadrant-example">Guichet unique</span>
+                        </div>
+                        <div class="matrix-quadrant major">
+                            <span class="quadrant-label">PROJET MAJEUR</span>
+                            <span class="quadrant-example">Pepiniere</span>
+                        </div>
+                        <div class="matrix-quadrant fill-in">
+                            <span class="quadrant-label">FILL-IN</span>
+                            <span class="quadrant-example">Signaletique</span>
+                        </div>
+                        <div class="matrix-quadrant avoid">
+                            <span class="quadrant-label">EVITER</span>
+                            <span class="quadrant-example">Refonte fiscale</span>
+                        </div>
+                    </div>
+                    <div class="matrix-axis-x">EFFORT</div>
+                </div>
+            </div>
+
+            <div class="roadmap-preview">
+                <h3>Exemple de Roadmap Generee</h3>
+                <div class="roadmap-phases">
+                    <div class="phase phase-1">
+                        <div class="phase-header">
+                            <span class="phase-name">Phase 1</span>
+                            <span class="phase-period">0-6 mois</span>
+                        </div>
+                        <div class="phase-budget">80k€</div>
+                        <div class="phase-actions">
+                            <div class="action-item">
+                                <span class="action-name">Guichet unique</span>
+                                <span class="action-impact">+6 creations</span>
+                            </div>
+                            <div class="action-item">
+                                <span class="action-name">Reduction loyer ZAE</span>
+                                <span class="action-impact">+4 creations</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phase phase-2">
+                        <div class="phase-header">
+                            <span class="phase-name">Phase 2</span>
+                            <span class="phase-period">6-18 mois</span>
+                        </div>
+                        <div class="phase-budget">1.55M€</div>
+                        <div class="phase-actions">
+                            <div class="action-item">
+                                <span class="action-name">Pepiniere entreprises</span>
+                                <span class="action-impact">+15 creations</span>
+                            </div>
+                            <div class="action-item">
+                                <span class="action-name">Extension ZAE Nord</span>
+                                <span class="action-impact">+25 creations</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phase phase-3">
+                        <div class="phase-header">
+                            <span class="phase-name">Phase 3</span>
+                            <span class="phase-period">18-36 mois</span>
+                        </div>
+                        <div class="phase-budget">800k€</div>
+                        <div class="phase-actions">
+                            <div class="action-item">
+                                <span class="action-name">Tiers-lieu innovation</span>
+                                <span class="action-impact">Ecosysteme</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="roadmap-total">
+                    <span class="total-label">TOTAL</span>
+                    <span class="total-budget">2.43M€</span>
+                    <span class="total-impact">+53 creations → +180 emplois</span>
+                </div>
+            </div>
+
+            <div class="kpi-example">
+                <h3>KPIs Automatiques</h3>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <span class="kpi-name">Delai instruction</span>
+                        <span class="kpi-target">&lt; 2 mois</span>
+                        <span class="kpi-freq">Mensuel</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-name">Satisfaction usagers</span>
+                        <span class="kpi-target">&gt; 4/5</span>
+                        <span class="kpi-freq">Trimestriel</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-name">Taux occupation ZAE</span>
+                        <span class="kpi-target">&gt; 85%</span>
+                        <span class="kpi-freq">Trimestriel</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Theoretical Framework Section -->
+        <section id="theoretical" class="section">
+            <div class="section-header">
+                <span class="section-number">03.5</span>
+                <h2>Niveau 5 : Theoretical Framework</h2>
+            </div>
+
+            <div class="theoretical-intro">
+                <div class="question-badge">Selon quelle loi ?</div>
+                <p>Ancrer les analyses dans des <strong>modeles theoriques valides</strong> pour transformer les observations empiriques en predictions fondees.</p>
+            </div>
+
+            <div class="theory-value">
+                <div class="theory-before">
+                    <h4>Sans theorie</h4>
+                    <p>"Les creations augmentent de 15% depuis 3 mois"</p>
+                    <span class="theory-verdict">Observation brute</span>
+                </div>
+                <div class="theory-after">
+                    <h4>Avec cadrage theorique</h4>
+                    <p>"Selon Rogers, nous sommes en phase 'early majority'. La croissance va rester soutenue 12-18 mois avant de ralentir."</p>
+                    <span class="theory-verdict">Prediction fondee</span>
+                </div>
+            </div>
+
+            <h3 class="theory-section-title">Bibliotheque de Theories <span class="theory-count">66+ theories</span></h3>
+            <div class="theory-library expanded">
+                <!-- Multi-Agents & Jeux -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-agents">
+                        <span class="domain-icon">🤖</span>
+                        <h4>Multi-Agents & Jeux</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card">
+                            <span class="theory-name">BDI Model</span>
+                            <span class="theory-use">Decisions entreprises</span>
+                            <code class="theory-params">beliefs[], desires[], intentions[]</code>
+                        </div>
+                        <div class="theory-card">
+                            <span class="theory-name">Game Theory</span>
+                            <span class="theory-use">Concurrence territoriale</span>
+                            <code class="theory-params">payoff_matrix, nash_equilibrium</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Evolutionary Games</span>
+                            <span class="theory-use">Strategies adaptatives</span>
+                            <code class="theory-params">fitness, mutation_rate</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Mean Field Games</span>
+                            <span class="theory-use">Grandes populations</span>
+                            <code class="theory-params">density, equilibrium</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Economie & Institutions -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-economics">
+                        <span class="domain-icon">📈</span>
+                        <h4>Economie & Institutions</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card">
+                            <span class="theory-name">Offre/Demande</span>
+                            <span class="theory-use">Prix foncier, emploi</span>
+                            <code class="theory-params">supply_curve, demand_curve</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Couts Transaction</span>
+                            <span class="theory-use">Efficacite institutionnelle</span>
+                            <code class="theory-params">transaction_cost (North)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Rendements Croissants</span>
+                            <span class="theory-use">Lock-in, path dependency</span>
+                            <code class="theory-params">increasing_returns (Arthur)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Complexite Economique</span>
+                            <span class="theory-use">Emergence, non-linearite</span>
+                            <code class="theory-params">feedback_loops (SFI)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Innovation -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-innovation">
+                        <span class="domain-icon">💡</span>
+                        <h4>Innovation & Diffusion</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card featured">
+                            <span class="theory-name">Rogers Diffusion</span>
+                            <span class="theory-use">Adoption produits/services</span>
+                            <code class="theory-params">innovators=2.5%, early_adopters=13.5%</code>
+                        </div>
+                        <div class="theory-card">
+                            <span class="theory-name">Courbe en S</span>
+                            <span class="theory-use">Maturite technologique</span>
+                            <code class="theory-params">inflection_point, saturation</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Disruption</span>
+                            <span class="theory-use">Remplacement technologies</span>
+                            <code class="theory-params">overshoot (Christensen)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reseaux & Social -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-networks">
+                        <span class="domain-icon">🔗</span>
+                        <h4>Reseaux & Social</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Liens Faibles</span>
+                            <span class="theory-use">Acces emploi, innovation</span>
+                            <code class="theory-params">bridge_score (Granovetter)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Embeddedness</span>
+                            <span class="theory-use">Tissu economique local</span>
+                            <code class="theory-params">network_density, clustering</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Small World</span>
+                            <span class="theory-use">Diffusion rapide info</span>
+                            <code class="theory-params">path_length (Watts)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decision & Comportement -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-decision">
+                        <span class="domain-icon">🧠</span>
+                        <h4>Decision & Comportement</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card">
+                            <span class="theory-name">Prospect Theory</span>
+                            <span class="theory-use">Biais decisionnels</span>
+                            <code class="theory-params">loss_aversion=2.25</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Nudge Theory</span>
+                            <span class="theory-use">Incitations comportementales</span>
+                            <code class="theory-params">choice_architecture (Thaler)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Bounded Rationality</span>
+                            <span class="theory-use">Limites cognitives</span>
+                            <code class="theory-params">satisficing (Simon)</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Territorial -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-territorial">
+                        <span class="domain-icon">🗺️</span>
+                        <h4>Geographie Economique</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card">
+                            <span class="theory-name">Poles de Croissance</span>
+                            <span class="theory-use">Effet d'entrainement</span>
+                            <code class="theory-params">spread_effect (Perroux)</code>
+                        </div>
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Core-Periphery</span>
+                            <span class="theory-use">Polarisation territoriale</span>
+                            <code class="theory-params">transport_cost (Krugman)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Agglomeration</span>
+                            <span class="theory-use">Concentration industrielle</span>
+                            <code class="theory-params">iceberg_cost, labor_mobility</code>
+                        </div>
+                        <div class="theory-card">
+                            <span class="theory-name">Central Place</span>
+                            <span class="theory-use">Hierarchie urbaine</span>
+                            <code class="theory-params">rank, market_area</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Dynamics -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-dynamics">
+                        <span class="domain-icon">🔄</span>
+                        <h4>System Dynamics</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new">
+                            <span class="theory-name">Urban Dynamics</span>
+                            <span class="theory-use">Evolution urbaine</span>
+                            <code class="theory-params">stock, flow (Forrester)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Causal Loops</span>
+                            <span class="theory-use">Boucles de retroaction</span>
+                            <code class="theory-params">reinforcing, balancing</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quant Finance (Renaissance Style) -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-quant">
+                        <span class="domain-icon">💹</span>
+                        <h4>Quant Finance</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Hidden Markov</span>
+                            <span class="theory-use">Etats caches marche</span>
+                            <code class="theory-params">transition_matrix (RenTech)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Kelly Criterion</span>
+                            <span class="theory-use">Sizing optimal positions</span>
+                            <code class="theory-params">kelly = edge/odds</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Stat Arbitrage</span>
+                            <span class="theory-use">Mean reversion</span>
+                            <code class="theory-params">z_score, half_life</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deep Learning -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-deeplearning">
+                        <span class="domain-icon">🤖</span>
+                        <h4>Deep Learning</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new">
+                            <span class="theory-name">LSTM</span>
+                            <span class="theory-use">Dependances temporelles</span>
+                            <code class="theory-params">memory_cell, MAPE 2.7%</code>
+                        </div>
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Transformer</span>
+                            <span class="theory-use">Attention, patterns distants</span>
+                            <code class="theory-params">self_attention (Two Sigma)</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">MC Dropout</span>
+                            <span class="theory-use">Quantification incertitude</span>
+                            <code class="theory-params">bayesian_approx</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signal Processing -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-signal">
+                        <span class="domain-icon">📡</span>
+                        <h4>Signal Processing</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new">
+                            <span class="theory-name">Fourier/FFT</span>
+                            <span class="theory-use">Cycles, tendances</span>
+                            <code class="theory-params">frequencies, amplitudes</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Kalman Filter</span>
+                            <span class="theory-use">Lissage temps reel</span>
+                            <code class="theory-params">state_estimate, covariance</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Wavelet</span>
+                            <span class="theory-use">Multi-echelle</span>
+                            <code class="theory-params">scale, time_local</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Causal Inference -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-causal">
+                        <span class="domain-icon">⚖️</span>
+                        <h4>Causal Inference</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">DoWhy</span>
+                            <span class="theory-use">Graphes causaux</span>
+                            <code class="theory-params">Model→Identify→Estimate</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">EconML</span>
+                            <span class="theory-use">Effets heterogenes</span>
+                            <code class="theory-params">CATE, Double ML</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Isolation Forest</span>
+                            <span class="theory-use">Anomaly detection</span>
+                            <code class="theory-params">contamination, outliers</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reinforcement Learning -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-rl">
+                        <span class="domain-icon">🎮</span>
+                        <h4>Reinforcement Learning</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Q-Learning</span>
+                            <span class="theory-use">Politiques optimales</span>
+                            <code class="theory-params">Q_table, discount_factor</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Multi-Armed Bandit</span>
+                            <span class="theory-use">Exploration/exploitation</span>
+                            <code class="theory-params">epsilon, UCB, Thompson</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">PPO</span>
+                            <span class="theory-use">Apprentissage stable</span>
+                            <code class="theory-params">clip_ratio, GAE_lambda</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Analysis -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-network">
+                        <span class="domain-icon">🕸️</span>
+                        <h4>Network Analysis</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Community Detection</span>
+                            <span class="theory-use">Clusters d'acteurs</span>
+                            <code class="theory-params">Louvain, modularity</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Centrality Measures</span>
+                            <span class="theory-use">Acteurs cles</span>
+                            <code class="theory-params">betweenness, PageRank</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Influence Propagation</span>
+                            <span class="theory-use">Diffusion innovations</span>
+                            <code class="theory-params">IC/LT models, cascade</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NLP & Text Mining -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-nlp">
+                        <span class="domain-icon">📝</span>
+                        <h4>NLP & Text Mining</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Topic Modeling (LDA)</span>
+                            <span class="theory-use">Themes presse locale</span>
+                            <code class="theory-params">n_topics, perplexity</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">NER (spaCy)</span>
+                            <span class="theory-use">Extraction entites</span>
+                            <code class="theory-params">ORG, LOC, PER</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Sentiment Analysis</span>
+                            <span class="theory-use">Perception territoriale</span>
+                            <code class="theory-params">polarity, subjectivity</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Optimization -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-optim">
+                        <span class="domain-icon">⚡</span>
+                        <h4>Optimization</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Genetic Algorithm</span>
+                            <span class="theory-use">Optimisation complexe</span>
+                            <code class="theory-params">crossover, mutation</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Linear Programming</span>
+                            <span class="theory-use">Allocation ressources</span>
+                            <code class="theory-params">constraints, simplex</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Multi-Objective</span>
+                            <span class="theory-use">Pareto-optimalite</span>
+                            <code class="theory-params">NSGA-II, fronts</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spatial Analysis -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-spatial">
+                        <span class="domain-icon">🌍</span>
+                        <h4>Spatial Analysis</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Kriging</span>
+                            <span class="theory-use">Interpolation spatiale</span>
+                            <code class="theory-params">variogram, sill, nugget</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Moran's I</span>
+                            <span class="theory-use">Autocorrelation spatiale</span>
+                            <code class="theory-params">I_stat, z_score, p_value</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Hot Spot (Getis-Ord)</span>
+                            <span class="theory-use">Zones concentration</span>
+                            <code class="theory-params">G_i*, clusters</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Knowledge Graphs -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-kg">
+                        <span class="domain-icon">🔮</span>
+                        <h4>Knowledge Graphs</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">OWL Ontology</span>
+                            <span class="theory-use">Modelisation domaine</span>
+                            <code class="theory-params">classes, properties, axioms</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Graph Embeddings</span>
+                            <span class="theory-use">Representation vectorielle</span>
+                            <code class="theory-params">RDF2Vec, TransE</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">SPARQL Reasoning</span>
+                            <span class="theory-use">Inference relations</span>
+                            <code class="theory-params">Pellet, HermiT</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Swarm Intelligence -->
+                <div class="theory-domain">
+                    <div class="domain-header domain-swarm">
+                        <span class="domain-icon">🐝</span>
+                        <h4>Swarm Intelligence</h4>
+                    </div>
+                    <div class="theory-cards">
+                        <div class="theory-card new featured">
+                            <span class="theory-name">Ant Colony (ACO)</span>
+                            <span class="theory-use">Routage, tournees</span>
+                            <code class="theory-params">pheromone, evaporation</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Bee Colony (ABC)</span>
+                            <span class="theory-use">Recherche solutions</span>
+                            <code class="theory-params">employed, scout, onlooker</code>
+                        </div>
+                        <div class="theory-card new">
+                            <span class="theory-name">Grey Wolf (GWO)</span>
+                            <span class="theory-use">Hierarchie recherche</span>
+                            <code class="theory-params">alpha, beta, delta</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="theory-section-title">Processus d'Analyse Theorique</h3>
+            <div class="theory-process">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Pattern Matching</h4>
+                        <p>Identifier quelle theorie correspond aux donnees observees</p>
+                        <code>courbe_en_S → Rogers Diffusion</code>
+                    </div>
+                </div>
+                <div class="process-arrow">→</div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Simulation</h4>
+                        <p>Projeter selon les parametres de la theorie</p>
+                        <code>phase="early_majority" → +18 mois croissance</code>
+                    </div>
+                </div>
+                <div class="process-arrow">→</div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Validation</h4>
+                        <p>Backtesting + coherence + consensus multi-theories</p>
+                        <code>confidence=82%</code>
+                    </div>
+                </div>
+                <div class="process-arrow">→</div>
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Combinaison</h4>
+                        <p>Ponderer les predictions par score de confiance</p>
+                        <code>weighted_forecast ± 15%</code>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="theory-section-title">Exemple d'Analyse</h3>
+            <div class="theory-example">
+                <div class="example-context">
+                    <span class="context-label">Contexte</span>
+                    <p>Adoption des services numeriques par les entreprises (24 mois de donnees)</p>
+                </div>
+                <div class="example-theories">
+                    <div class="applied-theory">
+                        <div class="theory-header">
+                            <span class="theory-badge">Rogers Diffusion</span>
+                            <span class="confidence-badge high">82% confiance</span>
+                        </div>
+                        <p>Phase actuelle: <strong>early majority</strong> (34% adoption)</p>
+                        <p class="theory-insight">La croissance va rester soutenue 12-18 mois avant de ralentir a l'approche des 84%.</p>
+                    </div>
+                    <div class="applied-theory">
+                        <div class="theory-header">
+                            <span class="theory-badge">Prospect Theory</span>
+                            <span class="confidence-badge medium">71% confiance</span>
+                        </div>
+                        <p>Les non-adoptants surestiment les risques (aversion x2.25)</p>
+                        <p class="theory-insight">Presenter les benefices en termes de "ne pas perdre" plutot que "gagner".</p>
+                    </div>
+                    <div class="applied-theory">
+                        <div class="theory-header">
+                            <span class="theory-badge">Growth Pole</span>
+                            <span class="confidence-badge medium">68% confiance</span>
+                        </div>
+                        <p>Effet d'entrainement: 0.65 emploi indirect par emploi direct</p>
+                        <p class="theory-insight">+45 emplois directs → +29 emplois indirects attendus.</p>
+                    </div>
+                </div>
+                <div class="example-synthesis">
+                    <span class="synthesis-label">Synthese Combinee</span>
+                    <p><strong>Prevision:</strong> Taux d'adoption 65-70% d'ici 18 mois</p>
+                    <p><strong>Impact:</strong> +74 emplois (directs + indirects)</p>
+                    <p><strong>Recommandation:</strong> Messages "anti-perte" pour les retardataires</p>
+                </div>
+            </div>
+
+            <div class="theory-integration">
+                <h3 class="theory-section-title">Integration avec les Autres Niveaux</h3>
+                <div class="integration-flow">
+                    <div class="integration-item">
+                        <span class="level-badge level-1">Niveau 1</span>
+                        <span class="integration-action">Discovery</span>
+                        <span class="integration-enrichment">→ Pattern match → "Phase early_adopters detectee"</span>
+                    </div>
+                    <div class="integration-item">
+                        <span class="level-badge level-2">Niveau 2</span>
+                        <span class="integration-action">Causal</span>
+                        <span class="integration-enrichment">→ Game Theory → "Equilibre Nash = cooperation"</span>
+                    </div>
+                    <div class="integration-item">
+                        <span class="level-badge level-3">Niveau 3</span>
+                        <span class="integration-action">Scenarios</span>
+                        <span class="integration-enrichment">→ Contraintes theoriques → Probabilites ajustees</span>
+                    </div>
+                    <div class="integration-item">
+                        <span class="level-badge level-4">Niveau 4</span>
+                        <span class="integration-action">Strategy</span>
+                        <span class="integration-enrichment">→ Prospect Theory → "Formuler comme eviter une perte"</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="implementations-section">
+                <h3 class="theory-section-title">Implementations de Reference</h3>
+                <div class="impl-grid">
+                    <a href="https://github.com/AB-CE/abce" target="_blank" class="impl-card">
+                        <code class="impl-name">ABCE</code>
+                        <span class="impl-desc">Agent-Based Computational Economics</span>
+                        <span class="impl-tag">ABM</span>
+                    </a>
+                    <a href="https://mesa.readthedocs.io/" target="_blank" class="impl-card">
+                        <code class="impl-name">Mesa</code>
+                        <span class="impl-desc">Agent-Based Modeling general</span>
+                        <span class="impl-tag">ABM</span>
+                    </a>
+                    <a href="https://github.com/SDXorg/pysd" target="_blank" class="impl-card">
+                        <code class="impl-name">PySD</code>
+                        <span class="impl-desc">System Dynamics en Python</span>
+                        <span class="impl-tag">Dynamics</span>
+                    </a>
+                    <a href="https://networkx.org/" target="_blank" class="impl-card">
+                        <code class="impl-name">NetworkX</code>
+                        <span class="impl-desc">Analyse de reseaux</span>
+                        <span class="impl-tag">Networks</span>
+                    </a>
+                    <a href="https://github.com/microsoft/EconML" target="_blank" class="impl-card">
+                        <code class="impl-name">EconML</code>
+                        <span class="impl-desc">Econometrie causale (Microsoft)</span>
+                        <span class="impl-tag">Causal</span>
+                    </a>
+                    <a href="https://pade.readthedocs.io/" target="_blank" class="impl-card">
+                        <code class="impl-name">PADE</code>
+                        <span class="impl-desc">Multi-Agent Systems Python</span>
+                        <span class="impl-tag">MAS</span>
+                    </a>
+                    <a href="https://quantecon.org/" target="_blank" class="impl-card">
+                        <code class="impl-name">QuantEcon</code>
+                        <span class="impl-desc">Economie quantitative</span>
+                        <span class="impl-tag">Economics</span>
+                    </a>
+                    <a href="https://github.com/davidrpugh/sfi-complexity-mooc" target="_blank" class="impl-card">
+                        <code class="impl-name">SFI Complexity</code>
+                        <span class="impl-desc">Complexity Economics (Santa Fe)</span>
+                        <span class="impl-tag">Complexity</span>
+                    </a>
+                    <a href="https://github.com/hmmlearn/hmmlearn" target="_blank" class="impl-card">
+                        <code class="impl-name">hmmlearn</code>
+                        <span class="impl-desc">Hidden Markov Models (RenTech)</span>
+                        <span class="impl-tag">Quant</span>
+                    </a>
+                    <a href="https://github.com/py-why/dowhy" target="_blank" class="impl-card">
+                        <code class="impl-name">DoWhy</code>
+                        <span class="impl-desc">Causal Inference Framework</span>
+                        <span class="impl-tag">Causal</span>
+                    </a>
+                    <a href="https://pytorch.org/" target="_blank" class="impl-card">
+                        <code class="impl-name">PyTorch</code>
+                        <span class="impl-desc">LSTM, Transformer, Deep Learning</span>
+                        <span class="impl-tag">Deep Learning</span>
+                    </a>
+                    <a href="https://github.com/scikit-learn-contrib/MAPIE" target="_blank" class="impl-card">
+                        <code class="impl-name">MAPIE</code>
+                        <span class="impl-desc">Intervalles de confiance conformes</span>
+                        <span class="impl-tag">Uncertainty</span>
+                    </a>
+                    <a href="https://github.com/rlabbe/filterpy" target="_blank" class="impl-card">
+                        <code class="impl-name">filterpy</code>
+                        <span class="impl-desc">Kalman Filters, Signal Processing</span>
+                        <span class="impl-tag">Signal</span>
+                    </a>
+                    <a href="https://www.pymc.io/" target="_blank" class="impl-card">
+                        <code class="impl-name">PyMC</code>
+                        <span class="impl-desc">Bayesian Inference</span>
+                        <span class="impl-tag">Bayesian</span>
+                    </a>
+                    <a href="https://stable-baselines3.readthedocs.io/" target="_blank" class="impl-card new">
+                        <code class="impl-name">Stable-Baselines3</code>
+                        <span class="impl-desc">PPO, A2C, DQN</span>
+                        <span class="impl-tag">RL</span>
+                    </a>
+                    <a href="https://github.com/taynaud/python-louvain" target="_blank" class="impl-card new">
+                        <code class="impl-name">python-louvain</code>
+                        <span class="impl-desc">Community Detection</span>
+                        <span class="impl-tag">Network</span>
+                    </a>
+                    <a href="https://radimrehurek.com/gensim/" target="_blank" class="impl-card new">
+                        <code class="impl-name">Gensim</code>
+                        <span class="impl-desc">LDA Topic Modeling</span>
+                        <span class="impl-tag">NLP</span>
+                    </a>
+                    <a href="https://spacy.io/" target="_blank" class="impl-card new">
+                        <code class="impl-name">spaCy</code>
+                        <span class="impl-desc">NER, Tokenization</span>
+                        <span class="impl-tag">NLP</span>
+                    </a>
+                    <a href="https://pymoo.org/" target="_blank" class="impl-card new">
+                        <code class="impl-name">pymoo</code>
+                        <span class="impl-desc">Multi-Objective Optimization</span>
+                        <span class="impl-tag">Optim</span>
+                    </a>
+                    <a href="https://pysal.org/" target="_blank" class="impl-card new">
+                        <code class="impl-name">PySAL</code>
+                        <span class="impl-desc">Spatial Analysis Library</span>
+                        <span class="impl-tag">Spatial</span>
+                    </a>
+                    <a href="https://owlready2.readthedocs.io/" target="_blank" class="impl-card new">
+                        <code class="impl-name">Owlready2</code>
+                        <span class="impl-desc">OWL Ontologies Python</span>
+                        <span class="impl-tag">KG</span>
+                    </a>
+                    <a href="https://pykeen.readthedocs.io/" target="_blank" class="impl-card new">
+                        <code class="impl-name">PyKEEN</code>
+                        <span class="impl-desc">KG Embeddings</span>
+                        <span class="impl-tag">KG</span>
+                    </a>
+                    <a href="https://deap.readthedocs.io/" target="_blank" class="impl-card new">
+                        <code class="impl-name">DEAP</code>
+                        <span class="impl-desc">Evolutionary Algorithms</span>
+                        <span class="impl-tag">Swarm</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section id="tech-stack" class="section">
+            <div class="section-header">
+                <span class="section-number">04</span>
+                <h2>Stack Technique</h2>
+            </div>
+
+            <div class="stack-categories">
+                <div class="stack-category">
+                    <h3>
+                        <span class="category-icon terracotta-bg">D</span>
+                        Donnees Francaises
+                    </h3>
+                    <div class="stack-items">
+                        <div class="stack-item">
+                            <code>pynsee</code>
+                            <span>SIRENE + INSEE + IGN tout-en-un</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>BODACC_API</code>
+                            <span>Annonces legales, defaillances</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>boamp-extractor</code>
+                            <span>Marches publics</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>BAN-Geocoder</code>
+                            <span>Geocodage offline performant</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stack-category">
+                    <h3>
+                        <span class="category-icon cobalt-bg">I</span>
+                        Intelligence
+                    </h3>
+                    <div class="stack-items">
+                        <div class="stack-item critical">
+                            <code>BERTrend</code>
+                            <span>Detection signaux faibles</span>
+                            <span class="badge-critical">CRITIQUE</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>BERTopic</code>
+                            <span>Topic modeling</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>spaCy + CamemBERT</code>
+                            <span>NLP francais</span>
+                        </div>
+                        <div class="stack-item critical">
+                            <code>MAPIE</code>
+                            <span>Quantification incertitude</span>
+                            <span class="badge-critical">CRITIQUE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stack-category">
+                    <h3>
+                        <span class="category-icon emerald-bg">G</span>
+                        Knowledge Graph
+                    </h3>
+                    <div class="stack-items">
+                        <div class="stack-item">
+                            <code>neo4j-graphrag-python</code>
+                            <span>GraphRAG officiel Neo4j</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>graphiti</code>
+                            <span>Ontologie flexible Pydantic</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>RAG_Techniques</code>
+                            <span>Best practices anti-hallucination</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stack-category">
+                    <h3>
+                        <span class="category-icon gold-bg">O</span>
+                        Orchestration
+                    </h3>
+                    <div class="stack-items">
+                        <div class="stack-item">
+                            <code>CAMEL-AI</code>
+                            <span>Agents existants MPtoO</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>LangGraph</code>
+                            <span>Meta-orchestrateur TAJINE</span>
+                        </div>
+                        <div class="stack-item">
+                            <code>Self-Learning-Agents</code>
+                            <span>Feedback & amelioration continue</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Algorithm Section -->
+        <section id="algorithm" class="section">
+            <div class="section-header">
+                <span class="section-number">05</span>
+                <h2>Algorithme & Design</h2>
+            </div>
+
+            <div class="algorithm-principles">
+                <div class="principle">
+                    <div class="principle-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <h3>Anti-Hallucination</h3>
+                    <p>Chaque prediction est accompagnee d'un intervalle de confiance calibre via MAPIE Conformal Prediction.</p>
+                    <div class="code-block">
+                        <pre><code>from mapie.regression import MapieRegressor
+
+mapie = MapieRegressor(estimator=model, cv=5)
+y_pred, y_pis = mapie.predict(X, alpha=0.1)
+# Intervalle 90% garanti</code></pre>
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <h3>Score Composite</h3>
+                    <p>Le score de confiance global combine plusieurs dimensions ponderees.</p>
+                    <div class="score-breakdown">
+                        <div class="score-row">
+                            <span class="score-dim">Sources</span>
+                            <div class="score-bar" style="--width: 25%"></div>
+                            <span class="score-pct">25%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-dim">Consensus</span>
+                            <div class="score-bar" style="--width: 20%"></div>
+                            <span class="score-pct">20%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-dim">Incertitude modele</span>
+                            <div class="score-bar" style="--width: 25%"></div>
+                            <span class="score-pct">25%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-dim">Temporalite</span>
+                            <div class="score-bar" style="--width: 15%"></div>
+                            <span class="score-pct">15%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-dim">Preuves</span>
+                            <div class="score-bar" style="--width: 15%"></div>
+                            <span class="score-pct">15%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-example">
+                <h3>Exemple: Analyse Territoriale Complete</h3>
+                <div class="code-block large">
+                    <pre><code>async def territorial_analysis(territory: str, sector: str):
+    """Workflow orchestre par TAJINE."""
+
+    # Phase 1: Collecte (agents existants)
+    data_result = await data_agent.step(
+        f"Collecte entreprises {sector} a {territory}"
+    )
+    veille_result = await veille_agent.step(
+        f"Scan veille {sector} {territory}"
+    )
+
+    # Phase 2: Integration Knowledge Graph (NOUVEAU)
+    kg_result = await kg_agent.integrate(
+        data=data_result, signals=veille_result
+    )
+
+    # Phase 3: Detection signaux faibles (NOUVEAU)
+    signals = await signal_detector.detect_weak_signals(
+        texts=veille_result.news
+    )
+
+    # Phase 4: Prediction avec incertitude
+    simulation = await simulation_agent.step(...)
+    uncertainty = await uncertainty_agent.quantify(
+        predictions=simulation.predictions
+    )
+
+    # Phase 5: Validation (NOUVEAU)
+    validated = await validator_agent.validate(
+        predictions=simulation,
+        uncertainty=uncertainty
+    )
+
+    return validated</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agents Mapping Section -->
+        <section id="agents" class="section">
+            <div class="section-header">
+                <span class="section-number">06</span>
+                <h2>Mapping Agents MPtoO</h2>
+            </div>
+
+            <div class="agents-overview">
+                <div class="agents-existing">
+                    <h3>Agents CAMEL Existants (a reutiliser)</h3>
+                    <div class="agents-grid">
+                        <div class="agent-card">
+                            <div class="agent-name">OrchestratorAgent</div>
+                            <div class="agent-role">Coordination multi-agents</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">DataAgent</div>
+                            <div class="agent-role">Collecte SIRENE + web</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">VeilleAgent</div>
+                            <div class="agent-role">Monitoring BODACC/BOAMP</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">GeoAgent</div>
+                            <div class="agent-role">Cartographie, geolocalisation</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">AnalystAgent</div>
+                            <div class="agent-role">Analyse SWOT, scoring</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">FinanceAgent</div>
+                            <div class="agent-role">Analyse financiere</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">SimulationAgent</div>
+                            <div class="agent-role">Scenarios economiques</div>
+                        </div>
+                        <div class="agent-card">
+                            <div class="agent-name">ProspectionAgent</div>
+                            <div class="agent-role">Lead scoring</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="agents-new">
+                    <h3>Nouveaux Agents TAJINE (a creer)</h3>
+                    <div class="agents-grid new">
+                        <div class="agent-card new">
+                            <div class="agent-badge">NOUVEAU</div>
+                            <div class="agent-name">KnowledgeGraphAgent</div>
+                            <div class="agent-role">Neo4j + Owlready2</div>
+                            <div class="agent-desc">Gestion de l'ontologie territoriale et du graphe de connaissances</div>
+                        </div>
+                        <div class="agent-card new">
+                            <div class="agent-badge">NOUVEAU</div>
+                            <div class="agent-name">SignalDetectionAgent</div>
+                            <div class="agent-role">BERTopic + BERTrend</div>
+                            <div class="agent-desc">Detection des signaux faibles et tendances emergentes</div>
+                        </div>
+                        <div class="agent-card new">
+                            <div class="agent-badge">NOUVEAU</div>
+                            <div class="agent-name">UncertaintyAgent</div>
+                            <div class="agent-role">MAPIE Conformal</div>
+                            <div class="agent-desc">Quantification de l'incertitude des predictions</div>
+                        </div>
+                        <div class="agent-card new">
+                            <div class="agent-badge">NOUVEAU</div>
+                            <div class="agent-name">ValidatorAgent</div>
+                            <div class="agent-role">Anti-hallucination</div>
+                            <div class="agent-desc">Validation des predictions avant publication</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reuse-stats">
+                <div class="stat-block">
+                    <div class="stat-circle" style="--percent: 70">
+                        <span>70%</span>
+                    </div>
+                    <div class="stat-text">
+                        <strong>Reutilisation</strong>
+                        <span>Fonctionnalites existantes</span>
+                    </div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-circle" style="--percent: 30">
+                        <span>30%</span>
+                    </div>
+                    <div class="stat-text">
+                        <strong>Nouveau Code</strong>
+                        <span>4 agents + orchestrateur</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stakeholders Section -->
+        <section id="stakeholders" class="section">
+            <div class="section-header">
+                <span class="section-number">07</span>
+                <h2>Stakeholders & Strategie Donnees</h2>
+            </div>
+
+            <div class="stakeholder-tabs">
+                <button class="tab-btn active" data-tab="collectivites">Collectivites</button>
+                <button class="tab-btn" data-tab="evaluateurs">Evaluateurs</button>
+                <button class="tab-btn" data-tab="etat">Services Etat</button>
+            </div>
+
+            <div class="tab-content active" id="collectivites">
+                <div class="stakeholder-profile">
+                    <h3>Agents de Collectivites Territoriales</h3>
+                    <p class="profile-desc">Agents de mairie, cadres territoriaux, charges de mission developpement economique, responsables observatoires locaux.</p>
+
+                    <div class="needs-table">
+                        <div class="table-header">
+                            <span>Besoin</span>
+                            <span>Criticite</span>
+                            <span>Donnees</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Diagnostic territorial</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>INSEE, SIRENE, DVF</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Prospection entreprises</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>SIRENE, bilans, secteurs</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Veille economique</span>
+                            <span class="criticite high">HAUTE</span>
+                            <span>BODACC, SIRENE temps reel</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Suivi ZAE</span>
+                            <span class="criticite high">HAUTE</span>
+                            <span>Cadastre, SIRENE geo</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Tableaux de bord elus</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>Agregation multi-sources</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="evaluateurs">
+                <div class="stakeholder-profile">
+                    <h3>Evaluateurs / Experts Publics</h3>
+                    <p class="profile-desc">France Domaine, services fiscaux DGFIP, experts judiciaires, commissaires aux comptes publics.</p>
+
+                    <div class="needs-table">
+                        <div class="table-header">
+                            <span>Besoin</span>
+                            <span>Criticite</span>
+                            <span>Donnees</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Valeur venale</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>DVF, references notariales</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Methode par comparaison</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>3-5 references comparables</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Chain of evidence</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>Tracabilite juridique</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Expropriation</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>References, prejudices</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="etat">
+                <div class="stakeholder-profile">
+                    <h3>Services de l'Etat</h3>
+                    <p class="profile-desc">Prefectures, DREAL, DREETS, DDT, INSEE regional, Banque de France, ministeres.</p>
+
+                    <div class="needs-table">
+                        <div class="table-header">
+                            <span>Besoin</span>
+                            <span>Criticite</span>
+                            <span>Donnees</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Intelligence economique</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>SIRENE, emploi, PIB regional</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Signaux faibles strategiques</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>News, BODACC, indicateurs</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Gestion de crise</span>
+                            <span class="criticite critical">CRITIQUE</span>
+                            <span>Donnees temps reel</span>
+                        </div>
+                        <div class="table-row">
+                            <span>Prospective territoriale</span>
+                            <span class="criticite high">HAUTE</span>
+                            <span>Modelisation, tendances</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-strategy">
+                <h3>Strategie d'Acces aux Donnees</h3>
+                <div class="strategy-grid">
+                    <div class="strategy-item">
+                        <div class="strategy-icon green">&#x2713;</div>
+                        <h4>Donnees Gratuites</h4>
+                        <ul>
+                            <li>SIRENE (28M etablissements)</li>
+                            <li>DVF (ventes immobilieres)</li>
+                            <li>BODACC (annonces legales)</li>
+                            <li>BAN (geocodage)</li>
+                            <li>INSEE (stats publiques)</li>
+                        </ul>
+                    </div>
+                    <div class="strategy-item">
+                        <div class="strategy-icon orange">$</div>
+                        <h4>Donnees Payantes</h4>
+                        <ul>
+                            <li>PERVAL/BIEN (notaires)</li>
+                            <li>Infogreffe bilans</li>
+                            <li>DIANE/Altares scoring</li>
+                        </ul>
+                    </div>
+                    <div class="strategy-item">
+                        <div class="strategy-icon blue">~</div>
+                        <h4>Donnees Inferees</h4>
+                        <ul>
+                            <li>CA entreprise (ML)</li>
+                            <li>Etat du bien (NLP)</li>
+                            <li>Risque defaillance</li>
+                            <li>Vacance commerciale (CV)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GitHub Resources Section -->
+        <section id="github" class="section">
+            <div class="section-header">
+                <span class="section-number">08</span>
+                <h2>Ressources GitHub</h2>
+            </div>
+
+            <div class="github-categories">
+                <div class="gh-category">
+                    <h3>APIs Donnees Francaises</h3>
+                    <div class="repo-list">
+                        <a href="https://github.com/InseeFrLab/pynsee" class="repo-card" target="_blank">
+                            <div class="repo-name">pynsee</div>
+                            <div class="repo-desc">Package complet INSEE + IGN + SIRENE</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                        <a href="https://github.com/aalepere/BODACC_API" class="repo-card" target="_blank">
+                            <div class="repo-name">BODACC_API</div>
+                            <div class="repo-desc">API Flask + MongoDB pour BODACC</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                        <a href="https://github.com/atao/BAN-Geocoder" class="repo-card" target="_blank">
+                            <div class="repo-name">BAN-Geocoder</div>
+                            <div class="repo-desc">Geocodage offline avec BAN locale</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="gh-category">
+                    <h3>Intelligence & NLP</h3>
+                    <div class="repo-list">
+                        <a href="https://github.com/rte-france/BERTrend" class="repo-card" target="_blank">
+                            <div class="repo-name">BERTrend</div>
+                            <div class="repo-desc">Detection de signaux faibles</div>
+                            <div class="repo-badge critical">CRITIQUE</div>
+                        </a>
+                        <a href="https://github.com/MaartenGr/BERTopic" class="repo-card" target="_blank">
+                            <div class="repo-name">BERTopic</div>
+                            <div class="repo-desc">Topic modeling neural</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                        <a href="https://github.com/scikit-learn-contrib/MAPIE" class="repo-card" target="_blank">
+                            <div class="repo-name">MAPIE</div>
+                            <div class="repo-desc">Conformal Prediction officiel</div>
+                            <div class="repo-badge critical">CRITIQUE</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="gh-category">
+                    <h3>Knowledge Graph & RAG</h3>
+                    <div class="repo-list">
+                        <a href="https://github.com/neo4j/neo4j-graphrag-python" class="repo-card" target="_blank">
+                            <div class="repo-name">neo4j-graphrag-python</div>
+                            <div class="repo-desc">GraphRAG officiel Neo4j</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                        <a href="https://github.com/getzep/graphiti" class="repo-card" target="_blank">
+                            <div class="repo-name">graphiti</div>
+                            <div class="repo-desc">KG temps reel pour agents IA</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                        <a href="https://github.com/NirDiamant/RAG_Techniques" class="repo-card" target="_blank">
+                            <div class="repo-name">RAG_Techniques</div>
+                            <div class="repo-desc">Techniques RAG avancees</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="gh-category">
+                    <h3>Orchestration Multi-Agents</h3>
+                    <div class="repo-list">
+                        <a href="https://github.com/camel-ai/camel" class="repo-card" target="_blank">
+                            <div class="repo-name">CAMEL-AI</div>
+                            <div class="repo-desc">Deja utilise dans MPtoO</div>
+                            <div class="repo-badge">EXISTANT</div>
+                        </a>
+                        <a href="https://github.com/langchain-ai/langgraph" class="repo-card" target="_blank">
+                            <div class="repo-name">LangGraph</div>
+                            <div class="repo-desc">Graph-based orchestration</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                        <a href="https://github.com/omdivyatej/Self-Learning-Agents" class="repo-card" target="_blank">
+                            <div class="repo-name">Self-Learning-Agents</div>
+                            <div class="repo-desc">Auto-amelioration via feedback</div>
+                            <div class="repo-badge recommended">RECOMMANDE</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Real World Lessons Section -->
+        <section id="lessons" class="section">
+            <div class="section-header">
+                <span class="section-number">09</span>
+                <h2>Lecons du Monde Reel</h2>
+            </div>
+
+            <div class="lessons-grid">
+                <div class="lesson-card">
+                    <div class="lesson-source">Palantir</div>
+                    <h3>Fusion de Donnees Heterogenes</h3>
+                    <p>Connecter des bases qui ne se parlent pas pour creer une vue unifiee.</p>
+                    <div class="lesson-application">
+                        <strong>Application TAJINE:</strong> Knowledge Graph multi-sources
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-source">Early Warning EU</div>
+                    <h3>Detection Precoce = Survie</h3>
+                    <p>+5.2% de survie pour entreprises accompagnees, +7.7% dans les pays leaders.</p>
+                    <div class="lesson-application">
+                        <strong>Application TAJINE:</strong> Signaux faibles 6-12 mois avant crise
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-source">FIBEN / BdF</div>
+                    <h3>Horizon Multi-Annees</h3>
+                    <p>Cotation sur 3 ans avec incidents paiement comme signal fort.</p>
+                    <div class="lesson-application">
+                        <strong>Application TAJINE:</strong> Prediction multi-horizon (1, 2, 3 ans)
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <div class="lesson-source">Observatoires</div>
+                    <h3>Mutualisation & Neutralite</h3>
+                    <p>30 ans d'existence, 120 structures adherentes, service public de la donnee.</p>
+                    <div class="lesson-application">
+                        <strong>Application TAJINE:</strong> Service public de l'intelligence
+                    </div>
+                </div>
+            </div>
+
+            <div class="reality-check">
+                <h3>Realite vs Theorie</h3>
+                <div class="reality-comparison">
+                    <div class="reality-col theory">
+                        <h4>En Theorie (Papers ML)</h4>
+                        <ul>
+                            <li>98% accuracy</li>
+                            <li>Toutes variables disponibles</li>
+                            <li>Donnees fraiches</li>
+                            <li>Dataset equilibre</li>
+                        </ul>
+                    </div>
+                    <div class="reality-col practice">
+                        <h4>En Pratique (TAJINE)</h4>
+                        <ul>
+                            <li>70-80% accuracy cible</li>
+                            <li>SIRENE: 14% completude effectif</li>
+                            <li>DVF: -6 mois retard</li>
+                            <li>~2% defaillances/an</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checklist-section">
+                <h3>Checklist Avant Implementation</h3>
+                <div class="checklist">
+                    <label class="check-item">
+                        <input type="checkbox">
+                        <span>Ai-je verifie la completude reelle de SIRENE pour mon cas d'usage?</span>
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox">
+                        <span>Ai-je un plan B si l'API INSEE est instable?</span>
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox">
+                        <span>Mes objectifs de performance sont-ils realistes (70-80%, pas 98%)?</span>
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox">
+                        <span>Chaque prediction affiche-t-elle ses limitations?</span>
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox">
+                        <span>N'utilise-t-on que des donnees publiques/open data?</span>
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox">
+                        <span>Transparence totale sur les methodes?</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentation Index Section -->
+        <section id="documentation" class="section">
+            <div class="section-header">
+                <span class="section-number">10</span>
+                <h2>Documentation Complete</h2>
+            </div>
+
+            <div class="doc-intro">
+                <p>Toute la documentation TAJINE est organisee en <strong>6 categories</strong> totalisant <strong>12 documents</strong> et <strong>560+ KB</strong> de contenu technique detaille.</p>
+            </div>
+
+            <div class="doc-categories">
+                <!-- Fondations -->
+                <div class="doc-category">
+                    <div class="doc-category-header">
+                        <span class="doc-icon">&#128218;</span>
+                        <h3>Fondations</h3>
+                    </div>
+                    <div class="doc-list">
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-documentation.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Documentation Principale</span>
+                            <span class="doc-size">93 KB</span>
+                        </a>
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-tech-stack.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Stack Technologique</span>
+                            <span class="doc-size">12 KB</span>
+                        </a>
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-github-resources.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Ressources GitHub</span>
+                            <span class="doc-size">14 KB</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Processus & Algorithme -->
+                <div class="doc-category">
+                    <div class="doc-category-header">
+                        <span class="doc-icon">&#129504;</span>
+                        <h3>Processus & Algorithme</h3>
+                    </div>
+                    <div class="doc-list">
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-cognitive-process.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Processus Cognitif</span>
+                            <span class="doc-size">52 KB</span>
+                        </a>
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-algorithm-design.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Design Algorithmique</span>
+                            <span class="doc-size">50 KB</span>
+                        </a>
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-agents-mapping.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Mapping Agents</span>
+                            <span class="doc-size">21 KB</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Moteur Cognitif v5.0 -->
+                <div class="doc-category featured">
+                    <div class="doc-category-header">
+                        <span class="doc-icon">&#9889;</span>
+                        <h3>Moteur Cognitif v5.0</h3>
+                        <span class="doc-badge new">NOUVEAU</span>
+                    </div>
+                    <div class="doc-list">
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-cognitive-engine-design.md" class="doc-link featured" target="_blank">
+                            <span class="doc-name">66+ Theories / 13 Domaines</span>
+                            <span class="doc-size">105 KB</span>
+                        </a>
+                    </div>
+                    <div class="doc-domains">
+                        <span class="domain-tag">Economie</span>
+                        <span class="domain-tag">Sociologie</span>
+                        <span class="domain-tag">Geographie</span>
+                        <span class="domain-tag">Politique</span>
+                        <span class="domain-tag">Systemes</span>
+                        <span class="domain-tag">Cognition</span>
+                        <span class="domain-tag">Physique</span>
+                        <span class="domain-tag new">RL</span>
+                        <span class="domain-tag new">Network</span>
+                        <span class="domain-tag new">NLP</span>
+                        <span class="domain-tag new">Optim</span>
+                        <span class="domain-tag new">Spatial</span>
+                        <span class="domain-tag new">KG</span>
+                    </div>
+                </div>
+
+                <!-- Donnees & Apprentissage -->
+                <div class="doc-category">
+                    <div class="doc-category-header">
+                        <span class="doc-icon">&#128202;</span>
+                        <h3>Donnees & Apprentissage</h3>
+                        <span class="doc-badge new">14 DEC</span>
+                    </div>
+                    <div class="doc-list">
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-14-tajine-data-collection-strategy.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Strategie de Collecte</span>
+                            <span class="doc-desc">RGPD, APIs francaises, methodes hedge funds</span>
+                            <span class="doc-size">31 KB</span>
+                        </a>
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-14-tajine-data-learning-engine-design.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Moteur d'Apprentissage</span>
+                            <span class="doc-desc">Shapley, UCB, Curiosity, Bayes</span>
+                            <span class="doc-size">51 KB</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Architecture Agentique -->
+                <div class="doc-category">
+                    <div class="doc-category-header">
+                        <span class="doc-icon">&#129302;</span>
+                        <h3>Architecture Agentique</h3>
+                        <span class="doc-badge new">14 DEC</span>
+                    </div>
+                    <div class="doc-list">
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-14-tajine-agentic-architecture-design.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Multi-Agents Design</span>
+                            <span class="doc-desc">CAMEL + ManusAgent + Oumi.ai + KG + Anti-Hallucination</span>
+                            <span class="doc-size">58 KB</span>
+                        </a>
+                    </div>
+                    <div class="doc-features">
+                        <div class="feature-chip">TAJINEWorkforce</div>
+                        <div class="feature-chip">CoALM Integration</div>
+                        <div class="feature-chip">OWL Ontology</div>
+                        <div class="feature-chip">MAPIE Validation</div>
+                    </div>
+                </div>
+
+                <!-- Strategie & Lecons -->
+                <div class="doc-category">
+                    <div class="doc-category-header">
+                        <span class="doc-icon">&#128161;</span>
+                        <h3>Strategie & Lecons</h3>
+                    </div>
+                    <div class="doc-list">
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-stakeholders-data-strategy.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Stakeholders & Data Strategy</span>
+                            <span class="doc-size">49 KB</span>
+                        </a>
+                        <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-13-tajine-real-world-lessons.md" class="doc-link" target="_blank">
+                            <span class="doc-name">Lecons du Monde Reel</span>
+                            <span class="doc-desc">Renaissance Tech, Palantir, Bloomberg</span>
+                            <span class="doc-size">23 KB</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Formulas -->
+            <div class="doc-formulas">
+                <h3>Formules Mathematiques Cles</h3>
+                <div class="formula-grid">
+                    <div class="formula-card">
+                        <div class="formula-name">Information Gain</div>
+                        <div class="formula">IG(T,a) = H(T) - H(T|a)</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-name">Shapley Value</div>
+                        <div class="formula">&#966;&#7522;(v) = &#8721; [|S|!(n-|S|-1)!/n!] &middot; [v(S&#8746;{i}) - v(S)]</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-name">UCB Algorithm</div>
+                        <div class="formula">UCB(a) = Q(a) + c &middot; &#8730;(ln(t)/N(a))</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-name">Conformal Prediction</div>
+                        <div class="formula">C(x) = {y : s(x,y) &#8804; q&#770;}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentation Index Link -->
+            <div class="doc-index-link">
+                <a href="https://github.com/hamidedefr/MPtoO-v2/blob/main/docs/plans/2025-12-14-tajine-documentation-index.md" class="index-btn" target="_blank">
+                    <span>Voir l'Index Central Complet</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </section>
+
+        <!-- Interface & Rapports Section -->
+        <section id="interface" class="section">
+            <div class="section-header">
+                <span class="section-number">11</span>
+                <h2>Interface & Rapports</h2>
+            </div>
+
+            <div class="interface-overview">
+                <p>TAJINE produit des outputs adaptes a differents publics et cas d'usage.</p>
+            </div>
+
+            <div class="interface-grid">
+                <!-- Dashboard -->
+                <div class="interface-card">
+                    <div class="interface-icon">&#128202;</div>
+                    <h3>Dashboard Interactif</h3>
+                    <div class="interface-tech">Plotly Dash + Mapbox</div>
+                    <ul class="interface-features">
+                        <li>Carte territoriale interactive</li>
+                        <li>Graphiques temps reel</li>
+                        <li>Filtres multi-criteres</li>
+                        <li>Export PNG/PDF</li>
+                    </ul>
+                    <div class="interface-users">
+                        <span class="user-badge">Analystes</span>
+                        <span class="user-badge">Decideurs</span>
+                    </div>
+                </div>
+
+                <!-- Alertes -->
+                <div class="interface-card">
+                    <div class="interface-icon">&#128276;</div>
+                    <h3>Systeme d'Alertes</h3>
+                    <div class="interface-tech">Email + Slack + Webhook</div>
+                    <ul class="interface-features">
+                        <li>Alertes signaux faibles</li>
+                        <li>Seuils configurables</li>
+                        <li>Priorite par criticite</li>
+                        <li>Historique complet</li>
+                    </ul>
+                    <div class="interface-users">
+                        <span class="user-badge">Operationnels</span>
+                        <span class="user-badge">Veilleurs</span>
+                    </div>
+                </div>
+
+                <!-- Rapports PDF -->
+                <div class="interface-card">
+                    <div class="interface-icon">&#128196;</div>
+                    <h3>Rapports PDF</h3>
+                    <div class="interface-tech">ReportLab + Jinja2</div>
+                    <ul class="interface-features">
+                        <li>Rapports territoriaux</li>
+                        <li>Analyses sectorielles</li>
+                        <li>Fiches entreprises</li>
+                        <li>Syntheses mensuelles</li>
+                    </ul>
+                    <div class="interface-users">
+                        <span class="user-badge">Direction</span>
+                        <span class="user-badge">Partenaires</span>
+                    </div>
+                </div>
+
+                <!-- API REST -->
+                <div class="interface-card">
+                    <div class="interface-icon">&#128268;</div>
+                    <h3>API REST</h3>
+                    <div class="interface-tech">FastAPI + OpenAPI</div>
+                    <ul class="interface-features">
+                        <li>Endpoints predictions</li>
+                        <li>Requetes Knowledge Graph</li>
+                        <li>Webhooks evenements</li>
+                        <li>Documentation Swagger</li>
+                    </ul>
+                    <div class="interface-users">
+                        <span class="user-badge">Developpeurs</span>
+                        <span class="user-badge">Integrateurs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Examples -->
+            <div class="output-examples">
+                <h3>Exemples d'Outputs</h3>
+                <div class="output-grid">
+                    <div class="output-card">
+                        <div class="output-type">Alerte Signal Faible</div>
+                        <div class="output-content">
+                            <code>
+{
+  "type": "weak_signal",
+  "territory": "Loire-Atlantique",
+  "signal": "Hausse embauches tech +23%",
+  "confidence": 0.84,
+  "horizon": "6 mois",
+  "sources": ["INSEE", "LinkedIn", "URSSAF"]
+}
+                            </code>
+                        </div>
+                    </div>
+                    <div class="output-card">
+                        <div class="output-type">Prediction Defaillance</div>
+                        <div class="output-content">
+                            <code>
+{
+  "type": "bankruptcy_risk",
+  "entity": "SIREN:123456789",
+  "probability": 0.72,
+  "interval": [0.65, 0.79],
+  "factors": ["retards_paiement", "baisse_CA"],
+  "recommendation": "Surveillance renforcee"
+}
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cas d'Usage Concrets Section -->
+        <section id="use-cases" class="section">
+            <div class="section-header">
+                <span class="section-number">12</span>
+                <h2>Cas d'Usage Concrets</h2>
+            </div>
+
+            <div class="use-cases-grid">
+                <!-- CU1: Anticipation Defaillance -->
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <span class="use-case-id">CU1</span>
+                        <h3>Anticipation de Defaillance</h3>
+                    </div>
+                    <div class="use-case-scenario">
+                        <strong>Scenario:</strong> Une PME de 50 salaries montre des signaux inquietants
+                    </div>
+                    <div class="use-case-signals">
+                        <h4>Signaux detectes:</h4>
+                        <ul>
+                            <li>&#9888; Retards paiement URSSAF (+45 jours)</li>
+                            <li>&#9888; Baisse effectifs LinkedIn (-12%)</li>
+                            <li>&#9888; Sentiment negatif articles locaux</li>
+                            <li>&#9888; Dirigeant demissionne (BODACC)</li>
+                        </ul>
+                    </div>
+                    <div class="use-case-output">
+                        <h4>Output TAJINE:</h4>
+                        <div class="prediction-box">
+                            <span class="risk-level high">Risque Eleve</span>
+                            <span class="probability">P(defaillance 12m) = 0.73</span>
+                            <span class="confidence">[0.65 - 0.81] @ 90%</span>
+                        </div>
+                    </div>
+                    <div class="use-case-action">
+                        <strong>Action recommandee:</strong> Alerte CCI + Accompagnement prevention
+                    </div>
+                </div>
+
+                <!-- CU2: Opportunite Implantation -->
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <span class="use-case-id">CU2</span>
+                        <h3>Opportunite d'Implantation</h3>
+                    </div>
+                    <div class="use-case-scenario">
+                        <strong>Scenario:</strong> Recherche zone ideale pour datacenter green
+                    </div>
+                    <div class="use-case-signals">
+                        <h4>Criteres analyses:</h4>
+                        <ul>
+                            <li>&#9989; Energie renouvelable disponible</li>
+                            <li>&#9989; Foncier industriel &lt; 50EUR/m2</li>
+                            <li>&#9989; Fibre optique haute capacite</li>
+                            <li>&#9989; Main d'oeuvre tech qualifiee</li>
+                        </ul>
+                    </div>
+                    <div class="use-case-output">
+                        <h4>Top 3 Territoires:</h4>
+                        <div class="ranking-list">
+                            <div class="rank-item"><span class="rank">1</span> Hauts-de-France (Score: 0.89)</div>
+                            <div class="rank-item"><span class="rank">2</span> Grand Est (Score: 0.84)</div>
+                            <div class="rank-item"><span class="rank">3</span> Normandie (Score: 0.81)</div>
+                        </div>
+                    </div>
+                    <div class="use-case-action">
+                        <strong>Action recommandee:</strong> Fiche detaillee + Contact ADI regionale
+                    </div>
+                </div>
+
+                <!-- CU3: Transformation Economique -->
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <span class="use-case-id">CU3</span>
+                        <h3>Transformation Economique</h3>
+                    </div>
+                    <div class="use-case-scenario">
+                        <strong>Scenario:</strong> Detection emergence filiere hydrogene en Occitanie
+                    </div>
+                    <div class="use-case-signals">
+                        <h4>Tendances detectees:</h4>
+                        <ul>
+                            <li>&#128200; +340% mentions "hydrogene" presse locale</li>
+                            <li>&#128200; 12 startups creees en 18 mois</li>
+                            <li>&#128200; 3 projets France 2030 finances</li>
+                            <li>&#128200; Partenariat Airbus-Region annonce</li>
+                        </ul>
+                    </div>
+                    <div class="use-case-output">
+                        <h4>Projection 5 ans:</h4>
+                        <div class="projection-box">
+                            <span class="metric">Emplois: 2,500 - 4,200</span>
+                            <span class="metric">CA filiere: 180-320 MEUR</span>
+                            <span class="metric">Maturite: Phase acceleration</span>
+                        </div>
+                    </div>
+                    <div class="use-case-action">
+                        <strong>Action recommandee:</strong> Rapport strategique + Formation filiere
+                    </div>
+                </div>
+
+                <!-- CU4: Alerte Territoriale -->
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <span class="use-case-id">CU4</span>
+                        <h3>Alerte Risque Territorial</h3>
+                    </div>
+                    <div class="use-case-scenario">
+                        <strong>Scenario:</strong> Bassin d'emploi en tension critique
+                    </div>
+                    <div class="use-case-signals">
+                        <h4>Signaux convergents:</h4>
+                        <ul>
+                            <li>&#128308; Fermeture usine principale (PSE 450)</li>
+                            <li>&#128308; Sous-traitants en cascade affectes</li>
+                            <li>&#128308; Population -8% sur 5 ans</li>
+                            <li>&#128308; Commerces centre-ville -23%</li>
+                        </ul>
+                    </div>
+                    <div class="use-case-output">
+                        <h4>Analyse causale:</h4>
+                        <div class="causal-chain">
+                            Fermeture usine &#8594; Perte sous-traitants &#8594; Chomage &#8594; Exode &#8594; Desertification
+                        </div>
+                    </div>
+                    <div class="use-case-action">
+                        <strong>Action recommandee:</strong> Plan de revitalisation urgent + CPER
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metriques & Evaluation Section -->
+        <section id="metrics" class="section">
+            <div class="section-header">
+                <span class="section-number">13</span>
+                <h2>Metriques & Evaluation</h2>
+            </div>
+
+            <div class="metrics-intro">
+                <p>TAJINE est evalue selon des metriques rigoureuses couvrant precision, fiabilite, et utilite operationnelle.</p>
+            </div>
+
+            <div class="metrics-categories">
+                <!-- Precision Predictions -->
+                <div class="metric-category">
+                    <h3>&#127919; Precision des Predictions</h3>
+                    <div class="metrics-table">
+                        <div class="metric-row header">
+                            <span>Metrique</span>
+                            <span>Cible</span>
+                            <span>Actuel</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>AUC-ROC (defaillance)</span>
+                            <span>&gt; 0.80</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Precision @ 10%</span>
+                            <span>&gt; 0.60</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>MAPE (series temporelles)</span>
+                            <span>&lt; 15%</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Couverture intervalle 90%</span>
+                            <span>88-92%</span>
+                            <span class="pending">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anti-Hallucination -->
+                <div class="metric-category">
+                    <h3>&#128737; Anti-Hallucination</h3>
+                    <div class="metrics-table">
+                        <div class="metric-row header">
+                            <span>Metrique</span>
+                            <span>Cible</span>
+                            <span>Actuel</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Taux faits verifies</span>
+                            <span>&gt; 95%</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Calibration (ECE)</span>
+                            <span>&lt; 0.05</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Taux sources citees</span>
+                            <span>100%</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Detection incertitude</span>
+                            <span>&gt; 0.90</span>
+                            <span class="pending">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Couverture Donnees -->
+                <div class="metric-category">
+                    <h3>&#128202; Couverture Donnees</h3>
+                    <div class="metrics-table">
+                        <div class="metric-row header">
+                            <span>Metrique</span>
+                            <span>Cible</span>
+                            <span>Actuel</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Entreprises indexees</span>
+                            <span>&gt; 5M</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Communes couvertes</span>
+                            <span>100%</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Fraicheur donnees APIs</span>
+                            <span>&lt; 24h</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Sources alternatives</span>
+                            <span>&gt; 15</span>
+                            <span class="pending">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Systeme -->
+                <div class="metric-category">
+                    <h3>&#9889; Performance Systeme</h3>
+                    <div class="metrics-table">
+                        <div class="metric-row header">
+                            <span>Metrique</span>
+                            <span>Cible</span>
+                            <span>Actuel</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Temps reponse API P95</span>
+                            <span>&lt; 2s</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Temps generation rapport</span>
+                            <span>&lt; 30s</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Uptime systeme</span>
+                            <span>&gt; 99.5%</span>
+                            <span class="pending">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>Entites Knowledge Graph</span>
+                            <span>&gt; 10M</span>
+                            <span class="pending">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluation Framework -->
+            <div class="eval-framework">
+                <h3>Framework d'Evaluation</h3>
+                <div class="eval-phases">
+                    <div class="eval-phase">
+                        <div class="phase-num">1</div>
+                        <h4>Backtesting</h4>
+                        <p>Validation sur donnees historiques (2019-2024)</p>
+                    </div>
+                    <div class="eval-phase">
+                        <div class="phase-num">2</div>
+                        <h4>A/B Testing</h4>
+                        <p>Comparaison avec methodes existantes</p>
+                    </div>
+                    <div class="eval-phase">
+                        <div class="phase-num">3</div>
+                        <h4>Pilote Terrain</h4>
+                        <p>Test reel sur 3 territoires pilotes</p>
+                    </div>
+                    <div class="eval-phase">
+                        <div class="phase-num">4</div>
+                        <h4>Monitoring Continu</h4>
+                        <p>Drift detection et recalibration</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Integration MPtoO Section -->
+        <section id="integration" class="section">
+            <div class="section-header">
+                <span class="section-number">14</span>
+                <h2>Integration MPtoO</h2>
+            </div>
+
+            <div class="integration-intro">
+                <p>TAJINE s'integre dans l'ecosysteme MPtoO-V2 en reutilisant les composants existants et en ajoutant des capacites specifiques a l'intelligence territoriale.</p>
+            </div>
+
+            <div class="integration-diagram">
+                <div class="integration-layer mptoo">
+                    <h3>MPtoO-V2 Core</h3>
+                    <div class="component-grid">
+                        <div class="component">
+                            <span class="comp-icon">&#129302;</span>
+                            <span class="comp-name">CAMEL Workforce</span>
+                            <span class="comp-status reused">Reutilise</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#128736;</span>
+                            <span class="comp-name">ManusAgent</span>
+                            <span class="comp-status reused">Reutilise</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#128268;</span>
+                            <span class="comp-name">FastAPI</span>
+                            <span class="comp-status reused">Reutilise</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#128451;</span>
+                            <span class="comp-name">Qdrant</span>
+                            <span class="comp-status reused">Reutilise</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="integration-arrow">&#8595;</div>
+
+                <div class="integration-layer tajine">
+                    <h3>TAJINE Extensions</h3>
+                    <div class="component-grid">
+                        <div class="component">
+                            <span class="comp-icon">&#127757;</span>
+                            <span class="comp-name">TAJINEWorkforce</span>
+                            <span class="comp-status new">Nouveau</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#129504;</span>
+                            <span class="comp-name">Cognitive Engine</span>
+                            <span class="comp-status new">Nouveau</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#128200;</span>
+                            <span class="comp-name">Knowledge Graph</span>
+                            <span class="comp-status new">Nouveau</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#128737;</span>
+                            <span class="comp-name">Anti-Hallucination</span>
+                            <span class="comp-status new">Nouveau</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="integration-arrow">&#8595;</div>
+
+                <div class="integration-layer external">
+                    <h3>Integrations Externes</h3>
+                    <div class="component-grid">
+                        <div class="component">
+                            <span class="comp-icon">&#127470;&#127475;</span>
+                            <span class="comp-name">Oumi.ai CoALM</span>
+                            <span class="comp-status external">Externe</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#128218;</span>
+                            <span class="comp-name">APIs INSEE</span>
+                            <span class="comp-status external">Externe</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#127968;</span>
+                            <span class="comp-name">Neo4j</span>
+                            <span class="comp-status external">Externe</span>
+                        </div>
+                        <div class="component">
+                            <span class="comp-icon">&#128202;</span>
+                            <span class="comp-name">MAPIE</span>
+                            <span class="comp-status external">Externe</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Structure -->
+            <div class="file-structure">
+                <h3>Structure des Fichiers TAJINE</h3>
+                <pre class="file-tree">
+MPtoO-V2/
+├── src/
+│   └── infrastructure/
+│       └── agents/
+│           └── tajine/              # NOUVEAU
+│               ├── __init__.py
+│               ├── workforce.py     # TAJINEWorkforce
+│               ├── cognitive_engine.py
+│               ├── knowledge_graph.py
+│               └── anti_hallucination.py
+├── docs/
+│   ├── plans/
+│   │   ├── 2025-12-13-tajine-*.md   # Documentation
+│   │   └── 2025-12-14-tajine-*.md   # Documentation
+│   └── tajine-site/                 # Site web
+│       ├── index.html
+│       ├── styles.css
+│       └── script.js
+└── tests/
+    └── unit/
+        └── infrastructure/
+            └── agents/
+                └── tajine/          # Tests TAJINE
+                </pre>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="next-steps">
+                <h3>Prochaines Etapes</h3>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-num">1</div>
+                        <h4>Setup Infrastructure</h4>
+                        <p>Neo4j, APIs, environnement dev</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">2</div>
+                        <h4>Implementation Core</h4>
+                        <p>TAJINEWorkforce, Cognitive Engine</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <h4>Data Pipeline</h4>
+                        <p>Collecte, nettoyage, Knowledge Graph</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">4</div>
+                        <h4>Validation</h4>
+                        <p>Tests, backtesting, pilote terrain</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-pattern"></div>
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <svg class="footer-tajine" viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Steam animated -->
+                        <g class="footer-steam" opacity="0.6">
+                            <path d="M50 4 Q53 8, 50 14 Q47 8, 50 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round">
+                                <animate attributeName="d" dur="2.5s" repeatCount="indefinite" values="M50 4 Q53 8, 50 14 Q47 8, 50 4;M50 2 Q55 10, 50 16 Q45 10, 50 2;M50 4 Q53 8, 50 14 Q47 8, 50 4"/>
+                            </path>
+                            <path d="M44 8 Q47 12, 44 18" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round">
+                                <animate attributeName="d" dur="2s" repeatCount="indefinite" values="M44 8 Q47 12, 44 18;M43 5 Q48 14, 43 20;M44 8 Q47 12, 44 18"/>
+                            </path>
+                            <path d="M56 8 Q53 12, 56 18" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round">
+                                <animate attributeName="d" dur="2.2s" repeatCount="indefinite" values="M56 8 Q53 12, 56 18;M57 5 Q52 14, 57 20;M56 8 Q53 12, 56 18"/>
+                            </path>
+                        </g>
+                        <!-- Lid knob -->
+                        <ellipse cx="50" cy="18" rx="4" ry="3" fill="currentColor"/>
+                        <!-- Conical lid -->
+                        <path d="M50 20 L78 55 Q80 59, 76 61 L24 61 Q20 59, 22 55 L50 20Z" fill="currentColor" opacity="0.2"/>
+                        <path d="M50 20 L78 55 Q80 59, 76 61 L24 61 Q20 59, 22 55 L50 20Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                        <!-- Geometric pattern -->
+                        <g opacity="0.3">
+                            <path d="M50 30 L54 38 L50 46 L46 38 Z" fill="currentColor"/>
+                            <path d="M40 40 L44 48 L40 56 L36 48 Z" fill="currentColor"/>
+                            <path d="M60 40 L64 48 L60 56 L56 48 Z" fill="currentColor"/>
+                        </g>
+                        <!-- Base plate -->
+                        <ellipse cx="50" cy="66" rx="35" ry="8" fill="currentColor" opacity="0.15"/>
+                        <ellipse cx="50" cy="66" rx="35" ry="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                    <span>TAJINE</span>
+                </div>
+                <p>Intelligence Territoriale Multi-Agents avec Anti-Hallucination</p>
+                <p class="footer-note">MPtoO-V2 Project - Documentation generee le 14 decembre 2025 - v5.0.0</p>
+            </div>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="animations.js"></script>
+</body>
+</html>

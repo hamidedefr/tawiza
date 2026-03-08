@@ -1,0 +1,73 @@
+{
+  "timestamp": "2025-11-17T05:15:19.900752",
+  "summary": {
+    "score": 90.00999999999999,
+    "max_score": 100,
+    "percentage": 90.00999999999999
+  },
+  "hardware": {
+    "gpu_detected": true,
+    "device": "0000:07:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M] (rev c8)",
+    "_dev_kfd": {
+      "exists": true,
+      "permissions": "crw-rw-rw-",
+      "owner": "root",
+      "group": "render"
+    },
+    "_dev_dri_renderD128": {
+      "exists": true,
+      "permissions": "crw-rw-rw-",
+      "owner": "root",
+      "group": "render"
+    }
+  },
+  "software": {},
+  "ollama": {
+    "running": true,
+    "models_count": 5,
+    "models": [
+      "mptoo-assistant:latest",
+      "qwen3:14b",
+      "qwen3-coder:30b",
+      "llava:13b",
+      "mistral:latest"
+    ],
+    "gpu_layers": 0,
+    "gpu_active": false
+  },
+  "agents": {
+    "openmanus": {
+      "gpu_config_exists": true,
+      "config_path": "src/infrastructure/agents/openmanus/gpu_config.py"
+    },
+    "skyvern": {
+      "gpu_config_exists": true,
+      "config_path": "src/infrastructure/agents/skyvern/gpu_config.py"
+    }
+  },
+  "performance": {
+    "generation_test": {
+      "status": "success",
+      "generation_time_ms": 572.6006031036377,
+      "tokens_generated": 38,
+      "model_used": "mistral:latest"
+    },
+    "speed_rating": "fast"
+  },
+  "issues": [],
+  "status": "\ud83d\udfe2 EXCELLENT",
+  "cli": {
+    "system gpu": {
+      "status": "success",
+      "output_length": 335
+    },
+    "system status": {
+      "status": "success",
+      "output_length": 684
+    },
+    "version": {
+      "status": "success",
+      "output_length": 543
+    }
+  }
+}

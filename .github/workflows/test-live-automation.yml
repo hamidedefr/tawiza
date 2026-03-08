@@ -1,0 +1,319 @@
+name: LIVE Automation Test Suite
+
+on:
+  push:
+    branches: [ main, mvp-local, develop ]
+    paths:
+      - 'src/infrastructure/llm/**'
+      - 'src/infrastructure/agents/**'
+      - 'src/infrastructure/security/**'
+      - 'tests/unit/infrastructure/**'
+      - 'tests/integration/test_live_automation_e2e.py'
+      - 'tests/performance/test_live_automation_performance.py'
+  pull_request:
+    branches: [ main, mvp-local ]
+    paths:
+      - 'src/infrastructure/llm/**'
+      - 'src/infrastructure/agents/**'
+      - 'src/infrastructure/security/**'
+      - 'tests/**'
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-xdist  # For parallel execution
+
+      - name: Run unit tests with coverage
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/unit/infrastructure/ \
+            -v \
+            -n auto \
+            --cov=src/infrastructure/llm \
+            --cov=src/infrastructure/agents/openmanus \
+            --cov=src/infrastructure/agents/skyvern \
+            --cov=src/infrastructure/security \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --cov-fail-under=80 \
+            -m "unit"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Archive coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-py${{ matrix.python-version }}
+          path: htmlcov/
+
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run security validator tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/unit/infrastructure/security/ \
+            -v \
+            --cov=src/infrastructure/security/validators \
+            --cov-report=xml \
+            -m "not slow"
+
+      - name: Run SSRF protection tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/unit/infrastructure/security/test_validators.py::TestURLValidator \
+            -v
+
+      - name: Run injection prevention tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/unit/infrastructure/security/test_validators.py::TestModelNameValidator \
+            -v
+
+      - name: Run path traversal prevention tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/unit/infrastructure/security/test_validators.py::TestPathValidator \
+            -v
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        options: >-
+          --health-cmd "curl -f http://localhost:11434/api/tags || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 11434:11434
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install playwright
+          playwright install chromium
+
+      - name: Wait for Ollama to be ready
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          timeout 120 bash -c 'until curl -f http://localhost:11434/api/tags > /dev/null 2>&1; do sleep 1; done'
+
+      - name: Pull test model
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          # Use a small model for testing (or skip if pulling takes too long)
+          timeout 300 curl http://localhost:11434/api/pull -d '{"name":"tinydolphin"}' || true
+
+      - name: Run integration tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/integration/test_live_automation_e2e.py \
+            -v \
+            -m "integration" \
+            --tb=short \
+            --timeout=60
+        continue-on-error: true  # Don't fail if Ollama tests fail
+
+      - name: Run integration tests with mocks
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/integration/ \
+            -v \
+            -k "not ollama" \
+            --tb=short
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run performance tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest tests/performance/test_live_automation_performance.py \
+            -v \
+            -m "performance" \
+            --tb=short \
+            -x  # Stop on first failure
+
+      - name: Store performance results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: .pytest_cache/
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 black isort mypy
+
+      - name: Check code formatting with black
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          black --check src/infrastructure/llm/ \
+                         src/infrastructure/agents/ \
+                         src/infrastructure/security/ \
+                         tests/unit/infrastructure/ \
+                         tests/integration/test_live_automation_e2e.py \
+                         tests/performance/test_live_automation_performance.py
+        continue-on-error: true
+
+      - name: Check import sorting
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          isort --check-only src/infrastructure/llm/ \
+                              src/infrastructure/agents/ \
+                              src/infrastructure/security/
+        continue-on-error: true
+
+      - name: Lint with flake8
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          flake8 src/infrastructure/llm/ \
+                  src/infrastructure/agents/ \
+                  src/infrastructure/security/ \
+                  --max-line-length=100 \
+                  --extend-ignore=E203,W503
+        continue-on-error: true
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, security-tests, integration-tests, performance-tests]
+    if: always()
+
+    steps:
+      - name: Check test results
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Tests: ${{ needs.security-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Performance Tests: ${{ needs.performance-tests.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if critical tests failed
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          if [ "${{ needs.unit-tests.result }}" = "failure" ]; then
+            echo "Unit tests failed!"
+            exit 1
+          fi
+          if [ "${{ needs.security-tests.result }}" = "failure" ]; then
+            echo "Security tests failed!"
+            exit 1
+          fi

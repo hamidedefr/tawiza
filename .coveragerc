@@ -1,0 +1,106 @@
+[run]
+# Coverage configuration for MPtoO-V2
+
+# Source packages to measure
+source = src
+
+# Branches to measure
+branch = True
+
+# Omit files from coverage
+omit =
+    # Test files
+    */tests/*
+    */test_*.py
+    */*_test.py
+
+    # Virtual environment
+    */venv/*
+    */site-packages/*
+
+    # Configuration
+    */config/*
+    */__init__.py
+
+    # CLI entry point (hard to test)
+    */main.py
+    */commands/interactive.py
+
+    # Third-party integrations (mock in tests)
+    # */adapters/*
+
+    # Development/debugging
+    */debug/*
+    */scripts/*
+
+# Concurrency support (for async tests)
+concurrency =
+    thread
+    multiprocessing
+
+# Parallel mode
+parallel = True
+
+[report]
+# Reporting options
+
+# Precision for coverage percentage
+precision = 2
+
+# Show missing lines
+show_missing = True
+
+# Skip covered files
+skip_covered = False
+
+# Skip empty files
+skip_empty = True
+
+# Exclude lines from coverage
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+
+    # Defensive programming
+    raise AssertionError
+    raise NotImplementedError
+
+    # Type checking
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING:
+    @overload
+
+    # Debugging
+    def __repr__
+    def __str__
+
+    # Abstract methods
+    @abstractmethod
+    @abc.abstractmethod
+
+    # Pass statements
+    pass
+
+    # Ellipsis
+    \.\.\.
+
+    # Main execution
+    if __name__ == .__main__.:
+
+# Fail under this coverage percentage
+# TODO: Increase as test coverage improves
+fail_under = 15
+
+[html]
+# HTML report configuration
+directory = htmlcov
+title = MPtoO CLI Coverage Report
+
+[xml]
+# XML report configuration (for CI/CD)
+output = coverage.xml
+
+[json]
+# JSON report configuration
+output = coverage.json
+pretty_print = True

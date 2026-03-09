@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { TAJINEProvider } from '@/contexts/TAJINEContext';
 import { Toaster } from 'sonner';
+import { TelemetryProvider } from '@/components/telemetry-provider';
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -39,14 +40,16 @@ export default function RootLayout({ children }: PropsWithChildren) {
             <span className="aurora-blob aurora-violet" />
           </div>
           <div className="dot-grid" aria-hidden="true" />
-          <AuthProvider>
-            <NotificationProvider>
-              <TAJINEProvider>
-                <main id="skip" className="relative z-10">{children}</main>
-                <Toaster richColors position="bottom-right" />
-              </TAJINEProvider>
-            </NotificationProvider>
-          </AuthProvider>
+          <TelemetryProvider>
+            <AuthProvider>
+              <NotificationProvider>
+                <TAJINEProvider>
+                  <main id="skip" className="relative z-10">{children}</main>
+                  <Toaster richColors position="bottom-right" />
+                </TAJINEProvider>
+              </NotificationProvider>
+            </AuthProvider>
+          </TelemetryProvider>
         </ThemeProvider>
       </body>
     </html>

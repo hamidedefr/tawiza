@@ -103,6 +103,11 @@ async def lifespan(app: FastAPI):
 
     # Startup
     logger.info("MPtoO v2 API starting...")
+
+    # Anonymous telemetry (opt-out via TELEMETRY_ENABLED=false)
+    from src.core.telemetry import capture_startup
+
+    capture_startup()
     logger.info("Initializing OpenAI-compatible endpoints for LobeChat integration")
 
     # Initialize database
@@ -192,6 +197,12 @@ async def lifespan(app: FastAPI):
 
     with suppress(Exception):
         await close_pool()
+
+    # Flush telemetry
+    from src.core.telemetry import shutdown as telemetry_shutdown
+
+    with suppress(Exception):
+        telemetry_shutdown()
 
     # Close database
     with suppress(Exception):

@@ -227,6 +227,7 @@ SECRET_KEY=CHANGEZ_MOI_EN_PRODUCTION     # Obligatoire
 | [Data Sources](docs/data-sources.md) | Catalogue des 15+ APIs |
 | [API Reference](docs/api-reference.md) | Endpoints REST & WebSocket |
 | [Self-Hosting](docs/self-hosting.md) | Guide de déploiement |
+| [Telemetry](TELEMETRY.md) | Ce qu'on collecte (et ce qu'on ne collecte pas) |
 | [Contributing](CONTRIBUTING.md) | Guide de contribution |
 | [Security](SECURITY.md) | Politique de sécurité |
 

@@ -78,13 +78,13 @@ L'agent TAJINE suit le cycle **PPDSL** (Perceive-Plan-Delegate-Synthesize-Learn)
 - **Web Intelligence** — Crawling adaptatif de sources configurables
 - **Départements** — Classement et détail par département
 - **Comparaison** — Benchmarking entre territoires
-- **Fine-tuning** — Interface d'annotation (Label Studio)
+- **Fine-tuning** — Pipeline d'amélioration continue (LLM-as-Judge)
 
 ### Analyse territoriale
 
 - **6 axes** : Infrastructure, Capital humain, Innovation, Export, Investissement, Durabilité
 - **Simulation Monte Carlo** + modélisation agent-based
-- **Scoring multi-facteurs** avec inférence causale (DoWhy)
+- **Scoring multi-facteurs** avec analyse d'attractivité territoriale
 
 ---
 
@@ -177,7 +177,7 @@ L'architecture suit le pattern **hexagonal** (ports & adapters). Voir [docs/arch
 | **Base de données** | PostgreSQL 17 + pgvector |
 | **Cache** | Redis (multi-niveaux) |
 | **LLM** | Ollama (local) avec HybridLLMRouter |
-| **ML** | scikit-learn, PyMC, DoWhy |
+| **ML** | scikit-learn, Oumi (fine-tuning) |
 | **Web Scraping** | Crawl4AI, Playwright |
 | **Monitoring** | Prometheus, Grafana, Langfuse |
 | **Tests** | pytest, pytest-asyncio |

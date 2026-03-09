@@ -8,7 +8,7 @@
 ```
 
 
-# Tawiza — Intelligence territoriale propulsée par l'IA
+# Tawiza - Intelligence territoriale propulsée par l'IA
 <p align="center">
   <img width="48%" alt="Dashboard Analytics" src="https://github.com/user-attachments/assets/ecc9079c-8c61-4d95-b32b-a59487238832" />
   <img width="48%" alt="Agent TAJINE" src="https://github.com/user-attachments/assets/ee96d642-5777-4d8b-98b0-28271bfcfaa3" />

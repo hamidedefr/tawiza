@@ -9,6 +9,11 @@
 
 # Tawiza — Intelligence territoriale propulsée par l'IA
 
+<img width="1419" height="842" alt="Capture d’écran 2026-03-09 à 02 09 21" src="https://github.com/user-attachments/assets/1703f85e-c076-471b-8c0a-4d36420e7413" />
+<img width="1419" height="842" alt="Capture d’écran 2026-03-09 à 02 21 20" src="https://github.com/user-attachments/assets/300b9bcc-3975-40f0-be67-1cac1be11ca6" />
+<img width="1419" height="842" alt="Capture d’écran 2026-03-09 à 02 10 36" src="https://github.com/user-attachments/assets/a670e8c9-7908-4349-94d2-86c4a42f185c" />
+
+
 [![Status: Beta](https://img.shields.io/badge/Status-Beta-orange.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)

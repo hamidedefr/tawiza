@@ -195,27 +195,27 @@ OPENROUTER_API_KEY=sk-or-...
 ## Architecture
 
 ```
-                    ┌──────────────────────────────────┐
-                    │       Frontend (Next.js 14)      │
-                    │   Dashboard · Chat · Analytics   │
-                    └───────────────┬──────────────────┘
-                                    │ REST + WebSocket
-                    ┌───────────────▼──────────────────┐
-                    │        API Layer (FastAPI)       │
-                    │   Routes · Middleware · Auth     │
-                    └───────────────┬──────────────────┘
-                                    │
-           ┌────────────────────────┼────────────────────────┐
-           │                        │                        │
- ┌─────────▼─────────┐  ┌──────────▼──────────┐  ┌──────────▼──────────┐
- │   Application     │  │   Agent TAJINE      │  │   Data Sources      │
- │   Services        │  │   (Cycle PPDSL)     │  │   (15+ APIs)        │
- └─────────┬─────────┘  └──────────┬──────────┘  └──────────┬──────────┘
-           │                        │                        │
- ┌─────────▼────────────────────────▼────────────────────────▼──────────┐
- │                            Infrastructure                            │
- │                PostgreSQL · Redis · Ollama · pgvector                │
- └────────────────────────────────────────────────────────────────────–─┘
+                                                 ┌──────────────────────────────────┐
+                                                 │       Frontend (Next.js 14)      │
+                                                 │   Dashboard · Chat · Analytics   │
+                                                 └───────────────┬──────────────────┘
+                                                                 │ REST + WebSocket
+                                                 ┌───────────────▼──────────────────┐
+                                                 │        API Layer (FastAPI)       │
+                                                 │   Routes · Middleware · Auth     │
+                                                 └───────────────┬──────────────────┘
+                                                                 │
+                                        ┌────────────────────────┼────────────────────────┐
+                                        │                        │                        │
+                              ┌─────────▼─────────┐  ┌──────────–▼─────────┐  ┌─────────––▼─────────┐
+                              │   Application     │  │   Agent TAJINE      │  │   Data Sources      │
+                              │   Services        │  │   (Cycle PPDSL)     │  │   (15+ APIs)        │
+                              └─────────┬─────────┘  └──────────–┬─────────┘  └─────────––┬─────────┘
+                                        │                        │                        │
+                              ┌─────────▼────────────────────────▼────────────────────────▼──────────┐
+                              │                            Infrastructure                            │
+                              │                PostgreSQL · Redis · Ollama · pgvector                │
+                              └────────────────────────────────────────────────────────────────────–─┘
 ```
 
 L'architecture suit le pattern **hexagonal** (ports & adapters). Voir [docs/architecture.md](docs/architecture.md) pour les détails.

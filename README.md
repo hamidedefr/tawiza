@@ -14,6 +14,7 @@
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Website](https://img.shields.io/badge/Website-tawiza.fr-indigo.svg)](https://hamidedefr.github.io/tawiza-landing/)
 
 > Parce que scraper l'INSEE à la main, c'est so 2020.
 

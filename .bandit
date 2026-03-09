@@ -1,9 +1,0 @@
-# Bandit security configuration
-[bandit]
-exclude_dirs = [".venv", "venv", "tests", ".git", "node_modules", "htmlcov"]
-
-# Skip specific tests that are intentional
-skips = ["B101"]  # assert_used - OK in dev
-
-# Confidence level to report
-aggregate = file

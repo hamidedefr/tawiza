@@ -93,7 +93,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: frontend
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Typecheck
         working-directory: frontend

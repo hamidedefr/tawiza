@@ -60,7 +60,7 @@ class TestSettings:
 
         assert len(security.secret_key) >= 32
         assert security.jwt_algorithm == "HS256"
-        assert security.jwt_expiration_minutes == 60
+        assert security.jwt_expiration_minutes == 15
 
     def test_is_production(self):
         """Test is_production property."""

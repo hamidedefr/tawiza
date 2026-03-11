@@ -30,7 +30,7 @@ class TestTajineConfig:
         config = TajineConfig()
 
         assert config.ollama_host == "http://localhost:11434"
-        assert config.ollama_model == "qwen3:14b"
+        assert config.ollama_model == "qwen3.5:27b"
         assert config.neo4j_uri == "bolt://localhost:7687"
 
     def test_neo4j_config(self):

@@ -16,6 +16,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
+
+pytest.importorskip("playwright", reason="Playwright not installed")
+
 from playwright.async_api import Browser, Page, Playwright
 
 from src.application.ports.agent_ports import AgentExecutionError, TaskStatus

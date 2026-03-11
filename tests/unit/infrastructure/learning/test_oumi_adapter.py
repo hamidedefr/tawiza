@@ -37,7 +37,7 @@ class TestOumiTrainingConfig:
 
         config = OumiTrainingConfig()
 
-        assert config.base_model == "qwen3:14b"
+        assert config.base_model == "qwen3.5:27b"
         assert config.training_backend == "oumi"
         assert config.use_coalm is True
 

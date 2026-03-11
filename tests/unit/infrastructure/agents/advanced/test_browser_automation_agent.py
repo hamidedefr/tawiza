@@ -7,9 +7,14 @@ Tests couvrant:
 """
 
 import asyncio
+import importlib
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+# Skip entire module if playwright or optuna not available
+playwright = pytest.importorskip("playwright", reason="Playwright not installed")
+pytest.importorskip("optuna", reason="optuna not installed")
 
 from src.infrastructure.agents.advanced.browser_automation_agent import (
     AutomationResult,

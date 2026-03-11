@@ -73,7 +73,7 @@ class TestAgentOrchestrator:
         assert orch.is_tawiza_agent("tawiza-analyst") is True
         assert orch.is_tawiza_agent("tawiza-data") is True
         assert orch.is_tawiza_agent("general") is False
-        assert orch.is_tawiza_agent("qwen3:14b") is False
+        assert orch.is_tawiza_agent("qwen3.5:27b") is False
 
 
 class TestTaskEvent:
@@ -257,4 +257,4 @@ class TestModelSelection:
         model = await orch._get_best_model()
 
         # Should return default
-        assert model == "qwen3:14b"
+        assert model == "qwen3.5:27b"

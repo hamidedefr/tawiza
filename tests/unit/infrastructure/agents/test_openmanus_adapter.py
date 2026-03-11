@@ -17,9 +17,17 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
-pytest.importorskip("playwright", reason="Playwright not installed")
+try:
+    from playwright.async_api import Browser, Page, Playwright
+except ImportError:
+    pytest.skip("Playwright not installed", allow_module_level=True)
 
-from playwright.async_api import Browser, Page, Playwright
+# Skip entire module in CI — these tests need real browser binaries
+pytestmark = pytest.mark.skipif(
+    not Path.home().joinpath(".cache/ms-playwright/chromium-1148").exists()
+    and not Path.home().joinpath(".cache/ms-playwright/chromium_headless_shell-1208").exists(),
+    reason="Playwright browsers not installed (run: playwright install)",
+)
 
 from src.application.ports.agent_ports import AgentExecutionError, TaskStatus
 from src.infrastructure.agents.openmanus.openmanus_adapter import OpenManusAdapter

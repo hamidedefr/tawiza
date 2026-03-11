@@ -5,10 +5,10 @@ Inspired by World Monitor's multi-variant feed architecture.
 """
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 
 
-class FeedCategory(str, Enum):
+class FeedCategory(StrEnum):
     """Feed categories for filtering and routing."""
 
     ECO_NATIONAL = "eco_national"  # National economic press

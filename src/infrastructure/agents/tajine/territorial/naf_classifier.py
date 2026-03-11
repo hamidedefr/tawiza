@@ -130,11 +130,11 @@ NAF_SECTIONS = [
 
 class NAFClassifier:
     """Classifie les descriptions d'activités en sections NAF."""
-    
+
     def __init__(self):
         self._sections = {s.code: s for s in NAF_SECTIONS}
         self._keyword_map = self._build_keyword_map()
-    
+
     def _build_keyword_map(self) -> dict[str, str]:
         """Construit un mapping mot-clé → code section."""
         mapping = {}
@@ -142,42 +142,42 @@ class NAFClassifier:
             for kw in section.keywords:
                 mapping[kw.lower()] = section.code
         return mapping
-    
+
     def classify(self, activity_text: str) -> tuple[str, float]:
         """
         Classifie une description d'activité.
-        
+
         Returns:
             (code_section, confidence) - ex: ("G", 0.8)
         """
         if not activity_text:
             return ("?", 0.0)
-        
+
         text = activity_text.lower()
-        
+
         # Compter les matches par section
         scores: dict[str, int] = {}
-        
+
         for keyword, code in self._keyword_map.items():
             if keyword in text:
                 scores[code] = scores.get(code, 0) + 1
-        
+
         if not scores:
             return ("?", 0.0)
-        
+
         # Prendre la section avec le plus de matches
         best_code = max(scores, key=lambda k: scores[k])
         confidence = min(1.0, scores[best_code] / 3)  # 3+ matches = 100%
-        
+
         return (best_code, confidence)
-    
+
     def classify_with_details(self, activity_text: str) -> dict[str, Any]:
         """
         Classifie avec détails complets.
         """
         code, confidence = self.classify(activity_text)
         section = self._sections.get(code)
-        
+
         return {
             "code": code,
             "name": section.name if section else "Non classifié",
@@ -185,11 +185,11 @@ class NAFClassifier:
             "confidence": round(confidence, 2),
             "activity_text": activity_text[:100] if activity_text else None,
         }
-    
+
     def get_section(self, code: str) -> NAFSection | None:
         """Retourne la section NAF par code."""
         return self._sections.get(code)
-    
+
     @property
     def all_sections(self) -> list[NAFSection]:
         """Retourne toutes les sections."""
@@ -211,18 +211,18 @@ def get_naf_classifier() -> NAFClassifier:
 def classify_bodacc_record(record: dict[str, Any]) -> dict[str, Any]:
     """
     Classifie un enregistrement BODACC.
-    
+
     Extrait l'activité du champ listeetablissements et la classifie.
     """
     import json
-    
+
     classifier = get_naf_classifier()
-    
+
     # Extraire l'activité
     activity = None
     raw = record.get("raw", {})
     etab_str = raw.get("listeetablissements", "")
-    
+
     if etab_str:
         try:
             etab = json.loads(etab_str) if isinstance(etab_str, str) else etab_str
@@ -230,5 +230,5 @@ def classify_bodacc_record(record: dict[str, Any]) -> dict[str, Any]:
                 activity = etab["etablissement"].get("activite", "")
         except (json.JSONDecodeError, TypeError):
             pass
-    
+
     return classifier.classify_with_details(activity)

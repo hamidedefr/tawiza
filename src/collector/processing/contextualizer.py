@@ -8,7 +8,6 @@ actionable intelligence reports in French.
 import httpx
 from loguru import logger
 
-
 # Default Ollama endpoint
 OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 DEFAULT_MODEL = "qwen2.5:7b"  # Faster for contextualisation, use qwen3.5:27b for quality

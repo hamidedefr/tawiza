@@ -18,13 +18,13 @@ from loguru import logger
 
 class DVFLocalCache:
     """Local SQLite cache for DVF transactions.
-    
+
     Downloads CSV files from data.gouv.fr and stores in SQLite for fast queries.
     """
-    
+
     CSV_BASE_URL = "https://files.data.gouv.fr/geo-dvf/latest/csv"
     AVAILABLE_YEARS = [2020, 2021, 2022, 2023, 2024]
-    
+
     # Big departments that benefit from local cache
     RECOMMENDED_DEPARTMENTS = [
         "75",  # Paris
@@ -38,17 +38,17 @@ class DVFLocalCache:
         "06",  # Alpes-Maritimes (Nice)
         "67",  # Bas-Rhin (Strasbourg)
     ]
-    
+
     def __init__(self, db_path: Path | str | None = None):
         """Initialize cache.
-        
+
         Args:
             db_path: Path to SQLite database. Defaults to /data/dvf_cache.db
         """
         self.db_path = Path(db_path) if db_path else Path("/data/dvf_cache.db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
-    
+
     def _init_db(self) -> None:
         """Create database schema."""
         with sqlite3.connect(self.db_path) as conn:
@@ -75,7 +75,7 @@ class DVFLocalCache:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_code_departement ON transactions(code_departement)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_annee ON transactions(annee)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_type_local ON transactions(type_local)")
-            
+
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS cache_meta (
                     department TEXT,
@@ -86,14 +86,14 @@ class DVFLocalCache:
                 )
             """)
             conn.commit()
-    
+
     def is_cached(self, department: str, year: int | None = None) -> bool:
         """Check if department data is cached.
-        
+
         Args:
             department: Department code
             year: Specific year or None for any
-            
+
         Returns:
             True if data is cached
         """
@@ -109,22 +109,22 @@ class DVFLocalCache:
                     (department,)
                 )
             return cursor.fetchone() is not None
-    
+
     def get_cached_departments(self) -> list[dict[str, Any]]:
         """Get list of cached departments with stats."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute("""
-                SELECT department, 
+                SELECT department,
                        GROUP_CONCAT(year) as years,
                        SUM(transaction_count) as total_transactions,
                        MAX(loaded_at) as last_update
-                FROM cache_meta 
+                FROM cache_meta
                 GROUP BY department
                 ORDER BY department
             """)
             return [dict(row) for row in cursor.fetchall()]
-    
+
     async def download_and_cache(
         self,
         department: str,
@@ -132,24 +132,24 @@ class DVFLocalCache:
         force: bool = False
     ) -> dict[str, Any]:
         """Download CSV and cache in SQLite.
-        
+
         Args:
             department: Department code (e.g., "75", "69")
             years: Years to download (default: all available)
             force: Re-download even if cached
-            
+
         Returns:
             Stats dict
         """
         years = years or self.AVAILABLE_YEARS
         stats = {"department": department, "years": [], "transactions": 0, "errors": []}
-        
+
         async with httpx.AsyncClient(timeout=120) as client:
             for year in years:
                 if not force and self.is_cached(department, year):
                     logger.info(f"DVF {department}/{year} already cached, skipping")
                     continue
-                
+
                 try:
                     count = await self._download_year(client, department, year)
                     stats["years"].append(year)
@@ -158,9 +158,9 @@ class DVFLocalCache:
                 except Exception as e:
                     logger.error(f"Failed to cache DVF {department}/{year}: {e}")
                     stats["errors"].append(f"{year}: {e}")
-        
+
         return stats
-    
+
     async def _download_year(
         self,
         client: httpx.AsyncClient,
@@ -169,47 +169,47 @@ class DVFLocalCache:
     ) -> int:
         """Download and parse one year's CSV."""
         url = f"{self.CSV_BASE_URL}/{year}/departements/{department}.csv.gz"
-        
+
         response = await client.get(url)
         if response.status_code == 404:
             # Try communes folder
             url = f"{self.CSV_BASE_URL}/{year}/communes/{department}.csv.gz"
             response = await client.get(url)
-        
+
         response.raise_for_status()
-        
+
         # Decompress
         content = gzip.decompress(response.content)
         text = content.decode("utf-8", errors="ignore")
-        
+
         # Parse CSV and insert
         reader = csv.DictReader(text.splitlines())
         count = 0
         batch = []
-        
+
         with sqlite3.connect(self.db_path) as conn:
             for row in reader:
                 tx = self._parse_csv_row(row)
                 if tx:
                     batch.append(tx)
                     count += 1
-                    
+
                     if len(batch) >= 1000:
                         self._insert_batch(conn, batch)
                         batch = []
-            
+
             if batch:
                 self._insert_batch(conn, batch)
-            
+
             # Update meta
             conn.execute("""
                 INSERT OR REPLACE INTO cache_meta (department, year, loaded_at, transaction_count)
                 VALUES (?, ?, ?, ?)
             """, (department, year, datetime.now().isoformat(), count))
             conn.commit()
-        
+
         return count
-    
+
     def _parse_csv_row(self, row: dict) -> tuple | None:
         """Parse CSV row to tuple for insertion."""
         try:
@@ -219,7 +219,7 @@ class DVFLocalCache:
             valeur_float = float(valeur)
             if valeur_float <= 0:
                 return None
-            
+
             def parse_float(v: str) -> float | None:
                 if not v:
                     return None
@@ -227,7 +227,7 @@ class DVFLocalCache:
                     return float(v.replace(",", "."))
                 except ValueError:
                     return None
-            
+
             def parse_int(v: str) -> int | None:
                 if not v:
                     return None
@@ -235,10 +235,10 @@ class DVFLocalCache:
                     return int(float(v))
                 except ValueError:
                     return None
-            
+
             date_str = row.get("date_mutation", "")
             annee = int(date_str[:4]) if date_str else None
-            
+
             return (
                 row.get("id_mutation", ""),
                 date_str,
@@ -258,17 +258,17 @@ class DVFLocalCache:
             )
         except Exception:
             return None
-    
+
     def _insert_batch(self, conn: sqlite3.Connection, batch: list[tuple]) -> None:
         """Insert batch of transactions."""
         conn.executemany("""
-            INSERT OR IGNORE INTO transactions 
+            INSERT OR IGNORE INTO transactions
             (id, date_mutation, annee, nature_mutation, valeur, type_local,
              surface_reelle, surface_terrain, nombre_pieces, code_postal,
              code_commune, nom_commune, code_departement, longitude, latitude)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, batch)
-    
+
     def search(
         self,
         code_insee: str | None = None,
@@ -279,7 +279,7 @@ class DVFLocalCache:
         limit: int = 50
     ) -> list[dict[str, Any]]:
         """Search cached transactions.
-        
+
         Args:
             code_insee: Commune INSEE code
             code_departement: Department code
@@ -287,20 +287,20 @@ class DVFLocalCache:
             annee_max: End year
             type_local: Property type filter
             limit: Max results
-            
+
         Returns:
             List of transactions
         """
         conditions = []
         params = []
-        
+
         if code_insee:
             conditions.append("code_commune = ?")
             params.append(code_insee)
         elif code_departement:
             conditions.append("code_departement = ?")
             params.append(code_departement)
-        
+
         if annee_min:
             conditions.append("annee >= ?")
             params.append(annee_min)
@@ -310,21 +310,21 @@ class DVFLocalCache:
         if type_local:
             conditions.append("type_local LIKE ?")
             params.append(f"%{type_local}%")
-        
+
         where = " AND ".join(conditions) if conditions else "1=1"
         params.append(limit)
-        
+
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(f"""
-                SELECT * FROM transactions 
+                SELECT * FROM transactions
                 WHERE {where}
                 ORDER BY date_mutation DESC
                 LIMIT ?
             """, params)
-            
+
             return [self._row_to_dict(row) for row in cursor.fetchall()]
-    
+
     def _row_to_dict(self, row: sqlite3.Row) -> dict[str, Any]:
         """Convert SQLite row to standard format."""
         return {
@@ -347,39 +347,39 @@ class DVFLocalCache:
                 "lon": row["longitude"],
             } if row["latitude"] else None,
         }
-    
+
     def get_stats(self, code_insee: str, annee: int | None = None) -> dict[str, Any]:
         """Get statistics for a commune."""
         conditions = ["code_commune = ?"]
         params: list[Any] = [code_insee]
-        
+
         if annee:
             conditions.append("annee = ?")
             params.append(annee)
-        
+
         where = " AND ".join(conditions)
-        
+
         with sqlite3.connect(self.db_path) as conn:
             # Total count
             cursor = conn.execute(
                 f"SELECT COUNT(*) FROM transactions WHERE {where}", params
             )
             total = cursor.fetchone()[0]
-            
+
             if total == 0:
                 return {"source": "dvf_cache", "code_insee": code_insee, "count": 0}
-            
+
             # Stats by type
             cursor = conn.execute(f"""
                 SELECT type_local,
                        COUNT(*) as count,
                        AVG(valeur) as avg_price,
                        AVG(CASE WHEN surface_reelle > 0 THEN valeur / surface_reelle END) as avg_price_m2
-                FROM transactions 
+                FROM transactions
                 WHERE {where}
                 GROUP BY type_local
             """, params)
-            
+
             by_type = {}
             for row in cursor.fetchall():
                 by_type[row[0] or "Autre"] = {
@@ -387,7 +387,7 @@ class DVFLocalCache:
                     "avg_price": round(row[2], 2) if row[2] else None,
                     "avg_price_m2": round(row[3], 2) if row[3] else None,
                 }
-            
+
             return {
                 "source": "dvf_cache",
                 "code_insee": code_insee,
@@ -399,13 +399,13 @@ class DVFLocalCache:
 
 async def populate_cache(departments: list[str] | None = None):
     """Populate cache with recommended departments.
-    
+
     Args:
         departments: Specific departments or None for recommended
     """
     cache = DVFLocalCache()
     departments = departments or DVFLocalCache.RECOMMENDED_DEPARTMENTS
-    
+
     for dept in departments:
         logger.info(f"Caching department {dept}...")
         stats = await cache.download_and_cache(dept)
@@ -415,11 +415,11 @@ async def populate_cache(departments: list[str] | None = None):
 if __name__ == "__main__":
     # CLI to populate cache
     import sys
-    
+
     if len(sys.argv) > 1:
         depts = sys.argv[1:]
     else:
         depts = DVFLocalCache.RECOMMENDED_DEPARTMENTS[:3]  # Top 3 by default
         print(f"Caching top departments: {depts}")
-    
+
     asyncio.run(populate_cache(depts))

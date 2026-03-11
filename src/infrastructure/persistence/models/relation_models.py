@@ -21,7 +21,7 @@ from src.infrastructure.persistence.database import Base
 # ---------------------------------------------------------------------------
 
 
-class ActorType(str, enum.Enum):
+class ActorType(enum.StrEnum):
     """Type of economic actor."""
 
     enterprise = "enterprise"
@@ -33,7 +33,7 @@ class ActorType(str, enum.Enum):
     financial = "financial"
 
 
-class RelationType(str, enum.Enum):
+class RelationType(enum.StrEnum):
     """Confidence tier of a detected relation."""
 
     structural = "structural"
@@ -41,7 +41,7 @@ class RelationType(str, enum.Enum):
     hypothetical = "hypothetical"
 
 
-class RelationSourceType(str, enum.Enum):
+class RelationSourceType(enum.StrEnum):
     """Data source that contributed evidence for a relation."""
 
     bodacc = "bodacc"

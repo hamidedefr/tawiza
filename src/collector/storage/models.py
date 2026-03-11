@@ -5,8 +5,8 @@ from datetime import date, datetime
 from sqlalchemy import (
     BigInteger,
     Column,
-    DateTime,
     Date,
+    DateTime,
     Double,
     Index,
     String,

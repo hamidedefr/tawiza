@@ -7,9 +7,9 @@ Downloads and caches the full mapping of 34,871 French communes to their
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import httpx
 
@@ -27,9 +27,9 @@ class EPCIReferentiel:
     """Reference data for EPCI ↔ commune mappings."""
 
     def __init__(self):
-        self._commune_to_epci: Dict[str, str] = {}
-        self._epci_info: Dict[str, dict] = {}
-        self._commune_info: Dict[str, dict] = {}
+        self._commune_to_epci: dict[str, str] = {}
+        self._epci_info: dict[str, dict] = {}
+        self._commune_info: dict[str, dict] = {}
         self._loaded = False
 
     async def load(self, force_refresh: bool = False) -> None:
@@ -123,11 +123,11 @@ class EPCIReferentiel:
 
     # --- Public API ---
 
-    def commune_to_epci(self, code_commune: str) -> Optional[str]:
+    def commune_to_epci(self, code_commune: str) -> str | None:
         """Get EPCI code for a commune."""
         return self._commune_to_epci.get(code_commune)
 
-    def dept_to_epci(self, code_commune: str) -> Optional[str]:
+    def dept_to_epci(self, code_commune: str) -> str | None:
         """Get department code from commune code."""
         info = self._commune_info.get(code_commune)
         return info["dept"] if info else None
@@ -142,27 +142,27 @@ class EPCIReferentiel:
         info = self._epci_info.get(code_epci)
         return info.get("pop", 0) if info else 0
 
-    def epci_departments(self, code_epci: str) -> List[str]:
+    def epci_departments(self, code_epci: str) -> list[str]:
         """Get department codes for an EPCI."""
         info = self._epci_info.get(code_epci)
         return info.get("depts", []) if info else []
 
-    def communes_in_epci(self, code_epci: str) -> List[str]:
+    def communes_in_epci(self, code_epci: str) -> list[str]:
         """Get all commune codes in an EPCI."""
         return [c for c, e in self._commune_to_epci.items() if e == code_epci]
 
-    def epcis_in_department(self, code_dept: str) -> List[str]:
+    def epcis_in_department(self, code_dept: str) -> list[str]:
         """Get all EPCI codes that cover a department."""
         return [
             code for code, info in self._epci_info.items()
             if code_dept in info.get("depts", [])
         ]
 
-    def all_epcis(self) -> Dict[str, dict]:
+    def all_epcis(self) -> dict[str, dict]:
         """Get all EPCI info."""
         return self._epci_info
 
-    def enrich_signal(self, code_commune: Optional[str], code_dept: Optional[str] = None) -> Optional[str]:
+    def enrich_signal(self, code_commune: str | None, code_dept: str | None = None) -> str | None:
         """
         Resolve EPCI code from commune or department.
         Returns EPCI code or None.
@@ -175,7 +175,7 @@ class EPCIReferentiel:
 
 
 # Singleton
-_referentiel: Optional[EPCIReferentiel] = None
+_referentiel: EPCIReferentiel | None = None
 
 
 async def get_referentiel() -> EPCIReferentiel:

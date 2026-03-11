@@ -5,13 +5,14 @@ Population data based on INSEE "populations légales" - 2024 estimates.
 """
 
 from typing import Optional
+
 from loguru import logger
 
 # French department populations (2024 estimates)
 # Source: INSEE populations légales
 DEPARTMENT_POPULATIONS = {
     "01": 664246,   # Ain
-    "02": 535899,   # Aisne  
+    "02": 535899,   # Aisne
     "03": 338586,   # Allier
     "04": 164578,   # Alpes-de-Haute-Provence
     "05": 141760,   # Hautes-Alpes
@@ -115,12 +116,12 @@ DEPARTMENT_POPULATIONS = {
 }
 
 
-def get_department_population(code_dept: str) -> Optional[int]:
+def get_department_population(code_dept: str) -> int | None:
     """Get population for a given department code.
-    
+
     Args:
         code_dept: Department code (e.g., '75', '13', '2A')
-    
+
     Returns:
         Population count or None if department not found
     """
@@ -130,13 +131,13 @@ def get_department_population(code_dept: str) -> Optional[int]:
     return population
 
 
-def normalize_per_10k(value: float, code_dept: str) -> Optional[float]:
+def normalize_per_10k(value: float, code_dept: str) -> float | None:
     """Normalize a value per 10,000 inhabitants.
-    
+
     Args:
         value: Raw value to normalize
         code_dept: Department code
-    
+
     Returns:
         Normalized value per 10K inhabitants or None if population unknown
     """
@@ -144,7 +145,7 @@ def normalize_per_10k(value: float, code_dept: str) -> Optional[float]:
     if population is None or population == 0:
         logger.warning(f"Cannot normalize for department {code_dept}: population unknown or zero")
         return None
-    
+
     normalized = (value * 10_000) / population
     logger.debug(f"Normalized {value} for dept {code_dept} (pop={population:,}): {normalized:.3f} per 10K")
     return normalized
@@ -152,7 +153,7 @@ def normalize_per_10k(value: float, code_dept: str) -> Optional[float]:
 
 def get_all_departments() -> list[str]:
     """Get list of all available department codes.
-    
+
     Returns:
         List of department codes
     """
@@ -161,7 +162,7 @@ def get_all_departments() -> list[str]:
 
 def get_total_population() -> int:
     """Get total population across all departments.
-    
+
     Returns:
         Total population count
     """
@@ -172,7 +173,7 @@ if __name__ == "__main__":
     # Test the population functions
     print(f"Total departments: {len(get_all_departments())}")
     print(f"Total population: {get_total_population():,}")
-    
+
     # Test some departments
     test_depts = ["75", "13", "59", "69", "2A"]
     for dept in test_depts:

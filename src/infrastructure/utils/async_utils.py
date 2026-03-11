@@ -261,7 +261,7 @@ async def gather_with_timeout[T](
     return results, errors
 
 
-async def timeout_with_default(
+async def timeout_with_default[T](
     coro: Awaitable[T],
     timeout: float,
     default: T,

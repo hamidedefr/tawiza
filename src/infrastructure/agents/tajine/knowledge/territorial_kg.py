@@ -10,7 +10,7 @@ the signals database. Supports:
 
 Architecture:
     signals DB → TerritorialKG (in-memory graph) → TAJINE Agent
-    
+
 The graph is rebuilt periodically from the DB and cached in memory.
 No Neo4j required.
 """
@@ -69,7 +69,7 @@ class KGSubgraph:
             lines.append(f"\n## {dept.label} ({dept.id})")
             lines.append(f"  Signaux: {dept.properties.get('total_signals', '?')}")
             lines.append(f"  Sources: {dept.properties.get('num_sources', '?')}")
-            
+
             for edge in dept_edges:
                 other_id = edge.target_id if edge.source_id == dept.id else edge.source_id
                 other = next((n for n in self.nodes if n.id == other_id), None)
@@ -78,7 +78,7 @@ class KGSubgraph:
                     if edge.properties:
                         for k, v in edge.properties.items():
                             lines.append(f"    {k}: {v}")
-        
+
         # Causal chains
         causal = [e for e in self.edges if e.relation == "causes"]
         if causal:
@@ -89,7 +89,7 @@ class KGSubgraph:
                 if src and tgt:
                     lag = e.properties.get("lag_months", "?")
                     lines.append(f"  {src.label} → {tgt.label} (corrélation={e.weight:.2f}, lag={lag} mois)")
-        
+
         # Anomalies
         anomalies = [e for e in self.edges if e.relation == "anomaly_in"]
         if anomalies:
@@ -98,13 +98,13 @@ class KGSubgraph:
                 tgt = next((n for n in self.nodes if n.id == e.target_id), None)
                 if tgt:
                     lines.append(f"  Score={e.weight:.2f}: {e.properties.get('description', tgt.label)}")
-        
+
         return "\n".join(lines)
 
 
 class TerritorialKG:
     """In-memory knowledge graph built from the signals database.
-    
+
     Features:
     - Auto-builds from PostgreSQL signals + micro_signals tables
     - Supports subgraph extraction for GraphRAG
@@ -177,22 +177,22 @@ class TerritorialKG:
 
     async def build(self, force: bool = False) -> None:
         """Build/rebuild the knowledge graph from the database.
-        
+
         Args:
             force: Force rebuild even if recently built
         """
         if not force and self._built_at and (datetime.now() - self._built_at).seconds < 3600:
             return  # Skip if built less than 1 hour ago
-        
+
         async with self._build_lock:
             logger.info("Building Territorial Knowledge Graph from signals DB...")
             start = datetime.now()
-            
+
             self.nodes.clear()
             self.edges.clear()
             self._adjacency.clear()
             self._reverse_adjacency.clear()
-            
+
             try:
                 conn = await asyncpg.connect(DB_URL, timeout=10)
                 try:
@@ -206,7 +206,7 @@ class TerritorialKG:
                     await self._detect_temporal_correlations(conn)
                 finally:
                     await conn.close()
-                
+
                 self._built_at = datetime.now()
                 elapsed = (datetime.now() - start).total_seconds()
                 logger.info(
@@ -219,7 +219,7 @@ class TerritorialKG:
     async def _build_department_nodes(self, conn: asyncpg.Connection) -> None:
         """Create nodes for each department with signal stats."""
         rows = await conn.fetch("""
-            SELECT code_dept, count(*) as total, 
+            SELECT code_dept, count(*) as total,
                    count(DISTINCT source) as sources,
                    min(event_date) as earliest,
                    max(event_date) as latest
@@ -299,7 +299,7 @@ class TerritorialKG:
             SELECT metric_name, count(*) as total,
                    avg(metric_value) as avg_val,
                    stddev(metric_value) as std_val
-            FROM signals 
+            FROM signals
             WHERE metric_name IS NOT NULL AND metric_value IS NOT NULL
             GROUP BY metric_name
             HAVING count(*) >= 5
@@ -374,11 +374,11 @@ class TerritorialKG:
         """Detect temporal correlations between sources for each department."""
         # For top 20 departments, check if source volumes correlate over time
         top_depts = await conn.fetch("""
-            SELECT code_dept, count(*) as n FROM signals 
+            SELECT code_dept, count(*) as n FROM signals
             WHERE code_dept IS NOT NULL
             GROUP BY code_dept ORDER BY n DESC LIMIT 20
         """)
-        
+
         for dept_row in top_depts:
             dept = dept_row["code_dept"]
             # Get monthly counts per source
@@ -389,13 +389,13 @@ class TerritorialKG:
                 GROUP BY source, month
                 ORDER BY month
             """, dept)
-            
+
             # Group by source
             source_series: dict[str, dict[str, int]] = defaultdict(dict)
             for r in rows:
                 if r["month"]:
                     source_series[r["source"]][str(r["month"].date())] = r["n"]
-            
+
             # Check co-occurrence patterns (simple: sources active in same months)
             sources = list(source_series.keys())
             for i in range(len(sources)):
@@ -430,42 +430,42 @@ class TerritorialKG:
 
     def get_subgraph(self, center_id: str, depth: int = 2) -> KGSubgraph:
         """Extract a subgraph around a center node.
-        
+
         Args:
             center_id: Center node ID (e.g. "dept:75")
             depth: How many hops from center
-            
+
         Returns:
             KGSubgraph with relevant nodes and edges
         """
         visited_nodes: set[str] = set()
         relevant_edges: list[KGEdge] = []
         queue = [(center_id, 0)]
-        
+
         while queue:
             node_id, d = queue.pop(0)
             if node_id in visited_nodes or d > depth:
                 continue
             visited_nodes.add(node_id)
-            
+
             # Get outgoing edges
             for edge in self._adjacency.get(node_id, []):
                 relevant_edges.append(edge)
                 if edge.target_id not in visited_nodes and d + 1 <= depth:
                     queue.append((edge.target_id, d + 1))
-            
+
             # Get incoming edges
             for edge in self._reverse_adjacency.get(node_id, []):
                 relevant_edges.append(edge)
                 if edge.source_id not in visited_nodes and d + 1 <= depth:
                     queue.append((edge.source_id, d + 1))
-        
+
         nodes = [self.nodes[nid] for nid in visited_nodes if nid in self.nodes]
         return KGSubgraph(nodes=nodes, edges=relevant_edges, query=center_id)
 
     def get_department_context(self, dept_code: str) -> str:
         """Get rich text context for a department, suitable for LLM injection.
-        
+
         This is the main GraphRAG interface - extracts a subgraph and
         converts it to structured text that an LLM can reason over.
         """
@@ -478,50 +478,50 @@ class TerritorialKG:
         """Find a causal chain between two nodes using BFS."""
         visited = set()
         queue = [(cause_id, [])]
-        
+
         while queue:
             current, path = queue.pop(0)
             if current in visited:
                 continue
             visited.add(current)
-            
+
             if current == effect_id and path:
                 return path
-            
+
             if len(path) >= max_depth:
                 continue
-            
+
             for edge in self._adjacency.get(current, []):
                 if edge.relation in ("causes", "leads") and edge.target_id not in visited:
                     queue.append((edge.target_id, path + [edge]))
-        
+
         return None
 
     def find_gaps(self) -> list[dict[str, Any]]:
         """Detect knowledge gaps for active learning.
-        
+
         Returns:
             List of gaps with suggestions for what data to collect
         """
         gaps = []
-        
+
         # 1. Departments with few sources
         for node_id, node in self.nodes.items():
             if node.type == "department":
                 num_sources = node.properties.get("num_sources", 0)
                 total = node.properties.get("total_signals", 0)
                 dept = node.properties.get("code", "")
-                
+
                 if num_sources < 4:
                     # Find which sources are missing
                     active_sources = set()
                     for edge in self._adjacency.get(node_id, []):
                         if edge.relation == "has_signals_from":
                             active_sources.add(edge.target_id.replace("source:", ""))
-                    
+
                     all_sources = {"bodacc", "france_travail", "dvf", "sirene", "insee", "ofgl", "urssaf", "presse"}
                     missing = all_sources - active_sources
-                    
+
                     gaps.append({
                         "type": "missing_sources",
                         "department": dept,
@@ -530,7 +530,7 @@ class TerritorialKG:
                         "missing_sources": list(missing),
                         "suggestion": f"Collect data from {', '.join(list(missing)[:3])} for dept {dept}",
                     })
-                
+
                 if total < 100 and dept:
                     gaps.append({
                         "type": "low_coverage",
@@ -539,7 +539,7 @@ class TerritorialKG:
                         "total_signals": total,
                         "suggestion": f"Run full collection for dept {dept} (only {total} signals)",
                     })
-        
+
         # 2. Sources not covering enough departments
         for node_id, node in self.nodes.items():
             if node.type == "source":
@@ -553,14 +553,14 @@ class TerritorialKG:
                         "departments_covered": depts,
                         "suggestion": f"Expand {source_name} collection to more departments",
                     })
-        
+
         # 3. No micro-signals detected for well-covered departments
         depts_with_anomalies = set()
         for edge in self.edges:
             if edge.relation == "anomaly_in":
                 dept_code = edge.source_id.replace("dept:", "")
                 depts_with_anomalies.add(dept_code)
-        
+
         for node_id, node in self.nodes.items():
             if node.type == "department":
                 dept = node.properties.get("code", "")
@@ -573,7 +573,7 @@ class TerritorialKG:
                         "total_signals": total,
                         "suggestion": f"Re-run anomaly detection for dept {dept} ({total} signals, no anomalies)",
                     })
-        
+
         gaps.sort(key=lambda g: g["priority"])
         return gaps
 
@@ -582,11 +582,11 @@ class TerritorialKG:
         type_counts = defaultdict(int)
         for node in self.nodes.values():
             type_counts[node.type] += 1
-        
+
         relation_counts = defaultdict(int)
         for edge in self.edges:
             relation_counts[edge.relation] += 1
-        
+
         return {
             "total_nodes": len(self.nodes),
             "total_edges": len(self.edges),

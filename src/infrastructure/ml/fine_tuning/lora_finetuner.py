@@ -50,10 +50,9 @@ except ImportError:
         return False  # type: ignore
 
 try:
+    from datasets import Dataset
     from transformers import TrainingArguments
     from trl import SFTTrainer
-
-    from datasets import Dataset
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     logger.debug(

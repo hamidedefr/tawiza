@@ -3,8 +3,8 @@ EPCI-level scoring — aggregate signals at intercommunality level.
 """
 
 import logging
-from typing import Dict, List, Any, Optional
 from datetime import date, timedelta
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from sqlalchemy import text
@@ -17,17 +17,17 @@ logger = logging.getLogger(__name__)
 
 async def get_epci_scores(
     engine: AsyncEngine,
-    code_dept: Optional[str] = None,
+    code_dept: str | None = None,
     days: int = 180,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Calculate composite scores for EPCIs, similar to department scoring.
-    
+
     Args:
         engine: Async SQLAlchemy engine
         code_dept: Optional department filter
         days: Lookback period
-    
+
     Returns:
         List of EPCI scores with details
     """
@@ -36,7 +36,7 @@ async def get_epci_scores(
 
     # Get signals aggregated by EPCI
     query = """
-    SELECT 
+    SELECT
         code_epci,
         metric_name,
         AVG(metric_value) as avg_value,
@@ -68,9 +68,9 @@ async def get_epci_scores(
         return []
 
     # Build per-EPCI metric profiles
-    epci_metrics: Dict[str, Dict[str, float]] = {}
-    epci_signal_counts: Dict[str, int] = {}
-    epci_source_counts: Dict[str, int] = {}
+    epci_metrics: dict[str, dict[str, float]] = {}
+    epci_signal_counts: dict[str, int] = {}
+    epci_source_counts: dict[str, int] = {}
 
     for row in rows:
         code_epci = row[0]
@@ -147,7 +147,7 @@ async def get_epci_signals(
     code_epci: str,
     days: int = 90,
     limit: int = 100,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Get signals for a specific EPCI."""
     since = date.today() - timedelta(days=days)
 

@@ -163,6 +163,7 @@ async def execute_browser_action(agent: TAJINEAgent, subtask: dict[str, Any]) ->
         Browser action result
     """
     from src.infrastructure.agents.tajine.callbacks import TAJINECallback, TAJINEEvent
+
     from src.infrastructure.agents.tajine.tools.browser_tools import BrowserActionTool
 
     params = subtask.get("params", {})
@@ -285,6 +286,7 @@ async def run_data_hunt(
         Dict with hunt results and metrics
     """
     from src.infrastructure.agents.tajine.callbacks import TAJINECallback, TAJINEEvent
+
     from src.infrastructure.agents.tajine.core.types import HuntContext
 
     territory = perception.get("territory", "France")

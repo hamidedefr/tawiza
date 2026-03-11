@@ -7,7 +7,6 @@ from loguru import logger
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-
 from src.infrastructure.persistence.models.conversation_model import (
     AnalysisResultDB,
     ConversationDB,

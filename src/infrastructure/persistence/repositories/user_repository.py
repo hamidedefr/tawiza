@@ -7,8 +7,8 @@ from uuid import UUID
 from loguru import logger
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.infrastructure.persistence.models.user_model import RefreshTokenDB, UserDB
+
 from src.infrastructure.security.auth import hash_password, verify_password
 
 

@@ -14,12 +14,12 @@ from apscheduler.triggers.date import DateTrigger
 from loguru import logger
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.infrastructure.persistence.database import get_session
 from src.infrastructure.persistence.models.scheduled_analysis_model import (
     ScheduledAnalysisDB,
     ScheduleFrequency,
 )
+
+from src.infrastructure.persistence.database import get_session
 
 
 class TAJINEScheduler:

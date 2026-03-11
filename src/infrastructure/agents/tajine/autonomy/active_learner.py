@@ -3,7 +3,7 @@
 When the TAJINE agent detects gaps in the Knowledge Graph, the Active Learner
 decides what data to collect next and triggers targeted collection.
 
-This closes the loop: 
+This closes the loop:
     Agent analyzes → finds gaps → triggers collection → new signals → KG rebuilds → repeat
 
 Architecture:
@@ -40,14 +40,14 @@ DB_URL = os.getenv(
 
 class ActiveLearner:
     """Autonomous data collection planner.
-    
+
     Analyzes knowledge gaps and prioritizes what to collect next.
     Can trigger collection jobs automatically or return recommendations.
     """
 
     def __init__(self, auto_collect: bool = False):
         """Initialize.
-        
+
         Args:
             auto_collect: If True, automatically trigger collection.
                          If False, only return recommendations.
@@ -58,28 +58,28 @@ class ActiveLearner:
 
     async def analyze_and_plan(self, gaps: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze gaps and create a collection plan.
-        
+
         Args:
             gaps: Gaps from TerritorialKG.find_gaps()
-            
+
         Returns:
             Collection plan with prioritized actions
         """
         if not gaps:
             return {"status": "no_gaps", "actions": []}
-        
+
         plan = {
             "timestamp": datetime.now().isoformat(),
             "total_gaps": len(gaps),
             "actions": [],
         }
-        
+
         # Group by type
         by_type: dict[str, list] = {}
         for gap in gaps:
             t = gap.get("type", "unknown")
             by_type.setdefault(t, []).append(gap)
-        
+
         # Priority 1: Missing sources for departments
         for gap in by_type.get("missing_sources", []):
             dept = gap["department"]
@@ -92,7 +92,7 @@ class ActiveLearner:
                     "priority": gap["priority"],
                     "reason": f"Dept {dept} missing {source} data",
                 })
-        
+
         # Priority 2: Low coverage departments
         for gap in by_type.get("low_coverage", []):
             dept = gap["department"]
@@ -102,7 +102,7 @@ class ActiveLearner:
                 "priority": 1,
                 "reason": f"Dept {dept} has only {gap['total_signals']} signals",
             })
-        
+
         # Priority 3: Sources not covering enough departments
         for gap in by_type.get("source_low_coverage", []):
             plan["actions"].append({
@@ -111,7 +111,7 @@ class ActiveLearner:
                 "priority": 2,
                 "reason": f"{gap['source']} only covers {gap['departments_covered']} departments",
             })
-        
+
         # Priority 4: Re-run detection
         for gap in by_type.get("no_anomalies_detected", []):
             plan["actions"].append({
@@ -120,21 +120,21 @@ class ActiveLearner:
                 "priority": 3,
                 "reason": gap["suggestion"],
             })
-        
+
         # Sort by priority
         plan["actions"].sort(key=lambda a: a["priority"])
-        
+
         # Auto-collect if enabled
         if self.auto_collect and plan["actions"]:
             executed = await self._execute_plan(plan["actions"][:5])  # Max 5 at a time
             plan["executed"] = executed
-        
+
         self._last_run = datetime.now()
         return plan
 
     async def _execute_plan(self, actions: list[dict]) -> list[dict]:
         """Execute collection actions.
-        
+
         Uses the collector scripts to gather data.
         """
         results = []
@@ -153,7 +153,7 @@ class ActiveLearner:
                     results.append({**action, "result": "skipped"})
             except Exception as e:
                 results.append({**action, "result": f"error: {e}"})
-        
+
         self._collection_history.extend(results)
         return results
 
@@ -183,7 +183,7 @@ class ActiveLearner:
                 return f"success: {stdout.decode()[-200:]}"
             else:
                 return f"failed (code {proc.returncode}): {stderr.decode()[-200:]}"
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return "timeout (300s)"
         except Exception as e:
             return f"error: {e}"

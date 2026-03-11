@@ -11,7 +11,7 @@ Key families:
 
 Jugement nature types for collective:
 - "Jugement d'ouverture de Liquidation judiciaire"
-- "Jugement d'ouverture de Redressement judiciaire"  
+- "Jugement d'ouverture de Redressement judiciaire"
 - "Jugement d'ouverture de Sauvegarde"
 - "Jugement de conversion en Liquidation judiciaire"
 - "Jugement de clôture pour insuffisance d'actif"
@@ -59,7 +59,7 @@ class BodaccCollector(BaseCollector):
         families: list[str] | None = None,
     ) -> list[CollectedSignal]:
         """Collect BODACC signals.
-        
+
         Args:
             code_dept: Department code filter
             since: Start date (default: 30 days ago)

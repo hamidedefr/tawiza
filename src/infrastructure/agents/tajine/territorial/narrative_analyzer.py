@@ -20,17 +20,17 @@ class NarrativeAnalysis:
     territory_code: str
     territory_name: str
     generated_at: datetime
-    
+
     # Sections narratives
     situation: str          # État actuel
     diagnostic: str         # Causes identifiées
     tendance: str          # Évolution probable
     recommandations: str   # Actions suggérées
-    
+
     # Metadata
     confidence: float
     model_used: str
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "territory_code": self.territory_code,
@@ -45,7 +45,7 @@ class NarrativeAnalysis:
             "confidence": round(self.confidence, 2),
             "model_used": self.model_used,
         }
-    
+
     def to_text(self) -> str:
         """Format texte lisible."""
         return f"""## Analyse de {self.territory_name}
@@ -72,7 +72,7 @@ class TAJINENarrativeAnalyzer:
     Analyseur narratif utilisant TAJINE/Ollama pour générer
     des analyses en langage naturel.
     """
-    
+
     # Prompt template pour l'analyse narrative
     ANALYSIS_PROMPT = """Tu es un expert en économie territoriale française. Analyse les données suivantes pour {territory_name} ({territory_code}) et produis une analyse concise.
 
@@ -102,7 +102,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
     def __init__(self, model: str = "qwen2.5:7b"):
         self.model = model
         self._ollama_client = None
-    
+
     @property
     def ollama_client(self):
         """Lazy loading du client Ollama."""
@@ -114,7 +114,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
                 logger.warning(f"Ollama client not available: {e}")
                 self._ollama_client = None
         return self._ollama_client
-    
+
     async def analyze(
         self,
         territory_code: str,
@@ -125,7 +125,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
     ) -> NarrativeAnalysis:
         """
         Génère une analyse narrative pour un territoire.
-        
+
         Args:
             territory_code: Code du département
             territory_name: Nom du territoire
@@ -134,7 +134,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             sectors: Analyse sectorielle (optionnel)
         """
         now = datetime.utcnow()
-        
+
         # Formater les signaux
         signals_text = "Aucun signal particulier"
         if signals:
@@ -142,7 +142,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
                 f"- {s.get('severity', 'info').upper()}: {s.get('title', 'Signal')}"
                 for s in signals[:5]
             ])
-        
+
         # Formater les secteurs
         sectors_text = "Données sectorielles non disponibles"
         if sectors and sectors.get("summary"):
@@ -152,7 +152,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
                     f"- {s['short_name']}: {s['creations']} créations"
                     for s in top
                 ])
-        
+
         # Construire le prompt
         prompt = self.ANALYSIS_PROMPT.format(
             territory_name=territory_name,
@@ -167,7 +167,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             signals_text=signals_text,
             sectors_text=sectors_text,
         )
-        
+
         # Appeler Ollama ou générer une analyse par défaut
         if self.ollama_client:
             try:
@@ -186,16 +186,16 @@ Sois factuel, concis et actionnable. Évite le jargon."""
                 )
             except Exception as e:
                 logger.error(f"Ollama analysis failed: {e}")
-        
+
         # Fallback : analyse basée sur les règles
         return self._generate_rule_based_analysis(
             territory_code, territory_name, metrics, signals, now
         )
-    
+
     async def _call_ollama(self, prompt: str) -> str:
         """Appelle Ollama pour générer l'analyse."""
         import httpx
-        
+
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 "http://127.0.0.1:11434/api/generate",
@@ -208,7 +208,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             )
             response.raise_for_status()
             return response.json().get("response", "")
-    
+
     def _parse_response(self, response: str) -> dict[str, str]:
         """Parse la réponse LLM en sections."""
         sections = {
@@ -217,13 +217,13 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             "tendance": "",
             "recommandations": "",
         }
-        
+
         current_section = None
         lines = response.split("\n")
-        
+
         for line in lines:
             line_lower = line.lower().strip()
-            
+
             if "situation" in line_lower and ":" in line_lower:
                 current_section = "situation"
                 continue
@@ -236,16 +236,16 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             elif "recommandation" in line_lower and ":" in line_lower:
                 current_section = "recommandations"
                 continue
-            
+
             if current_section and line.strip():
                 sections[current_section] += line.strip() + " "
-        
+
         # Nettoyer
         for k in sections:
             sections[k] = sections[k].strip()
-        
+
         return sections
-    
+
     def _generate_rule_based_analysis(
         self,
         territory_code: str,
@@ -258,7 +258,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
         vitality = metrics.get("vitality_index", 50)
         net = metrics.get("net_creation", 0)
         unemployment = metrics.get("unemployment_rate", 7.0)
-        
+
         # Situation
         if vitality >= 60:
             situation = f"{territory_name} affiche une bonne dynamique économique avec un indice de vitalité de {vitality:.1f}/100."
@@ -266,7 +266,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             situation = f"{territory_name} présente une situation économique stable avec une vitalité de {vitality:.1f}/100."
         else:
             situation = f"{territory_name} traverse une période difficile avec un indice de vitalité de {vitality:.1f}/100."
-        
+
         # Diagnostic
         if net > 0:
             diagnostic = f"Le solde net de +{net} entreprises indique une création supérieure aux fermetures."
@@ -274,12 +274,12 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             diagnostic = f"Le solde négatif de {net} entreprises révèle plus de fermetures que de créations."
         else:
             diagnostic = "Le nombre de créations équilibre les fermetures."
-        
+
         if unemployment > 9:
             diagnostic += f" Le chômage élevé ({unemployment:.1f}%) pèse sur l'attractivité."
         elif unemployment < 6:
             diagnostic += f" Le faible taux de chômage ({unemployment:.1f}%) témoigne d'un marché de l'emploi tendu."
-        
+
         # Tendance
         if signals:
             critical = [s for s in signals if s.get("severity") in ("alert", "critical")]
@@ -289,7 +289,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
                 tendance = "Les indicateurs ne montrent pas de dégradation imminente."
         else:
             tendance = "La tendance reste à confirmer avec plus de données historiques."
-        
+
         # Recommandations
         if vitality < 45:
             recommandations = "Priorité : identifier les secteurs en difficulté et accompagner les entreprises fragiles."
@@ -297,7 +297,7 @@ Sois factuel, concis et actionnable. Évite le jargon."""
             recommandations = "Focus sur l'emploi : renforcer les dispositifs d'insertion et attirer des entreprises."
         else:
             recommandations = "Maintenir la dynamique et surveiller les secteurs émergents."
-        
+
         return NarrativeAnalysis(
             territory_code=territory_code,
             territory_name=territory_name,

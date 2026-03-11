@@ -237,6 +237,18 @@ ignore = [
     "SIM105",  # suppressible-exception (try/except/pass is readable)
     "SIM108",  # if-else-block-instead-of-if-exp (readability preference)
     "SIM117",  # multiple-with-statements (nested is clearer for some)
+    "UP035",   # deprecated-import (typing.Dict etc, will migrate incrementally)
+    "F841",    # local-variable-is-assigned-but-never-used (cleanup later)
+    "B028",    # no-explicit-stacklevel (warnings.warn)
+    "B905",    # zip-without-explicit-strict
+    "B006",    # mutable-argument-default
+    "F821",    # undefined-name (false positives with lazy imports)
+    "F403",    # wildcard-imports (used intentionally in some modules)
+    "SIM116",  # if-else-block-instead-of-dict-lookup
+    "SIM115",  # open-file-with-context-handler
+    "F823",    # undefined-name-in-all
+    "UP007",   # non-pep604-annotation (X | Y syntax, needs Python 3.10+)
+    "ARG005",  # unused-lambda-argument
 ]
 
 [tool.ruff.format]

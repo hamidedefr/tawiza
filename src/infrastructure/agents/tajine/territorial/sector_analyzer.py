@@ -29,11 +29,11 @@ class SectorStats:
     creations: int = 0
     closures: int = 0
     modifications: int = 0
-    
+
     @property
     def net_creation(self) -> int:
         return self.creations - self.closures
-    
+
     @property
     def dynamism_score(self) -> float:
         """Score de dynamisme (-100 à +100)."""
@@ -41,7 +41,7 @@ class SectorStats:
         if total == 0:
             return 0.0
         return ((self.creations - self.closures) / total) * 100
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "code": self.code,
@@ -64,7 +64,7 @@ class TerritorialSectorAnalysis:
     total_records: int
     classified_records: int
     sectors: dict[str, SectorStats] = field(default_factory=dict)
-    
+
     @property
     def top_creators(self) -> list[SectorStats]:
         """Top 5 secteurs créateurs."""
@@ -73,7 +73,7 @@ class TerritorialSectorAnalysis:
             key=lambda s: s.creations,
             reverse=True
         )[:5]
-    
+
     @property
     def top_destroyers(self) -> list[SectorStats]:
         """Top 5 secteurs avec le plus de fermetures."""
@@ -82,7 +82,7 @@ class TerritorialSectorAnalysis:
             key=lambda s: s.closures,
             reverse=True
         )[:5]
-    
+
     @property
     def most_dynamic(self) -> list[SectorStats]:
         """Top 5 secteurs les plus dynamiques (score positif)."""
@@ -91,12 +91,12 @@ class TerritorialSectorAnalysis:
             key=lambda s: s.net_creation,
             reverse=True
         )[:5]
-    
+
     @property
     def in_crisis(self) -> list[SectorStats]:
         """Secteurs en crise (plus de fermetures que créations)."""
         return [s for s in self.sectors.values() if s.net_creation < 0]
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "territory_code": self.territory_code,
@@ -117,10 +117,10 @@ class TerritorialSectorAnalysis:
 
 class SectorAnalyzer:
     """Analyseur sectoriel pour les données BODACC."""
-    
+
     def __init__(self):
         self.classifier = get_naf_classifier()
-    
+
     async def analyze_territory(
         self,
         territory_code: str,
@@ -130,7 +130,7 @@ class SectorAnalyzer:
     ) -> TerritorialSectorAnalysis:
         """
         Analyse les données BODACC d'un territoire par secteur.
-        
+
         Args:
             territory_code: Code du département
             territory_name: Nom du territoire
@@ -142,23 +142,23 @@ class SectorAnalyzer:
             "departement": territory_code,
             "limit": limit,
         })
-        
+
         # Initialiser les stats par secteur
         sector_stats: dict[str, SectorStats] = {}
         classified_count = 0
-        
+
         for record in results:
             # Extraire et classifier l'activité
             activity = self._extract_activity(record)
             if not activity:
                 continue
-            
+
             code, confidence = self.classifier.classify(activity)
             if code == "?" or confidence < 0.3:
                 continue
-            
+
             classified_count += 1
-            
+
             # Créer la section si nécessaire
             if code not in sector_stats:
                 section = self.classifier.get_section(code)
@@ -167,7 +167,7 @@ class SectorAnalyzer:
                     name=section.name if section else "Inconnu",
                     short_name=section.short_name if section else "Autre",
                 )
-            
+
             # Incrémenter selon le type
             record_type = record.get("type", "").lower()
             if record_type == "creation":
@@ -176,7 +176,7 @@ class SectorAnalyzer:
                 sector_stats[code].closures += 1
             elif record_type == "modification":
                 sector_stats[code].modifications += 1
-        
+
         return TerritorialSectorAnalysis(
             territory_code=territory_code,
             territory_name=territory_name,
@@ -185,22 +185,22 @@ class SectorAnalyzer:
             classified_records=classified_count,
             sectors=sector_stats,
         )
-    
+
     def _extract_activity(self, record: dict[str, Any]) -> str | None:
         """Extrait la description d'activité d'un enregistrement BODACC."""
         raw = record.get("raw", {})
         etab_str = raw.get("listeetablissements", "")
-        
+
         if not etab_str:
             return None
-        
+
         try:
             etab = json.loads(etab_str) if isinstance(etab_str, str) else etab_str
             if isinstance(etab, dict) and "etablissement" in etab:
                 return etab["etablissement"].get("activite", "")
         except (json.JSONDecodeError, TypeError):
             pass
-        
+
         return None
 
 

@@ -151,7 +151,7 @@ class SitadelCollector(BaseCollector):
                         },
                     })
 
-            except (ValueError, KeyError) as e:
+            except (ValueError, KeyError):
                 continue
 
         return signals

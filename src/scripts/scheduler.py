@@ -20,6 +20,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from dotenv import load_dotenv
+
 load_dotenv(project_root / ".env")
 
 
@@ -48,13 +49,13 @@ async def job_detect():
     """Détection micro-signaux + temporel + alertes."""
     from src.scripts.detect_microsignals_v2 import run_detection
     from src.scripts.detect_temporal import detect_temporal_signals
-    
+
     logger.info("⏰ [SCHEDULER] Détection micro-signaux")
     await run_detection(days_back=180, save=True)
-    
+
     logger.info("⏰ [SCHEDULER] Détection temporelle")
     await detect_temporal_signals()
-    
+
     logger.info("⏰ [SCHEDULER] Vérification alertes")
     from src.scripts.alert_telegram import send_alert
     await send_alert()
@@ -105,17 +106,17 @@ def setup_scheduler():
 
     scheduler.start()
     logger.info("✅ Scheduler démarré — 4 jobs planifiés")
-    
+
     for job in scheduler.get_jobs():
         logger.info(f"  📅 {job.name}: next run {job.next_run_time}")
-    
+
     return scheduler
 
 
 async def main():
     logger.info("🚀 Démarrage scheduler Tawiza V2")
     scheduler = setup_scheduler()
-    
+
     try:
         while True:
             await asyncio.sleep(3600)

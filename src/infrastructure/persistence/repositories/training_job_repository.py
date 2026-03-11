@@ -5,6 +5,7 @@ from uuid import UUID
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.infrastructure.persistence.models.training_job_model import TrainingJobDB
 
 from src.domain.entities.training_job import (
     TrainingConfig,
@@ -13,7 +14,6 @@ from src.domain.entities.training_job import (
     TrainingTrigger,
 )
 from src.domain.repositories.ml_repositories import ITrainingJobRepository
-from src.infrastructure.persistence.models.training_job_model import TrainingJobDB
 
 
 class SQLAlchemyTrainingJobRepository(ITrainingJobRepository):

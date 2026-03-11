@@ -17,7 +17,6 @@ from src.infrastructure.persistence.territorial_history import (
     get_history_store,
 )
 
-
 # Liste des 101 départements français (métropole + DOM)
 DEPARTEMENTS = {
     "01": "Ain", "02": "Aisne", "03": "Allier", "04": "Alpes-de-Haute-Provence",
@@ -58,18 +57,20 @@ async def collect_all_departments(
 ) -> dict[str, Any]:
     """
     Collecte les métriques de tous les départements.
-    
+
     Args:
         batch_size: Nombre de départements à traiter en parallèle
         delay_between_batches: Délai entre les batches (rate limiting)
-    
+
     Returns:
         Résumé de la collecte
     """
+    from src.infrastructure.agents.tajine.territorial.metrics_collector import (
+        TerritorialMetricsCollector,
+    )
     from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
     from src.infrastructure.datasources.adapters.sirene import SireneAdapter
-    from src.infrastructure.agents.tajine.territorial.metrics_collector import TerritorialMetricsCollector
-    
+
     # Initialiser les adaptateurs
     try:
         from src.infrastructure.datasources.adapters.france_travail import FranceTravailAdapter
@@ -78,7 +79,7 @@ async def collect_all_departments(
             ft_adapter = None
     except Exception:
         ft_adapter = None
-    
+
     try:
         from src.infrastructure.datasources.adapters.insee_local import INSEELocalAdapter
         insee_adapter = INSEELocalAdapter()
@@ -86,13 +87,13 @@ async def collect_all_departments(
             insee_adapter = None
     except Exception:
         insee_adapter = None
-    
+
     try:
         from src.infrastructure.datasources.adapters.dvf import DVFAdapter
         dvf_adapter = DVFAdapter()
     except Exception:
         dvf_adapter = None
-    
+
     collector = TerritorialMetricsCollector(
         sirene_adapter=SireneAdapter(),
         bodacc_adapter=BodaccAdapter(),
@@ -100,17 +101,17 @@ async def collect_all_departments(
         insee_adapter=insee_adapter,
         dvf_adapter=dvf_adapter,
     )
-    
+
     store = get_history_store()
     now = datetime.utcnow()
-    
+
     results = {
         "started_at": now.isoformat(),
         "success": 0,
         "failed": 0,
         "errors": [],
     }
-    
+
     # Déterminer les sources utilisées
     sources_used = ["BODACC", "SIRENE"]
     if ft_adapter:
@@ -119,23 +120,23 @@ async def collect_all_departments(
         sources_used.append("INSEE")
     if dvf_adapter:
         sources_used.append("DVF")
-    
+
     logger.info(f"Starting territorial collection for {len(DEPARTEMENTS)} departments")
     logger.info(f"Sources: {', '.join(sources_used)}")
-    
+
     # Traiter par batches
     dept_list = list(DEPARTEMENTS.items())
-    
+
     for i in range(0, len(dept_list), batch_size):
         batch = dept_list[i:i + batch_size]
-        
+
         # Collecter en parallèle
         tasks = []
         for code, name in batch:
             tasks.append(_collect_one(collector, store, code, name, now, sources_used))
-        
+
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         for (code, name), result in zip(batch, batch_results):
             if isinstance(result, Exception):
                 results["failed"] += 1
@@ -145,26 +146,26 @@ async def collect_all_departments(
                 results["success"] += 1
             else:
                 results["failed"] += 1
-        
+
         # Rate limiting
         if i + batch_size < len(dept_list):
             await asyncio.sleep(delay_between_batches)
-        
+
         # Log progress
         progress = min(i + batch_size, len(dept_list))
         logger.info(f"Progress: {progress}/{len(dept_list)} departments")
-    
+
     results["finished_at"] = datetime.utcnow().isoformat()
     results["duration_seconds"] = (
-        datetime.fromisoformat(results["finished_at"]) - 
+        datetime.fromisoformat(results["finished_at"]) -
         datetime.fromisoformat(results["started_at"])
     ).total_seconds()
-    
+
     logger.info(
         f"Collection complete: {results['success']} success, "
         f"{results['failed']} failed in {results['duration_seconds']:.1f}s"
     )
-    
+
     return results
 
 
@@ -179,7 +180,7 @@ async def _collect_one(
     """Collecte et sauvegarde les métriques d'un département."""
     try:
         metrics = await collector.collect_metrics(code, name, period_months=1)
-        
+
         historical = HistoricalMetrics(
             territory_code=code,
             territory_name=name,
@@ -197,9 +198,9 @@ async def _collect_one(
             net_creation=metrics.net_creation,
             sources_used=sources_used,
         )
-        
+
         return store.save_metrics(historical)
-        
+
     except Exception as e:
         logger.error(f"Error collecting {code}: {e}")
         raise
@@ -209,25 +210,27 @@ async def collect_selected_departments(
     codes: list[str],
 ) -> dict[str, Any]:
     """Collecte uniquement les départements spécifiés."""
+    from src.infrastructure.agents.tajine.territorial.metrics_collector import (
+        TerritorialMetricsCollector,
+    )
     from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
     from src.infrastructure.datasources.adapters.sirene import SireneAdapter
-    from src.infrastructure.agents.tajine.territorial.metrics_collector import TerritorialMetricsCollector
-    
+
     collector = TerritorialMetricsCollector(
         sirene_adapter=SireneAdapter(),
         bodacc_adapter=BodaccAdapter(),
     )
-    
+
     store = get_history_store()
     now = datetime.utcnow()
-    
+
     results = {"success": 0, "failed": 0}
-    
+
     for code in codes:
         name = DEPARTEMENTS.get(code, f"Département {code}")
         try:
             metrics = await collector.collect_metrics(code, name, period_months=1)
-            
+
             historical = HistoricalMetrics(
                 territory_code=code,
                 territory_name=name,
@@ -245,23 +248,23 @@ async def collect_selected_departments(
                 net_creation=metrics.net_creation,
                 sources_used=["BODACC", "SIRENE"],
             )
-            
+
             if store.save_metrics(historical):
                 results["success"] += 1
             else:
                 results["failed"] += 1
-                
+
         except Exception as e:
             logger.error(f"Failed to collect {code}: {e}")
             results["failed"] += 1
-    
+
     return results
 
 
 # CLI pour test manuel
 if __name__ == "__main__":
     import sys
-    
+
     async def main():
         if len(sys.argv) > 1 and sys.argv[1] == "--all":
             print("Collecting ALL departments...")
@@ -270,7 +273,7 @@ if __name__ == "__main__":
             # Par défaut, collecter quelques départements de test
             print("Collecting test departments (75, 69, 13, 33, 59)...")
             results = await collect_selected_departments(["75", "69", "13", "33", "59"])
-        
+
         print(f"\nResults: {results}")
-    
+
     asyncio.run(main())

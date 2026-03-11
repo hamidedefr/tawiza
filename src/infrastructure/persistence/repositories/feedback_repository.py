@@ -5,10 +5,10 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.infrastructure.persistence.models.feedback_model import FeedbackDB
 
 from src.domain.entities.feedback import Feedback, FeedbackStatus, FeedbackType
 from src.domain.repositories.ml_repositories import IFeedbackRepository
-from src.infrastructure.persistence.models.feedback_model import FeedbackDB
 
 
 class SQLAlchemyFeedbackRepository(IFeedbackRepository):

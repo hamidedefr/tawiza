@@ -12,7 +12,7 @@ from ..base import BaseCollector, CollectedSignal, CollectorConfig
 
 class BanqueFranceCollector(BaseCollector):
     """Collect business failure statistics from Banque de France and open data sources.
-    
+
     Monitors:
     - Company failures by department
     - Monthly business failure trends
@@ -64,14 +64,14 @@ class BanqueFranceCollector(BaseCollector):
         # Try each data source until we find working data
         for source in self.DATA_SOURCES:
             logger.info(f"[banque_france] Trying source: {source['name']}")
-            
+
             try:
                 source_signals = await self._collect_from_source(source, code_dept, since)
                 if source_signals:
                     signals.extend(source_signals)
                     logger.info(f"[banque_france] Got {len(source_signals)} signals from {source['name']}")
                     break  # Stop after first successful source
-                    
+
             except Exception as e:
                 logger.warning(f"[banque_france] Source {source['name']} failed: {e}")
                 continue
@@ -104,15 +104,15 @@ class BanqueFranceCollector(BaseCollector):
         try:
             csv_content = response.text
             csv_reader = csv.DictReader(io.StringIO(csv_content))
-            
+
             signals = []
             for row in csv_reader:
                 signal = await self._process_csv_row(row, code_dept, since)
                 if signal:
                     signals.append(signal)
-                    
+
             return signals
-            
+
         except Exception as e:
             logger.error(f"[banque_france] CSV processing failed: {e}")
             return []
@@ -123,21 +123,21 @@ class BanqueFranceCollector(BaseCollector):
         """Try to fetch data from API endpoints."""
         params = source.get("params", {})
         response = await self._request_with_retry("GET", source["url"], params=params)
-        
+
         if not response:
             return []
 
         try:
             data = response.json()
             datasets = data.get("datasets", [])
-            
+
             # Look for datasets related to business failures
             for dataset in datasets:
                 if self._is_relevant_dataset(dataset):
                     return await self._process_api_dataset(dataset, code_dept, since)
-                    
+
             return []
-            
+
         except Exception as e:
             logger.error(f"[banque_france] API processing failed: {e}")
             return []
@@ -151,13 +151,13 @@ class BanqueFranceCollector(BaseCollector):
             # This is speculative since we don't know the exact CSV format
             dept = row.get("departement") or row.get("dept") or row.get("code_dept")
             failures = row.get("defaillances") or row.get("nb_defaillances") or row.get("count")
-            
+
             if not dept or not failures:
                 return None
-                
+
             if code_dept and dept != code_dept:
                 return None
-                
+
             return CollectedSignal(
                 source="banque_france",
                 source_url=f"bdf:defaillances:{dept}:{since.isoformat()}",
@@ -172,7 +172,7 @@ class BanqueFranceCollector(BaseCollector):
                     "data_source": "csv"
                 }
             )
-            
+
         except Exception as e:
             logger.debug(f"[banque_france] Error processing CSV row: {e}")
             return None
@@ -182,16 +182,16 @@ class BanqueFranceCollector(BaseCollector):
     ) -> list[CollectedSignal]:
         """Process API dataset to extract signals."""
         signals = []
-        
+
         try:
             # Get dataset records if available
             dataset_id = dataset.get("dataset_id")
             if not dataset_id:
                 return []
-                
+
             # This would need to be adapted based on actual API structure
             logger.info(f"[banque_france] Processing dataset: {dataset_id}")
-            
+
             # For now, create a placeholder signal based on dataset metadata
             signal = CollectedSignal(
                 source="banque_france",
@@ -208,10 +208,10 @@ class BanqueFranceCollector(BaseCollector):
                 }
             )
             signals.append(signal)
-            
+
         except Exception as e:
             logger.warning(f"[banque_france] Dataset processing error: {e}")
-            
+
         return signals
 
     async def _generate_fallback_data(
@@ -219,7 +219,7 @@ class BanqueFranceCollector(BaseCollector):
     ) -> list[CollectedSignal]:
         """Generate realistic fallback data when external sources fail."""
         signals = []
-        
+
         # French departments with estimated monthly business failure patterns
         dept_patterns = {
             "75": 45,    # Paris - high business activity, higher failures
@@ -231,7 +231,7 @@ class BanqueFranceCollector(BaseCollector):
             "94": 10,    # Val-de-Marne
             "95": 8,     # Val-d'Oise
         }
-        
+
         # If specific department requested
         if code_dept:
             if code_dept in dept_patterns:
@@ -259,9 +259,9 @@ class BanqueFranceCollector(BaseCollector):
                     }
                 )
                 signals.append(signal)
-            
+
             return signals
-        
+
         # Single department case
         if code_dept:
             failure_count = dept_patterns.get(code_dept, 5)
@@ -280,18 +280,18 @@ class BanqueFranceCollector(BaseCollector):
                 }
             )
             signals.append(signal)
-        
+
         return signals
 
     def _is_relevant_dataset(self, dataset: dict) -> bool:
         """Check if a dataset is relevant for business failures."""
         title = dataset.get("title", "").lower()
         desc = dataset.get("description", "").lower()
-        
+
         relevant_terms = [
-            "defaillance", "faillite", "liquidation", 
+            "defaillance", "faillite", "liquidation",
             "cessation", "entreprise", "societe"
         ]
-        
+
         text_to_check = f"{title} {desc}"
         return any(term in text_to_check for term in relevant_terms)

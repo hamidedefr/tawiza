@@ -8,7 +8,6 @@ from typing import Any
 
 from loguru import logger
 
-
 # Department name -> code mapping (French departements)
 DEPT_NAME_TO_CODE = {
     "ain": "01",

@@ -1,16 +1,16 @@
 """FastAPI endpoints for the collector - signals & anomalies dashboard."""
 
 import os
-from datetime import date, timedelta
+from datetime import UTC, date, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Query, Request
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from loguru import logger
-from sqlalchemy import text
 import numpy as np
 import pandas as pd
+from fastapi import APIRouter, Query, Request
+from loguru import logger
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from sqlalchemy import text
 
 from .storage.repository import SignalRepository
 
@@ -229,38 +229,38 @@ async def get_departments_heatmap(
     """Get aggregated signals and anomalies by department for map heatmap."""
     repo = get_repo()
     since = date.today() - timedelta(days=days)
-    
+
     # Direct SQL query for efficient aggregation
     query = text("""
         WITH signal_stats AS (
-            SELECT 
+            SELECT
                 code_dept,
                 COUNT(*) as total_signals,
                 json_object_agg(source, count) as sources,
                 MAX(event_date) as latest_signal
             FROM (
-                SELECT 
+                SELECT
                     code_dept,
                     source,
                     COUNT(*) as count,
                     event_date
-                FROM signals 
-                WHERE code_dept IS NOT NULL 
+                FROM signals
+                WHERE code_dept IS NOT NULL
                   AND event_date >= :since_date
                 GROUP BY code_dept, source, event_date
             ) source_counts
             GROUP BY code_dept
         ),
         anomaly_stats AS (
-            SELECT 
+            SELECT
                 LEFT(code_commune, 2) as code_dept,
                 COUNT(*) as anomalies
-            FROM anomalies 
+            FROM anomalies
             WHERE detected_at >= :since_datetime
               AND code_commune IS NOT NULL
             GROUP BY LEFT(code_commune, 2)
         )
-        SELECT 
+        SELECT
             s.code_dept as code,
             s.total_signals,
             COALESCE(s.sources, '{}') as sources,
@@ -270,7 +270,7 @@ async def get_departments_heatmap(
         LEFT JOIN anomaly_stats a ON s.code_dept = a.code_dept
         ORDER BY s.total_signals DESC
     """)
-    
+
     # Execute query
     async with repo._engine.begin() as conn:
         result = await conn.execute(query, {
@@ -278,7 +278,7 @@ async def get_departments_heatmap(
             "since_datetime": since
         })
         rows = result.fetchall()
-    
+
     departments = []
     for row in rows:
         departments.append({
@@ -288,7 +288,7 @@ async def get_departments_heatmap(
             "anomalies": row.anomalies,
             "latest_signal": row.latest_signal.isoformat() if row.latest_signal else None,
         })
-    
+
     return {
         "departments": departments,
         "period_days": days,
@@ -302,8 +302,7 @@ async def get_territorial_ranking(
     request: Request
 ) -> dict[str, Any]:
     """Get Phase 2 territorial ranking based on signal analysis."""
-    import numpy as np
-    
+
     # Population INSEE 2024 (top départements)
     POPULATIONS = {
         "75": 2161, "13": 2043, "69": 1914, "59": 2615, "33": 1690,
@@ -323,10 +322,10 @@ async def get_territorial_ranking(
         "83": "Var", "91": "Essonne", "95": "Val-d'Oise", "54": "Meurthe-et-Moselle",
         "45": "Loiret", "57": "Moselle",
     }
-    
+
     # Get metrics per department using direct SQL
     query = text("""
-    SELECT 
+    SELECT
         code_dept,
         -- Créations (SIRENE)
         SUM(CASE WHEN source='sirene' AND metric_name='creation_entreprise' THEN metric_value ELSE 0 END) as creations,
@@ -349,18 +348,18 @@ async def get_territorial_ranking(
         SUM(CASE WHEN source='presse_locale' AND metric_name IN ('presse_negatif','presse_crise','presse_emploi_negatif','presse_fermeture') THEN 1 ELSE 0 END) as presse_negative,
         -- Sources count
         COUNT(DISTINCT source) as nb_sources
-    FROM signals 
+    FROM signals
     WHERE code_dept IS NOT NULL
     GROUP BY code_dept
     ORDER BY code_dept
     """)
-    
+
     repo = get_repo()
-    
+
     async with repo._engine.begin() as conn:
         result = await conn.execute(query)
         rows = result.fetchall()
-    
+
     def winsorize(values, lower=5, upper=95):
         """Clip values at percentiles to remove outliers."""
         if len(values) == 0:
@@ -378,14 +377,14 @@ async def get_territorial_ranking(
         ranks = np.empty_like(order, dtype=float)
         ranks[order] = np.linspace(0, 100, n)
         return ranks
-    
+
     depts = []
     for row in rows:
         code = row[0]
         pop = POPULATIONS.get(code)
         if not pop:
             continue  # Skip departments we don't have population for
-        
+
         creations = float(row[1] or 0)
         fermetures = float(row[2] or 0)
         liquidations = float(row[3] or 0)
@@ -397,10 +396,10 @@ async def get_territorial_ranking(
         presse_pos = float(row[9] or 0)
         presse_neg = float(row[10] or 0)
         nb_sources = int(row[11] or 0)
-        
+
         # Normalisation pour 10k habitants
         pop_10k = pop / 10  # pop est en milliers, donc /10 = pour 10k
-        
+
         # Facteurs alpha
         f_sante = creations / (liquidations + 1)  # ratio créations/liquidations
         f_declin = (liquidations + procedures) / pop_10k  # procédures pour 10k hab
@@ -408,9 +407,9 @@ async def get_territorial_ranking(
         f_immo = tx_immo / pop_10k  # transactions pour 10k hab
         f_construction = logements / pop_10k  # logements autorisés pour 10k hab
         f_presse = (presse_pos + 1) / (presse_neg + 1)  # ratio positif/négatif
-        
+
         confidence = nb_sources / 10.0  # 10 sources max maintenant
-        
+
         depts.append({
             'code': code,
             'name': DEPT_NAMES.get(code, f"Dept {code}"),
@@ -424,20 +423,20 @@ async def get_territorial_ranking(
             'confidence': confidence,
             'nb_sources': nb_sources,
         })
-    
+
     if not depts:
         return {"ranking": [], "total_departments": 0}
-    
+
     # Scoring composite par percentile ranking
     n = len(depts)
-    
+
     sante_vals = np.array([d['f_sante'] for d in depts])
     declin_vals = np.array([d['f_declin'] for d in depts])
     emploi_vals = np.array([d['f_emploi'] for d in depts])
     immo_vals = np.array([d['f_immo'] for d in depts])
     constr_vals = np.array([d['f_construction'] for d in depts])
     presse_vals = np.array([d['f_presse'] for d in depts])
-    
+
     # Winsorize
     sante_w = winsorize(sante_vals)
     declin_w = winsorize(declin_vals)
@@ -445,7 +444,7 @@ async def get_territorial_ranking(
     immo_w = winsorize(immo_vals)
     constr_w = winsorize(constr_vals)
     presse_w = winsorize(presse_vals)
-    
+
     # Percentile ranks
     r_sante = percentile_rank(sante_w)
     r_declin = 100 - percentile_rank(declin_w)  # invert: less decline = better
@@ -453,7 +452,7 @@ async def get_territorial_ranking(
     r_immo = percentile_rank(immo_w)
     r_constr = percentile_rank(constr_w)
     r_presse = percentile_rank(presse_w)
-    
+
     # Pondération
     weights = {
         'sante': 0.25,      # santé entreprises (créa/liq)
@@ -463,7 +462,7 @@ async def get_territorial_ranking(
         'construction': 0.10,# construction neuve
         'presse': 0.10,     # sentiment presse
     }
-    
+
     ranking = []
     for i, d in enumerate(depts):
         score = (
@@ -477,7 +476,7 @@ async def get_territorial_ranking(
         # Bonus/malus confiance (±5 points max)
         conf_adj = (d['confidence'] - 0.5) * 10  # de -5 à +5
         score = max(0, min(100, score + conf_adj))
-        
+
         ranking.append({
             "code": d['code'],
             "name": d['name'],
@@ -493,10 +492,10 @@ async def get_territorial_ranking(
                 "presse": round(r_presse[i], 1),
             }
         })
-    
+
     # Sort by score descending
     ranking.sort(key=lambda d: d['score'], reverse=True)
-    
+
     return {
         "ranking": ranking,
         "total_departments": len(ranking),
@@ -510,31 +509,31 @@ async def get_sources_summary(
 ) -> dict[str, Any]:
     """Get summary of signals count and last collection time per source."""
     from datetime import datetime, timezone
-    
+
     query = text("""
-    SELECT 
-        source, 
-        COUNT(*) as count, 
+    SELECT
+        source,
+        COUNT(*) as count,
         MAX(collected_at) as last_collected
-    FROM signals 
-    GROUP BY source 
+    FROM signals
+    GROUP BY source
     ORDER BY COUNT(*) DESC
     """)
-    
+
     repo = get_repo()
-    
+
     async with repo._engine.begin() as conn:
         result = await conn.execute(query)
         rows = result.fetchall()
-    
-    now = datetime.now(timezone.utc)
+
+    now = datetime.now(UTC)
     sources = []
-    
+
     for row in rows:
         last_collected = row.last_collected
         if last_collected and last_collected.tzinfo is None:
-            last_collected = last_collected.replace(tzinfo=timezone.utc)
-        
+            last_collected = last_collected.replace(tzinfo=UTC)
+
         # Status: green if < 24h, yellow if < 7 days, red otherwise
         status = "offline"
         if last_collected:
@@ -543,14 +542,14 @@ async def get_sources_summary(
                 status = "online"
             elif hours_since < 24 * 7:
                 status = "degraded"
-        
+
         sources.append({
             "source": row.source,
             "count": row.count,
             "last_collected": last_collected.isoformat() if last_collected else None,
             "status": status,
         })
-    
+
     return {
         "sources": sources,
         "total_signals": sum(s["count"] for s in sources),
@@ -566,26 +565,26 @@ async def get_google_trends_data(
 ) -> dict[str, Any]:
     """Get Google Trends data from signals."""
     query = text("""
-    SELECT 
+    SELECT
         metric_name,
         code_dept,
         AVG(metric_value) as avg_value,
         COUNT(*) as count,
         MAX(collected_at) as latest
-    FROM signals 
+    FROM signals
     WHERE source = 'google_trends'
       AND metric_name IS NOT NULL
     GROUP BY metric_name, code_dept
     ORDER BY avg_value DESC, count DESC
     LIMIT :limit
     """)
-    
+
     repo = get_repo()
-    
+
     async with repo._engine.begin() as conn:
         result = await conn.execute(query, {"limit": limit})
         rows = result.fetchall()
-    
+
     trends = []
     for row in rows:
         trends.append({
@@ -595,7 +594,7 @@ async def get_google_trends_data(
             "count": row.count,
             "latest": row.latest.isoformat() if row.latest else None,
         })
-    
+
     # Group by keyword for summary
     keyword_summary = {}
     for trend in trends:
@@ -609,14 +608,14 @@ async def get_google_trends_data(
             }
         keyword_summary[keyword]["total_value"] += trend["avg_value"]
         keyword_summary[keyword]["department_count"] += 1
-    
+
     # Convert to list and sort
     top_keywords = sorted(
         keyword_summary.values(),
         key=lambda x: x["total_value"],
         reverse=True
     )[:10]
-    
+
     return {
         "trends": trends,
         "top_keywords": top_keywords,
@@ -631,13 +630,13 @@ async def get_department_scores(
 ) -> dict[str, Any]:
     """Get territorial health scores for all departments."""
     from .quant.scoring import get_department_rankings
-    
+
     repo = get_repo()
     db_url = repo._engine.url.render_as_string(hide_password=False)
-    
+
     try:
         rankings = await get_department_rankings(db_url)
-        
+
         return {
             "status": "success",
             "count": len(rankings),
@@ -645,7 +644,7 @@ async def get_department_scores(
             "algorithm": "Tawiza-V2 Phase 2",
             "factors": [
                 "factor_sante_entreprises",
-                "factor_tension_emploi", 
+                "factor_tension_emploi",
                 "factor_dynamisme_immo",
                 "factor_construction",
                 "factor_declin_ratio",
@@ -668,26 +667,26 @@ async def get_department_factors(
     dept: str,
 ) -> dict[str, Any]:
     """Get detailed alpha factors for a specific department."""
-    from .quant.scoring import compute_territorial_scores
     from .quant.population import get_department_population
-    
+    from .quant.scoring import compute_territorial_scores
+
     repo = get_repo()
     db_url = repo._engine.url.render_as_string(hide_password=False)
-    
+
     try:
         # Get all scores
         all_scores = await compute_territorial_scores(db_url)
-        
+
         if dept not in all_scores:
             return {
-                "status": "error", 
+                "status": "error",
                 "message": f"Department {dept} not found",
                 "department": dept
             }
-        
+
         dept_data = all_scores[dept]
         population = get_department_population(dept)
-        
+
         return {
             "status": "success",
             "department": dept,
@@ -719,34 +718,34 @@ async def get_department_trends(
     """Get temporal trends analysis for a specific department."""
     from .quant.temporal import compute_moving_averages, compute_rate_of_change
     from .quant.trends import _generate_trend_alert
-    
+
     repo = get_repo()
     db_url = repo._engine.url.render_as_string(hide_password=False)
-    
+
     try:
         logger.info(f"Getting trends for department {dept}")
-        
+
         # Get rate of change for all metrics
         roc_data = await compute_rate_of_change(db_url, dept, periods=[3, 6, 12])
-        
+
         trends = {}
         alerts = []
-        
+
         if metric:
             # Specific metric analysis
             if metric in roc_data:
                 ma_data = await compute_moving_averages(db_url, dept, metric)
-                
+
                 alert = await _generate_trend_alert(
-                    dept, metric, ma_data, roc_data[metric], 
+                    dept, metric, ma_data, roc_data[metric],
                     ma_data.get('data_points', 0)
                 )
-                
+
                 trends[metric] = {
                     'moving_averages': ma_data,
                     'rate_of_change': roc_data[metric]
                 }
-                
+
                 if alert:
                     alerts.append(alert)
         else:
@@ -754,15 +753,15 @@ async def get_department_trends(
             for metric_name, roc_values in roc_data.items():
                 if roc_values and roc_values.get('alert'):
                     ma_data = await compute_moving_averages(db_url, dept, metric_name)
-                    
+
                     alert = await _generate_trend_alert(
                         dept, metric_name, ma_data, roc_values,
                         ma_data.get('data_points', 0)
                     )
-                    
+
                     if alert:
                         alerts.append(alert)
-        
+
         return {
             "status": "success",
             "department": dept,
@@ -773,7 +772,7 @@ async def get_department_trends(
             "roc_summary": roc_data,
             "algorithm": "Tawiza-V2 Phase 3"
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting trends for department {dept}: {e}")
         return {
@@ -784,7 +783,7 @@ async def get_department_trends(
 
 
 @router.get("/trends/alerts")
-@limiter.limit("20/minute") 
+@limiter.limit("20/minute")
 async def get_trends_alerts(
     request: Request,
     confidence_threshold: float = Query(0.5, description="Minimum confidence for alerts"),
@@ -792,28 +791,28 @@ async def get_trends_alerts(
 ) -> dict[str, Any]:
     """Get all active trend alerts across all departments."""
     from .quant.trends import detect_trends
-    
+
     repo = get_repo()
     db_url = repo._engine.url.render_as_string(hide_password=False)
-    
+
     try:
         logger.info("Getting comprehensive trend alerts")
-        
+
         # Get all trend alerts
         all_alerts = await detect_trends(db_url)
-        
+
         # Filter by confidence and trend type
         filtered_alerts = [
-            alert for alert in all_alerts 
+            alert for alert in all_alerts
             if alert.get('confidence', 0) >= confidence_threshold
         ]
-        
+
         if trend_type:
             filtered_alerts = [
                 alert for alert in filtered_alerts
                 if alert.get('trend_type') == trend_type
             ]
-        
+
         # Group by trend type for summary
         trend_summary = {}
         for alert in filtered_alerts:
@@ -827,16 +826,16 @@ async def get_trends_alerts(
             trend_summary[t_type]['count'] += 1
             trend_summary[t_type]['departments'].add(alert.get('dept'))
             trend_summary[t_type]['avg_confidence'] += alert.get('confidence', 0)
-        
+
         # Calculate averages and convert sets to lists
         for t_type in trend_summary:
             count = trend_summary[t_type]['count']
             trend_summary[t_type]['avg_confidence'] /= count if count > 0 else 1
             trend_summary[t_type]['departments'] = list(trend_summary[t_type]['departments'])
-        
+
         # Sort alerts by confidence
         filtered_alerts.sort(key=lambda x: x.get('confidence', 0), reverse=True)
-        
+
         return {
             "status": "success",
             "total_alerts": len(filtered_alerts),
@@ -847,7 +846,7 @@ async def get_trends_alerts(
             "algorithm": "Tawiza-V2 Phase 3",
             "generated_at": date.today().isoformat()
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting trend alerts: {e}")
         return {
@@ -864,15 +863,15 @@ async def get_lag_correlations(
 ) -> dict[str, Any]:
     """Get cross-source lag correlations analysis."""
     from .quant.temporal import compute_lag_correlations
-    
+
     repo = get_repo()
     db_url = repo._engine.url.render_as_string(hide_password=False)
-    
+
     try:
         logger.info("Computing cross-source lag correlations")
-        
+
         correlations = await compute_lag_correlations(db_url)
-        
+
         # Extract significant correlations
         significant_correlations = []
         for pair_name, corr_data in correlations.items():
@@ -883,13 +882,13 @@ async def get_lag_correlations(
                     'best_lag_months': corr_data.get('best_lag_months'),
                     'strength': 'strong' if abs(corr_data.get('best_correlation', 0)) > 0.6 else 'moderate'
                 })
-        
+
         # Sort by correlation strength
         significant_correlations.sort(
-            key=lambda x: abs(x.get('best_correlation', 0)), 
+            key=lambda x: abs(x.get('best_correlation', 0)),
             reverse=True
         )
-        
+
         return {
             "status": "success",
             "total_pairs_analyzed": len(correlations),
@@ -899,11 +898,11 @@ async def get_lag_correlations(
             "algorithm": "Tawiza-V2 Phase 3",
             "interpretation": {
                 "strong": "> 0.6 correlation coefficient",
-                "moderate": "0.3 - 0.6 correlation coefficient", 
+                "moderate": "0.3 - 0.6 correlation coefficient",
                 "lag_months": "time delay between source 1 signal and source 2 response"
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Error computing lag correlations: {e}")
         return {
@@ -927,29 +926,29 @@ async def get_ml_anomalies(
 ) -> dict[str, Any]:
     """Get ML-detected anomalies from Isolation Forest and clustering."""
     repo = get_repo()
-    
+
     try:
         # Query ML anomalies table
         base_query = f"""
-        SELECT 
+        SELECT
             id, code_dept, detected_at, anomaly_score, is_anomaly,
             method, features_used, feature_values, description,
             cluster_id, cluster_size, created_at
-        FROM ml_anomalies 
+        FROM ml_anomalies
         WHERE detected_at >= CURRENT_DATE - INTERVAL '{days} days'
         """
-        
+
         params = {}
         if method:
             base_query += " AND method = :method"
             params["method"] = method
-        
+
         base_query += f" ORDER BY detected_at DESC, ABS(anomaly_score) DESC NULLS LAST LIMIT {limit}"
-        
+
         async with repo._engine.begin() as conn:
             result = await conn.execute(text(base_query), params)
             rows = result.fetchall()
-        
+
         # Format results
         anomalies = []
         for row in rows:
@@ -970,19 +969,19 @@ async def get_ml_anomalies(
                 "created_at": row.created_at.isoformat() if row.created_at else None
             }
             anomalies.append(anomaly)
-        
+
         # Summary statistics
         total_anomalies = len(anomalies)
         method_breakdown = {}
         dept_breakdown = {}
-        
+
         for anomaly in anomalies:
             method_name = anomaly["method"]
             dept = anomaly["code_dept"]
-            
+
             method_breakdown[method_name] = method_breakdown.get(method_name, 0) + 1
             dept_breakdown[dept] = dept_breakdown.get(dept, 0) + 1
-        
+
         return {
             "status": "success",
             "total_anomalies": total_anomalies,
@@ -995,7 +994,7 @@ async def get_ml_anomalies(
             },
             "algorithm": "Tawiza-V2 Phase 4 - ML Detection"
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting ML anomalies: {e}")
         return {
@@ -1014,24 +1013,24 @@ async def get_ml_clusters(
 ) -> dict[str, Any]:
     """Get departments grouped by ML clustering profiles."""
     repo = get_repo()
-    
+
     try:
         # Query clustering results
         query = f"""
-        SELECT 
+        SELECT
             code_dept, method, cluster_id, cluster_size,
             feature_values, description, detected_at
-        FROM ml_anomalies 
+        FROM ml_anomalies
         WHERE method = :method
             AND cluster_id IS NOT NULL
             AND detected_at >= CURRENT_DATE - INTERVAL '{days} days'
         ORDER BY cluster_id, code_dept;
         """
-        
+
         async with repo._engine.begin() as conn:
             result = await conn.execute(text(query), {"method": method})
             rows = result.fetchall()
-        
+
         if not rows:
             return {
                 "status": "success",
@@ -1040,11 +1039,11 @@ async def get_ml_clusters(
                 "clusters": {},
                 "total_departments": 0
             }
-        
+
         # Group by cluster_id
         clusters = {}
         isolated_departments = []
-        
+
         for row in rows:
             cluster_id = row.cluster_id
             dept_data = {
@@ -1054,7 +1053,7 @@ async def get_ml_clusters(
                 "description": row.description,
                 "detected_at": row.detected_at.isoformat() if row.detected_at else None
             }
-            
+
             if cluster_id == -1:  # Noise/isolated
                 isolated_departments.append(dept_data)
             else:
@@ -1065,7 +1064,7 @@ async def get_ml_clusters(
                         "departments": []
                     }
                 clusters[cluster_id]["departments"].append(dept_data)
-        
+
         # Calculate cluster statistics
         cluster_summary = {}
         for cluster_id, cluster_data in clusters.items():
@@ -1075,7 +1074,7 @@ async def get_ml_clusters(
                 "department_codes": [d["code_dept"] for d in depts],
                 "profile": "Similar economic characteristics"
             }
-        
+
         return {
             "status": "success",
             "method": method,
@@ -1088,7 +1087,7 @@ async def get_ml_clusters(
             "isolated_departments": isolated_departments,
             "algorithm": f"Tawiza-V2 Phase 4 - {method.upper()} Clustering"
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting ML clusters: {e}")
         return {
@@ -1107,56 +1106,56 @@ async def get_discovered_factors(
 ) -> dict[str, Any]:
     """Get factors discovered by LLM factor mining with Information Coefficients."""
     from .quant.factor_mining import FactorMining
-    
+
     try:
         logger.info("Running Factor Mining for API request...")
-        
+
         # Initialize factor mining
         repo = get_repo()
         db_url = repo._engine.url.render_as_string(hide_password=False)
         factor_miner = FactorMining(db_url=db_url)
-        
+
         # Run factor mining
         mining_results = await factor_miner.run_factor_mining()
-        
+
         if "error" in mining_results:
             return {
                 "status": "error",
                 "message": mining_results["error"],
                 "factors": []
             }
-        
+
         # Filter factors by IC threshold and significance
         ic_results = mining_results.get("information_coefficients", [])
         filtered_factors = []
-        
+
         for factor_result in ic_results:
             ic_spearman = factor_result.get("ic_spearman")
             ic_pearson = factor_result.get("ic_pearson")
             p_val_spearman = factor_result.get("p_value_spearman", 1.0)
             p_val_pearson = factor_result.get("p_value_pearson", 1.0)
-            
+
             # Check IC threshold
             if ic_spearman is None or abs(ic_spearman) < min_ic:
                 continue
-            
+
             # Check significance if required
             if significant_only:
                 if p_val_spearman >= 0.05 and p_val_pearson >= 0.05:
                     continue
-            
+
             # Add interpretation
             factor_result["interpretation"] = {
                 "ic_strength": "strong" if abs(ic_spearman) > 0.5 else "moderate" if abs(ic_spearman) > 0.3 else "weak",
                 "direction": "positive" if ic_spearman > 0 else "negative",
                 "statistical_significance": "significant" if min(p_val_spearman, p_val_pearson) < 0.05 else "not_significant"
             }
-            
+
             filtered_factors.append(factor_result)
-        
+
         # Sort by absolute IC
         filtered_factors.sort(key=lambda x: abs(x.get("ic_spearman", 0)), reverse=True)
-        
+
         return {
             "status": "success",
             "total_hypotheses_generated": len(mining_results.get("factor_hypotheses", [])),
@@ -1171,12 +1170,12 @@ async def get_discovered_factors(
             "generated_at": mining_results.get("timestamp"),
             "interpretation": {
                 "ic_spearman": "Spearman rank correlation coefficient (non-linear relationships)",
-                "ic_pearson": "Pearson correlation coefficient (linear relationships)", 
+                "ic_pearson": "Pearson correlation coefficient (linear relationships)",
                 "p_value": "Statistical significance (< 0.05 considered significant)",
                 "sample_size": "Number of departments used in calculation"
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting discovered factors: {e}")
         return {
@@ -1195,28 +1194,28 @@ async def trigger_ml_detection(
 ) -> dict[str, Any]:
     """Manually trigger ML anomaly detection and clustering."""
     from .quant.ml_detection import MLDetection
-    
+
     try:
         logger.info(f"Manual ML detection triggered - contamination={contamination}, hdbscan={use_hdbscan}")
-        
+
         # Initialize ML detection
         repo = get_repo()
         db_url = repo._engine.url.render_as_string(hide_password=False)
         ml_detector = MLDetection(db_url=db_url)
-        
+
         # Run full detection
         detection_results = await ml_detector.run_full_detection()
-        
+
         if "error" in detection_results:
             return {
                 "status": "error",
                 "message": detection_results["error"]
             }
-        
+
         # Extract summary statistics
         iso_results = detection_results.get("isolation_forest", {})
         cluster_results = detection_results.get("clustering", {})
-        
+
         return {
             "status": "success",
             "message": "ML detection completed successfully",
@@ -1234,11 +1233,11 @@ async def trigger_ml_detection(
             },
             "algorithm": "Tawiza-V2 Phase 4 - ML Detection Suite"
         }
-        
+
     except Exception as e:
         logger.error(f"Error triggering ML detection: {e}")
         return {
-            "status": "error", 
+            "status": "error",
             "message": str(e)
         }
 
@@ -1250,18 +1249,18 @@ async def get_alpha_expressions(request: Request) -> dict[str, Any]:
     """Get available alpha expressions for territorial intelligence."""
     try:
         from .quant.qlib.expressions import (
-            ALPHA_EXPRESSIONS, 
+            ALPHA_EXPRESSIONS,
             EXPRESSION_CATEGORIES,
-            describe_expression
+            describe_expression,
         )
-        
+
         # Return expressions grouped by category
         result = {
             "status": "success",
             "total_expressions": len(ALPHA_EXPRESSIONS),
             "categories": {}
         }
-        
+
         for category, expr_names in EXPRESSION_CATEGORIES.items():
             result["categories"][category] = []
             for expr_name in expr_names:
@@ -1277,9 +1276,9 @@ async def get_alpha_expressions(request: Request) -> dict[str, Any]:
                 except Exception:
                     # Skip expressions that have errors
                     continue
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Error retrieving alpha expressions: {e}")
         return {
@@ -1299,10 +1298,11 @@ async def compute_alpha_features(
 ) -> dict[str, Any]:
     """Compute alpha features for specified departments."""
     try:
-        from .quant.qlib.handler import TerritorialDataHandler, DataHandlerConfig
-        from .quant.qlib.expressions import get_compatible_expressions, ALPHA_EXPRESSIONS
         from datetime import datetime, timedelta
-        
+
+        from .quant.qlib.expressions import ALPHA_EXPRESSIONS, get_compatible_expressions
+        from .quant.qlib.handler import DataHandlerConfig, TerritorialDataHandler
+
         # Parse parameters
         dept_list = [d.strip() for d in departments.split(",")]
         if len(dept_list) > 20:  # Limit for performance
@@ -1310,7 +1310,7 @@ async def compute_alpha_features(
                 "status": "error",
                 "message": "Too many departments requested (max 20)"
             }
-        
+
         expr_list = None
         if expressions:
             expr_list = [e.strip() for e in expressions.split(",")]
@@ -1321,11 +1321,11 @@ async def compute_alpha_features(
                     "status": "error",
                     "message": f"Unknown expressions: {invalid_exprs}"
                 }
-        
+
         # Set date range
         end_date = datetime.now().date()
         start_date = end_date - timedelta(days=months_back * 30)
-        
+
         # Create data handler
         config = DataHandlerConfig(
             db_url=os.getenv(
@@ -1337,12 +1337,12 @@ async def compute_alpha_features(
             end_date=str(end_date),
             alpha_expressions=expr_list
         )
-        
+
         handler = TerritorialDataHandler(config)
-        
+
         # Prepare dataset
         dataset = await handler.prepare_dataset(data_key=data_key, alpha_expressions=expr_list)
-        
+
         # Convert to dict format for API response
         result = {
             "status": "success",
@@ -1358,12 +1358,12 @@ async def compute_alpha_features(
             "territories": dataset.territories,
             "dates": [str(d) for d in dataset.dates] if dataset.dates else []
         }
-        
+
         # Add sample data (latest period for each department)
         if len(dataset) > 0:
             latest_data = dataset.get_latest_data(1)
             features_dict = latest_data.features.to_dict('index')
-            
+
             # Format data by department
             result["latest_features"] = {}
             for (date, dept), features in features_dict.items():
@@ -1371,22 +1371,22 @@ async def compute_alpha_features(
                     result["latest_features"][dept] = {}
                 result["latest_features"][dept] = {
                     "date": str(date),
-                    "features": {k: float(v) if not pd.isna(v) else None 
+                    "features": {k: float(v) if not pd.isna(v) else None
                                for k, v in features.items()}
                 }
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Error computing alpha features: {e}")
         return {
-            "status": "error", 
+            "status": "error",
             "message": str(e)
         }
 
 
 @router.get("/qlib/anomalies")
-@limiter.limit("10/minute") 
+@limiter.limit("10/minute")
 async def detect_qlib_anomalies(
     request: Request,
     departments: str = Query(..., description="Comma-separated department codes"),
@@ -1395,9 +1395,10 @@ async def detect_qlib_anomalies(
 ) -> dict[str, Any]:
     """Detect anomalies using QLib-enhanced features."""
     try:
-        from .quant.qlib.handler import TerritorialDataHandler, DataHandlerConfig
         import pandas as pd
-        
+
+        from .quant.qlib.handler import DataHandlerConfig, TerritorialDataHandler
+
         # Parse departments
         dept_list = [d.strip() for d in departments.split(",")]
         if len(dept_list) > 15:
@@ -1405,27 +1406,27 @@ async def detect_qlib_anomalies(
                 "status": "error",
                 "message": "Too many departments for anomaly detection (max 15)"
             }
-        
+
         # Set up data handler
         config = DataHandlerConfig(
             db_url=os.getenv(
-                "COLLECTOR_DATABASE_URL", 
+                "COLLECTOR_DATABASE_URL",
                 "postgresql://localhost:5433/tawiza"
             ),
             territories=dept_list
         )
-        
+
         handler = TerritorialDataHandler(config)
-        
+
         # Detect anomalies
         anomalies = await handler.detect_anomalies(method=method, contamination=contamination)
-        
+
         if anomalies.empty:
             return {
                 "status": "warning",
                 "message": "No anomalies detected or insufficient data"
             }
-        
+
         # Format results
         anomaly_list = []
         for idx, row in anomalies.iterrows():
@@ -1436,7 +1437,7 @@ async def detect_qlib_anomalies(
                     "date": str(idx[0]) if isinstance(idx, tuple) else str(idx),
                     "severity": "high" if row['anomaly_score'] < -0.5 else "medium"
                 })
-        
+
         return {
             "status": "success",
             "method": method,
@@ -1445,7 +1446,7 @@ async def detect_qlib_anomalies(
             "departments_analyzed": len(dept_list),
             "anomalies": sorted(anomaly_list, key=lambda x: x['anomaly_score'])
         }
-        
+
     except Exception as e:
         logger.error(f"Error in QLib anomaly detection: {e}")
         return {
@@ -1463,16 +1464,16 @@ async def get_timeline_data(
     """Get temporal data grouped by week for charts - BODACC liquidations, SIRENE créations."""
     repo = get_repo()
     since = date.today() - timedelta(days=days)
-    
+
     query = text("""
-    SELECT 
+    SELECT
         date_trunc('week', event_date)::date as semaine,
         source,
         metric_name,
         SUM(metric_value) as total_value,
         COUNT(*) as nb_signals
-    FROM signals 
-    WHERE event_date IS NOT NULL 
+    FROM signals
+    WHERE event_date IS NOT NULL
       AND event_date >= :since_date
       AND (
           (source = 'bodacc' AND metric_name = 'liquidation_judiciaire') OR
@@ -1481,21 +1482,21 @@ async def get_timeline_data(
     GROUP BY 1, 2, 3
     ORDER BY 1, 2, 3
     """)
-    
+
     async with repo._engine.begin() as conn:
         result = await conn.execute(query, {"since_date": since})
         rows = result.fetchall()
-    
+
     # Format data for recharts
     timeline_data = []
     weeks_dict = {}
-    
+
     for row in rows:
         week = row.semaine.isoformat()
         source = row.source
         metric = row.metric_name
         value = int(row.total_value or 0)
-        
+
         if week not in weeks_dict:
             weeks_dict[week] = {
                 "semaine": week,
@@ -1503,16 +1504,16 @@ async def get_timeline_data(
                 "creations": 0,
                 "fermetures": 0
             }
-        
+
         if source == "bodacc" and metric == "liquidation_judiciaire":
             weeks_dict[week]["liquidations"] += value
         elif source == "sirene" and metric == "creation_entreprise":
             weeks_dict[week]["creations"] += value
         elif source == "sirene" and metric == "fermeture_entreprise":
             weeks_dict[week]["fermetures"] += value
-    
+
     timeline_data = sorted(weeks_dict.values(), key=lambda x: x["semaine"])
-    
+
     return {
         "timeline": timeline_data,
         "period_days": days,
@@ -1528,7 +1529,7 @@ async def get_departments_compare(
     limit: int = Query(50, description="Max departments to return")
 ) -> dict[str, Any]:
     """Get departments comparison data for charts - liquidations, créations, emploi, prix m²."""
-    
+
     # Mapping département codes vers noms
     DEPT_NAMES = {
         "75": "Paris", "13": "Bouches-du-Rhône", "69": "Rhône", "59": "Nord",
@@ -1549,39 +1550,39 @@ async def get_departments_compare(
         "01": "Ain", "03": "Allier", "15": "Cantal", "43": "Haute-Loire", "63": "Puy-de-Dôme",
         "87": "Haute-Vienne", "19": "Corrèze", "23": "Creuse", "16": "Charente",
         "24": "Dordogne", "47": "Lot-et-Garonne", "40": "Landes", "65": "Hautes-Pyrénées",
-        "12": "Aveyron", "46": "Lot", "24": "Dordogne", "86": "Vienne", "79": "Deux-Sèvres",
+        "12": "Aveyron", "46": "Lot", "86": "Vienne", "79": "Deux-Sèvres",
         "85": "Vendée", "49": "Maine-et-Loire", "72": "Sarthe", "53": "Mayenne",
         "61": "Orne", "50": "Manche", "27": "Eure", "28": "Eure-et-Loir", "41": "Loir-et-Cher",
         "18": "Cher", "36": "Indre", "08": "Ardennes", "10": "Aube", "52": "Haute-Marne",
         "55": "Meuse", "80": "Somme", "02": "Aisne", "60": "Oise"
     }
-    
+
     repo = get_repo()
-    
+
     query = text("""
-    SELECT 
+    SELECT
         code_dept,
         SUM(CASE WHEN source='bodacc' AND metric_name='liquidation_judiciaire' THEN metric_value ELSE 0 END) as liquidations,
         SUM(CASE WHEN source='sirene' AND metric_name='creation_entreprise' THEN metric_value ELSE 0 END) as creations,
         SUM(CASE WHEN source='sirene' AND metric_name='fermeture_entreprise' THEN metric_value ELSE 0 END) as fermetures,
         SUM(CASE WHEN source='france_travail' THEN metric_value ELSE 0 END) as offres_emploi,
         AVG(CASE WHEN source='dvf' AND metric_name='prix_m2_moyen' THEN metric_value ELSE NULL END) as prix_m2
-    FROM signals 
+    FROM signals
     WHERE code_dept IS NOT NULL
     GROUP BY code_dept
     ORDER BY liquidations DESC
     LIMIT :limit
     """)
-    
+
     async with repo._engine.begin() as conn:
         result = await conn.execute(query, {"limit": limit})
         rows = result.fetchall()
-    
+
     departments = []
     for row in rows:
         code = row.code_dept
         name = DEPT_NAMES.get(code, f"Département {code}")
-        
+
         departments.append({
             "code": code,
             "name": name,
@@ -1594,7 +1595,7 @@ async def get_departments_compare(
                 float(row.creations or 0) / max(float(row.liquidations or 0), 1), 2
             )
         })
-    
+
     return {
         "departments": departments,
         "total_departments": len(departments),
@@ -1645,8 +1646,8 @@ async def get_epci_signals_endpoint(
     limit: int = Query(100, description="Max results"),
 ) -> dict[str, Any]:
     """Get signals for a specific EPCI."""
-    from .epci.scoring import get_epci_signals
     from .epci.referentiel import get_referentiel
+    from .epci.scoring import get_epci_signals
 
     repo = get_repo()
     ref = await get_referentiel()

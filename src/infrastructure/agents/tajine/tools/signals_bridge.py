@@ -39,7 +39,7 @@ async def _get_conn() -> asyncpg.Connection:
 
 class SignalsQueryTool(BaseTool):
     """Query the unified signals database.
-    
+
     Access 82K+ signals from 10 sources: BODACC, France Travail, DVF,
     SIRENE, Presse locale, INSEE, OFGL, URSSAF, Google Trends.
     """
@@ -60,7 +60,7 @@ class SignalsQueryTool(BaseTool):
 
     async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """Execute signals query.
-        
+
         Params:
             department: str - Department code (e.g. "75", "93")
             source: str - Filter by source (bodacc, france_travail, dvf, etc.)
@@ -79,12 +79,12 @@ class SignalsQueryTool(BaseTool):
         conn = await _get_conn()
         try:
             results: dict[str, Any] = {}
-            
+
             # Build WHERE clause
             conditions = []
             args = []
             arg_idx = 1
-            
+
             if dept:
                 conditions.append(f"code_dept = ${arg_idx}")
                 args.append(dept)
@@ -101,9 +101,9 @@ class SignalsQueryTool(BaseTool):
                 conditions.append(f"(extracted_text ILIKE ${arg_idx} OR entities::text ILIKE ${arg_idx})")
                 args.append(f"%{keyword}%")
                 arg_idx += 1
-                
+
             where = " AND ".join(conditions) if conditions else "TRUE"
-            
+
             # Aggregates
             if aggregate:
                 # Total count
@@ -111,24 +111,24 @@ class SignalsQueryTool(BaseTool):
                     f"SELECT count(*) as total FROM signals WHERE {where}", *args
                 )
                 results["total_signals"] = row["total"]
-                
+
                 # By source
                 rows = await conn.fetch(
                     f"SELECT source, count(*) as n FROM signals WHERE {where} GROUP BY source ORDER BY n DESC",
                     *args
                 )
                 results["by_source"] = {r["source"]: r["n"] for r in rows}
-                
+
                 # By department (top 10)
                 if not dept:
                     rows = await conn.fetch(
-                        f"""SELECT code_dept, count(*) as n 
+                        f"""SELECT code_dept, count(*) as n
                         FROM signals WHERE {where} AND code_dept IS NOT NULL
                         GROUP BY code_dept ORDER BY n DESC LIMIT 10""",
                         *args
                     )
                     results["top_departments"] = {r["code_dept"]: r["n"] for r in rows}
-                
+
                 # Temporal distribution (by month)
                 rows = await conn.fetch(
                     f"""SELECT date_trunc('month', event_date) as month, count(*) as n
@@ -139,19 +139,19 @@ class SignalsQueryTool(BaseTool):
                 results["monthly_distribution"] = {
                     str(r["month"].date()): r["n"] for r in rows
                 }
-                
+
                 # Signal types distribution
                 rows = await conn.fetch(
-                    f"""SELECT signal_type, count(*) as n 
+                    f"""SELECT signal_type, count(*) as n
                     FROM signals WHERE {where} AND signal_type IS NOT NULL
                     GROUP BY signal_type ORDER BY n DESC LIMIT 10""",
                     *args
                 )
                 results["by_type"] = {r["signal_type"]: r["n"] for r in rows}
-            
+
             # Recent signals detail
             rows = await conn.fetch(
-                f"""SELECT source, event_date, code_dept, signal_type, metric_name, 
+                f"""SELECT source, event_date, code_dept, signal_type, metric_name,
                        metric_value, confidence, extracted_text
                 FROM signals WHERE {where}
                 ORDER BY event_date DESC NULLS LAST
@@ -171,7 +171,7 @@ class SignalsQueryTool(BaseTool):
                 }
                 for r in rows
             ]
-            
+
             return {
                 "status": "success",
                 "query": {"department": dept, "source": source, "days": days, "keyword": keyword},
@@ -203,7 +203,7 @@ class MicroSignalsTool(BaseTool):
 
     async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """Execute micro-signals query.
-        
+
         Params:
             department: str - Filter by territory code
             min_score: float - Minimum score threshold (default 0.3)
@@ -218,7 +218,7 @@ class MicroSignalsTool(BaseTool):
             conditions = ["is_active = true", f"score >= {min_score}"]
             args = []
             arg_idx = 1
-            
+
             if dept:
                 conditions.append(f"territory_code = ${arg_idx}")
                 args.append(dept)
@@ -227,9 +227,9 @@ class MicroSignalsTool(BaseTool):
                 conditions.append(f"signal_type = ${arg_idx}")
                 args.append(signal_type)
                 arg_idx += 1
-            
+
             where = " AND ".join(conditions)
-            
+
             rows = await conn.fetch(
                 f"""SELECT territory_code, signal_type, sources, dimensions,
                        score, confidence, impact, novelty, description,
@@ -240,7 +240,7 @@ class MicroSignalsTool(BaseTool):
                 LIMIT 50""",
                 *args
             )
-            
+
             micro_signals = []
             for r in rows:
                 ms = {
@@ -257,7 +257,7 @@ class MicroSignalsTool(BaseTool):
                     "detected_at": str(r["detected_at"]) if r["detected_at"] else None,
                 }
                 micro_signals.append(ms)
-            
+
             # Summary stats
             summary = {}
             if micro_signals:
@@ -273,7 +273,7 @@ class MicroSignalsTool(BaseTool):
                     "avg_score": sum(ms["score"] for ms in micro_signals) / len(micro_signals),
                     "max_score_signal": max(micro_signals, key=lambda x: x["score"]),
                 }
-            
+
             return {
                 "status": "success",
                 "summary": summary,
@@ -305,7 +305,7 @@ class TerritorialScoringTool(BaseTool):
 
     async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """Execute scoring query.
-        
+
         Params:
             department: str - Get score for specific department
             top_n: int - Return top N departments (default 10)
@@ -315,21 +315,21 @@ class TerritorialScoringTool(BaseTool):
         dept = params.get("department")
         top_n = params.get("top_n", 10)
         bottom_n = params.get("bottom_n", 10)
-        
+
         conn = await _get_conn()
         try:
             # Check if scoring table exists
             exists = await conn.fetchval("""
                 SELECT EXISTS(
-                    SELECT 1 FROM information_schema.tables 
+                    SELECT 1 FROM information_schema.tables
                     WHERE table_name = 'department_scores'
                 )
             """)
-            
+
             if not exists:
                 # Fallback: compute from signals
                 return await self._compute_from_signals(conn, dept, top_n, bottom_n)
-            
+
             if dept:
                 row = await conn.fetchrow(
                     "SELECT * FROM department_scores WHERE code_dept = $1", dept
@@ -337,7 +337,7 @@ class TerritorialScoringTool(BaseTool):
                 if row:
                     return {"status": "success", "department": dict(row)}
                 return {"status": "not_found", "department": dept}
-            
+
             # Top departments
             top_rows = await conn.fetch(
                 f"SELECT * FROM department_scores ORDER BY score_global DESC LIMIT {top_n}"
@@ -345,7 +345,7 @@ class TerritorialScoringTool(BaseTool):
             bottom_rows = await conn.fetch(
                 f"SELECT * FROM department_scores ORDER BY score_global ASC LIMIT {bottom_n}"
             )
-            
+
             return {
                 "status": "success",
                 "top_departments": [dict(r) for r in top_rows],
@@ -357,31 +357,31 @@ class TerritorialScoringTool(BaseTool):
             return await self._compute_from_signals(conn, dept, top_n, bottom_n)
         finally:
             await conn.close()
-    
+
     async def _compute_from_signals(
         self, conn: asyncpg.Connection, dept: str | None, top_n: int, bottom_n: int
     ) -> dict[str, Any]:
         """Compute basic scores from signals table."""
         rows = await conn.fetch("""
-            SELECT code_dept, 
+            SELECT code_dept,
                    count(*) as total_signals,
                    count(DISTINCT source) as num_sources,
                    count(*) FILTER (WHERE source = 'bodacc') as bodacc,
                    count(*) FILTER (WHERE source = 'france_travail') as ft,
                    count(*) FILTER (WHERE source = 'dvf') as dvf,
                    count(*) FILTER (WHERE source = 'sirene') as sirene
-            FROM signals 
+            FROM signals
             WHERE code_dept IS NOT NULL
             GROUP BY code_dept
             ORDER BY total_signals DESC
         """)
-        
+
         if dept:
             for r in rows:
                 if r["code_dept"] == dept:
                     return {"status": "success", "department": dict(r)}
             return {"status": "not_found"}
-        
+
         return {
             "status": "success",
             "source": "computed_from_signals",
@@ -409,7 +409,7 @@ class SignalSearchTool(BaseTool):
 
     async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """Search signals.
-        
+
         Params:
             query: str - Search query (required)
             department: str - Filter by department
@@ -419,11 +419,11 @@ class SignalSearchTool(BaseTool):
         query = params.get("query", "")
         if not query:
             return {"status": "error", "error": "query is required"}
-        
+
         dept = params.get("department")
         source = params.get("source")
         limit = min(params.get("limit", 30), 100)
-        
+
         conn = await _get_conn()
         try:
             conditions = [
@@ -431,7 +431,7 @@ class SignalSearchTool(BaseTool):
             ]
             args: list[Any] = [f"%{query}%"]
             arg_idx = 2
-            
+
             if dept:
                 conditions.append(f"code_dept = ${arg_idx}")
                 args.append(dept)
@@ -440,24 +440,24 @@ class SignalSearchTool(BaseTool):
                 conditions.append(f"source = ${arg_idx}")
                 args.append(source)
                 arg_idx += 1
-            
+
             where = " AND ".join(conditions)
-            
+
             # Count
             total = await conn.fetchval(
                 f"SELECT count(*) FROM signals WHERE {where}", *args
             )
-            
+
             # Results
             rows = await conn.fetch(
-                f"""SELECT source, event_date, code_dept, signal_type, 
+                f"""SELECT source, event_date, code_dept, signal_type,
                        metric_name, metric_value, extracted_text, entities
                 FROM signals WHERE {where}
                 ORDER BY event_date DESC NULLS LAST
                 LIMIT {limit}""",
                 *args
             )
-            
+
             results = [
                 {
                     "source": r["source"],
@@ -471,7 +471,7 @@ class SignalSearchTool(BaseTool):
                 }
                 for r in rows
             ]
-            
+
             return {
                 "status": "success",
                 "query": query,
@@ -504,18 +504,18 @@ class DepartmentProfileTool(BaseTool):
 
     async def execute(self, params: dict[str, Any]) -> dict[str, Any]:
         """Get department profile.
-        
+
         Params:
             department: str - Department code (required, e.g. "75")
         """
         dept = params.get("department")
         if not dept:
             return {"status": "error", "error": "department code is required"}
-        
+
         conn = await _get_conn()
         try:
             profile: dict[str, Any] = {"code_dept": dept}
-            
+
             # 1. Signal stats by source
             rows = await conn.fetch("""
                 SELECT source, count(*) as n,
@@ -533,7 +533,7 @@ class DepartmentProfileTool(BaseTool):
                 for r in rows
             }
             profile["total_signals"] = sum(r["n"] for r in rows)
-            
+
             # 2. Signal types
             rows = await conn.fetch("""
                 SELECT signal_type, count(*) as n
@@ -541,10 +541,10 @@ class DepartmentProfileTool(BaseTool):
                 GROUP BY signal_type ORDER BY n DESC
             """, dept)
             profile["signal_types"] = {r["signal_type"]: r["n"] for r in rows}
-            
+
             # 3. Active micro-signals
             rows = await conn.fetch("""
-                SELECT signal_type, dimensions, score, confidence, 
+                SELECT signal_type, dimensions, score, confidence,
                        description, evidence, detected_at
                 FROM micro_signals
                 WHERE territory_code = $1 AND is_active = true
@@ -562,10 +562,10 @@ class DepartmentProfileTool(BaseTool):
                 }
                 for r in rows
             ]
-            
+
             # 4. Recent notable signals (high confidence or notable metrics)
             rows = await conn.fetch("""
-                SELECT source, event_date, signal_type, metric_name, 
+                SELECT source, event_date, signal_type, metric_name,
                        metric_value, confidence, extracted_text
                 FROM signals
                 WHERE code_dept = $1 AND (confidence > 0.7 OR metric_value IS NOT NULL)
@@ -583,7 +583,7 @@ class DepartmentProfileTool(BaseTool):
                 }
                 for r in rows
             ]
-            
+
             # 5. Temporal trend (signals per month, last 12 months)
             rows = await conn.fetch("""
                 SELECT date_trunc('month', event_date) as month, count(*) as n
@@ -595,10 +595,10 @@ class DepartmentProfileTool(BaseTool):
                 {"month": str(r["month"].date()), "count": r["n"]}
                 for r in rows
             ]
-            
+
             # 6. Key metrics summary
             metrics = await conn.fetch("""
-                SELECT metric_name, 
+                SELECT metric_name,
                        avg(metric_value) as avg_val,
                        min(metric_value) as min_val,
                        max(metric_value) as max_val,
@@ -618,7 +618,7 @@ class DepartmentProfileTool(BaseTool):
                 }
                 for r in metrics
             ]
-            
+
             return {"status": "success", "profile": profile}
         except Exception as e:
             logger.error(f"DepartmentProfile error: {e}")
@@ -646,7 +646,7 @@ def register_signals_tools(registry) -> None:
 # Convenience: list all tool names
 SIGNALS_TOOLS = [
     "signals_query",
-    "microsignals_query", 
+    "microsignals_query",
     "territorial_scoring",
     "signal_search",
     "department_profile",

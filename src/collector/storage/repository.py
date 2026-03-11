@@ -5,9 +5,9 @@ from typing import Any
 
 from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from .models import Base, Signal, Anomaly
+from .models import Anomaly, Base, Signal
 
 
 class SignalRepository:

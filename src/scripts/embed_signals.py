@@ -26,25 +26,25 @@ EMBED_BATCH = 10  # embeddings per Ollama call
 def build_signal_text(row: asyncpg.Record) -> str:
     """Build a searchable text from a signal row."""
     parts = []
-    
+
     source = row["source"] or ""
     parts.append(f"Source: {source}")
-    
+
     if row.get("code_dept"):
         parts.append(f"Departement: {row['code_dept']}")
-    
+
     if row.get("metric_name"):
         parts.append(f"Metrique: {row['metric_name']}")
-    
+
     if row.get("metric_value") is not None:
         parts.append(f"Valeur: {row['metric_value']}")
-    
+
     if row.get("signal_type"):
         parts.append(f"Type: {row['signal_type']}")
-    
+
     if row.get("event_date"):
         parts.append(f"Date: {row['event_date']}")
-    
+
     if row.get("extracted_text"):
         text = str(row["extracted_text"])[:300]
         parts.append(f"Contenu: {text}")
@@ -59,7 +59,7 @@ def build_signal_text(row: asyncpg.Record) -> str:
                     break
         except (json.JSONDecodeError, TypeError):
             pass
-    
+
     return " | ".join(parts)
 
 
@@ -91,18 +91,18 @@ async def embed_texts(client: httpx.AsyncClient, texts: list[str]) -> list[list[
 async def run_embedding(limit: int = 50000):
     """Main embedding pipeline."""
     conn = await asyncpg.connect(DB_URL)
-    
+
     try:
         # Count already embedded
         existing = await conn.fetchval("SELECT count(*) FROM signal_embeddings")
         total = await conn.fetchval("SELECT count(*) FROM signals")
         remaining = total - existing
         logger.info(f"Signals: {total} total, {existing} embedded, {remaining} remaining")
-        
+
         if remaining == 0:
             logger.info("All signals already embedded!")
             return
-        
+
         # Process in batches
         processed = 0
         async with httpx.AsyncClient() as client:
@@ -117,10 +117,10 @@ async def run_embedding(limit: int = 50000):
                     ORDER BY s.id
                     LIMIT $1
                 """, BATCH_SIZE)
-                
+
                 if not rows:
                     break
-                
+
                 # Build texts
                 texts = []
                 signal_ids = []
@@ -129,13 +129,13 @@ async def run_embedding(limit: int = 50000):
                     if text and len(text) > 10:
                         texts.append(text)
                         signal_ids.append(row["id"])
-                
+
                 if not texts:
                     break
-                
+
                 # Get embeddings
                 embeddings = await embed_texts(client, texts)
-                
+
                 # Insert into DB
                 inserted = 0
                 for sid, text, emb in zip(signal_ids, texts, embeddings):
@@ -149,13 +149,13 @@ async def run_embedding(limit: int = 50000):
                             inserted += 1
                         except Exception as e:
                             logger.warning(f"Insert error for signal {sid}: {e}")
-                
+
                 processed += len(rows)
                 logger.info(f"Batch done: {inserted}/{len(rows)} embedded (total: {processed})")
-        
+
         final = await conn.fetchval("SELECT count(*) FROM signal_embeddings")
         logger.info(f"Embedding complete: {final} total embeddings")
-        
+
     finally:
         await conn.close()
 
@@ -171,7 +171,7 @@ async def search_similar(query: str, limit: int = 10) -> list[dict]:
         )
         resp.raise_for_status()
         query_emb = resp.json()["embeddings"][0]
-    
+
     conn = await asyncpg.connect(DB_URL)
     try:
         rows = await conn.fetch("""
@@ -183,7 +183,7 @@ async def search_similar(query: str, limit: int = 10) -> list[dict]:
             ORDER BY se.embedding <=> $1::vector
             LIMIT $2
         """, str(query_emb), limit)
-        
+
         return [dict(r) for r in rows]
     finally:
         await conn.close()
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, default=50000)
     parser.add_argument("--search", type=str, default=None)
     args = parser.parse_args()
-    
+
     if args.search:
         results = asyncio.run(search_similar(args.search))
         for r in results:

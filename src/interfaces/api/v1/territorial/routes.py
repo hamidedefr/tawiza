@@ -7,9 +7,10 @@ Provides endpoints for territorial economic metrics and signal detection.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import Any
 
 router = APIRouter(prefix="/territorial", tags=["territorial"])
 
@@ -47,10 +48,12 @@ class SignalResponse(BaseModel):
 
 def get_metrics_collector():
     """Get or create the metrics collector instance."""
-    from src.infrastructure.datasources.adapters.sirene import SireneAdapter
+    from src.infrastructure.agents.tajine.territorial.metrics_collector import (
+        TerritorialMetricsCollector,
+    )
     from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
-    from src.infrastructure.agents.tajine.territorial.metrics_collector import TerritorialMetricsCollector
-    
+    from src.infrastructure.datasources.adapters.sirene import SireneAdapter
+
     # France Travail est optionnel (nécessite OAuth2 credentials)
     france_travail_adapter = None
     try:
@@ -60,7 +63,7 @@ def get_metrics_collector():
             france_travail_adapter = adapter
     except Exception:
         pass  # France Travail non disponible
-    
+
     # INSEE est optionnel (nécessite OAuth2 credentials)
     insee_adapter = None
     try:
@@ -70,7 +73,7 @@ def get_metrics_collector():
             insee_adapter = adapter
     except Exception:
         pass  # INSEE non disponible
-    
+
     # DVF est gratuit (pas d'auth)
     dvf_adapter = None
     try:
@@ -78,7 +81,7 @@ def get_metrics_collector():
         dvf_adapter = DVFAdapter()
     except Exception:
         pass  # DVF non disponible
-    
+
     return TerritorialMetricsCollector(
         sirene_adapter=SireneAdapter(),
         bodacc_adapter=BodaccAdapter(),
@@ -111,7 +114,7 @@ async def get_territory_metrics(
 ) -> TerritoryMetricsResponse:
     """
     Get economic metrics for a specific territory.
-    
+
     Args:
         territory_code: INSEE code (department: 2 digits, commune: 5 digits)
         territory_name: Human-readable name
@@ -120,13 +123,13 @@ async def get_territory_metrics(
     try:
         collector = get_metrics_collector()
         name = territory_name or f"Territory {territory_code}"
-        
+
         metrics = await collector.collect_metrics(
             territory_code=territory_code,
             territory_name=name,
             period_months=period_months,
         )
-        
+
         return TerritoryMetricsResponse(
             territory_code=territory_code,
             territory_name=name,
@@ -177,7 +180,7 @@ async def compare_territories(
     Compare economic metrics across multiple territories.
     """
     from datetime import datetime
-    
+
     # Mapping des noms de départements
     dept_names = {
         "01": "Ain", "02": "Aisne", "03": "Allier", "04": "Alpes-de-Haute-Provence",
@@ -206,10 +209,10 @@ async def compare_territories(
         "91": "Essonne", "92": "Hauts-de-Seine", "93": "Seine-Saint-Denis",
         "94": "Val-de-Marne", "95": "Val-d'Oise",
     }
-    
+
     collector = get_metrics_collector()
     codes = [c.strip() for c in departments.split(",")]
-    
+
     results = []
     for code in codes:
         try:
@@ -234,10 +237,10 @@ async def compare_territories(
                 "name": dept_names.get(code, f"Département {code}"),
                 "error": str(e),
             })
-    
+
     # Trier par vitalité décroissante
     results.sort(key=lambda x: x.get("vitality_index", 0), reverse=True)
-    
+
     return TerritoryComparisonResponse(
         territories=results,
         generated_at=datetime.utcnow().isoformat(),
@@ -261,13 +264,13 @@ async def detect_signals(
     try:
         detector = get_signal_detector()
         name = territory_name or f"Territory {territory_code}"
-        
+
         signals = await detector.detect_signals(
             territory_code=territory_code,
             territory_name=name,
             period_months=period_months,
         )
-        
+
         return SignalResponse(
             territory_code=territory_code,
             territory_name=name,
@@ -289,10 +292,10 @@ async def get_history(
 ) -> dict[str, Any]:
     """Get historical metrics for a territory."""
     from src.infrastructure.persistence.territorial_history import get_history_store
-    
+
     store = get_history_store()
     history = store.get_history(territory_code, days=days)
-    
+
     return {
         "territory_code": territory_code,
         "days": days,
@@ -311,11 +314,11 @@ async def get_trends(
 ) -> dict[str, Any]:
     """Get vitality trends for a territory."""
     from src.infrastructure.persistence.territorial_history import get_history_store
-    
+
     store = get_history_store()
     latest = store.get_latest(territory_code)
     trends = store.get_trends(territory_code, periods=[7, 30, 90])
-    
+
     return {
         "territory_code": territory_code,
         "current_vitality": latest.vitality_index if latest else None,
@@ -334,11 +337,12 @@ async def get_ranking(
 ) -> dict[str, Any]:
     """Get national ranking of territories by vitality."""
     from datetime import datetime
+
     from src.infrastructure.persistence.territorial_history import get_history_store
-    
+
     store = get_history_store()
     all_latest = store.get_all_latest()
-    
+
     return {
         "generated_at": datetime.utcnow().isoformat(),
         "total_territories": len(all_latest),
@@ -366,10 +370,10 @@ async def trigger_collection(
 ) -> dict[str, Any]:
     """Trigger manual collection for specified departments."""
     from src.application.jobs.territorial_collector import collect_selected_departments
-    
+
     codes = [c.strip() for c in departments.split(",")]
     results = await collect_selected_departments(codes)
-    
+
     return {
         "status": "completed",
         "departments_requested": len(codes),
@@ -388,21 +392,23 @@ async def get_predictive_signals(
     include_sectors: bool = Query(True, description="Include sector analysis"),
 ) -> dict[str, Any]:
     """Detect predictive signals for a territory."""
-    from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
-    from src.infrastructure.datasources.adapters.sirene import SireneAdapter
-    from src.infrastructure.agents.tajine.territorial.metrics_collector import TerritorialMetricsCollector
+    from src.infrastructure.agents.tajine.territorial.metrics_collector import (
+        TerritorialMetricsCollector,
+    )
     from src.infrastructure.agents.tajine.territorial.predictive_signals import get_signal_detector
     from src.infrastructure.agents.tajine.territorial.sector_analyzer import get_sector_analyzer
-    
+    from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
+    from src.infrastructure.datasources.adapters.sirene import SireneAdapter
+
     name = territory_name or f"Département {territory_code}"
-    
+
     # Collecter les métriques actuelles
     collector = TerritorialMetricsCollector(
         sirene_adapter=SireneAdapter(),
         bodacc_adapter=BodaccAdapter(),
     )
     metrics = await collector.collect_metrics(territory_code, name, period_months=1)
-    
+
     # Analyse sectorielle si demandée
     sector_analysis = None
     if include_sectors:
@@ -412,7 +418,7 @@ async def get_predictive_signals(
             territory_code, name, bodacc, limit=200
         )
         sector_analysis = sector_result.to_dict()
-    
+
     # Détecter les signaux
     detector = get_signal_detector()
     signals = await detector.detect_signals(
@@ -428,12 +434,12 @@ async def get_predictive_signals(
         },
         sector_analysis=sector_analysis,
     )
-    
+
     # Grouper par sévérité
     by_severity = {"critical": [], "alert": [], "warning": [], "info": []}
     for s in signals:
         by_severity[s.severity.value].append(s.to_dict())
-    
+
     return {
         "territory_code": territory_code,
         "territory_name": name,
@@ -455,18 +461,18 @@ async def get_national_alerts(
     limit: int = Query(20, ge=1, le=100),
 ) -> dict[str, Any]:
     """Get national-level alerts from all territories."""
-    from src.infrastructure.persistence.territorial_history import get_history_store
     from src.infrastructure.agents.tajine.territorial.predictive_signals import (
-        get_signal_detector,
         SignalSeverity,
+        get_signal_detector,
     )
-    
+    from src.infrastructure.persistence.territorial_history import get_history_store
+
     store = get_history_store()
     detector = get_signal_detector()
-    
+
     # Récupérer tous les territoires avec historique
     all_latest = store.get_all_latest()
-    
+
     all_signals = []
     severity_filter = {
         "info": [SignalSeverity.INFO, SignalSeverity.WARNING, SignalSeverity.ALERT, SignalSeverity.CRITICAL],
@@ -474,7 +480,7 @@ async def get_national_alerts(
         "alert": [SignalSeverity.ALERT, SignalSeverity.CRITICAL],
         "critical": [SignalSeverity.CRITICAL],
     }.get(min_severity, [SignalSeverity.WARNING, SignalSeverity.ALERT, SignalSeverity.CRITICAL])
-    
+
     for metrics in all_latest:
         signals = await detector.detect_signals(
             territory_code=metrics.territory_code,
@@ -488,12 +494,12 @@ async def get_national_alerts(
                 "vitality_index": metrics.vitality_index,
             },
         )
-        
+
         # Filtrer par sévérité
         for s in signals:
             if s.severity in severity_filter:
                 all_signals.append(s)
-    
+
     # Trier par sévérité puis par date
     severity_order = {
         SignalSeverity.CRITICAL: 0,
@@ -502,7 +508,7 @@ async def get_national_alerts(
         SignalSeverity.INFO: 3,
     }
     all_signals.sort(key=lambda s: (severity_order[s.severity], s.detected_at), reverse=False)
-    
+
     return {
         "generated_at": datetime.utcnow().isoformat(),
         "territories_analyzed": len(all_latest),
@@ -523,12 +529,12 @@ async def get_sectors(
     limit: int = Query(200, ge=50, le=1000),
 ) -> dict[str, Any]:
     """Get sector analysis for a territory."""
-    from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
     from src.infrastructure.agents.tajine.territorial.sector_analyzer import get_sector_analyzer
-    
+    from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
+
     analyzer = get_sector_analyzer()
     bodacc = BodaccAdapter()
-    
+
     name = territory_name or f"Département {territory_code}"
     analysis = await analyzer.analyze_territory(
         territory_code=territory_code,
@@ -536,7 +542,7 @@ async def get_sectors(
         bodacc_adapter=bodacc,
         limit=limit,
     )
-    
+
     return analysis.to_dict()
 
 
@@ -551,22 +557,26 @@ async def get_narrative_analysis(
     use_llm: bool = Query(True, description="Use LLM for analysis (requires Ollama)"),
 ) -> dict[str, Any]:
     """Generate TAJINE narrative analysis."""
-    from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
-    from src.infrastructure.datasources.adapters.sirene import SireneAdapter
-    from src.infrastructure.agents.tajine.territorial.metrics_collector import TerritorialMetricsCollector
+    from src.infrastructure.agents.tajine.territorial.metrics_collector import (
+        TerritorialMetricsCollector,
+    )
+    from src.infrastructure.agents.tajine.territorial.narrative_analyzer import (
+        get_narrative_analyzer,
+    )
     from src.infrastructure.agents.tajine.territorial.predictive_signals import get_signal_detector
     from src.infrastructure.agents.tajine.territorial.sector_analyzer import get_sector_analyzer
-    from src.infrastructure.agents.tajine.territorial.narrative_analyzer import get_narrative_analyzer
-    
+    from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
+    from src.infrastructure.datasources.adapters.sirene import SireneAdapter
+
     name = territory_name or f"Département {territory_code}"
-    
+
     # Collecter les métriques
     collector = TerritorialMetricsCollector(
         sirene_adapter=SireneAdapter(),
         bodacc_adapter=BodaccAdapter(),
     )
     metrics = await collector.collect_metrics(territory_code, name, period_months=1)
-    
+
     # Détecter les signaux
     detector = get_signal_detector()
     signals = await detector.detect_signals(
@@ -579,17 +589,17 @@ async def get_narrative_analysis(
             "vitality_index": metrics.vitality_index,
         }
     )
-    
+
     # Analyse sectorielle
     sector_analyzer = get_sector_analyzer()
     bodacc = BodaccAdapter()
     sectors = await sector_analyzer.analyze_territory(territory_code, name, bodacc, limit=100)
-    
+
     # Générer l'analyse narrative
     analyzer = get_narrative_analyzer()
     if not use_llm:
         analyzer._ollama_client = False  # Force rule-based
-    
+
     analysis = await analyzer.analyze(
         territory_code=territory_code,
         territory_name=name,
@@ -605,7 +615,7 @@ async def get_narrative_analysis(
         signals=[s.to_dict() for s in signals],
         sectors=sectors.to_dict(),
     )
-    
+
     return {
         **analysis.to_dict(),
         "metrics_summary": {
@@ -626,10 +636,10 @@ async def get_daily_report(
 ) -> dict[str, Any]:
     """Generate daily flash report."""
     from src.application.services.territorial_reports import get_report_generator
-    
+
     generator = get_report_generator()
     report = await generator.generate_daily_flash()
-    
+
     if format == "markdown":
         return {"markdown": report.to_markdown()}
     return report.to_dict()
@@ -645,10 +655,10 @@ async def get_weekly_report(
 ) -> dict[str, Any]:
     """Generate weekly summary report."""
     from src.application.services.territorial_reports import get_report_generator
-    
+
     generator = get_report_generator()
     report = await generator.generate_weekly_summary()
-    
+
     if format == "markdown":
         return {"markdown": report.to_markdown()}
     return report.to_dict()

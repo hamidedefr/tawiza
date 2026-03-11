@@ -14,6 +14,7 @@ from typing import Any
 
 import numpy as np
 from loguru import logger
+from src.infrastructure.persistence.models.territorial_timeseries import IndicatorType
 
 from src.application.services.correlation_engine import (
     AnomalyResult,
@@ -23,7 +24,6 @@ from src.application.services.correlation_engine import (
 )
 from src.infrastructure.data_ingestion.bodacc_ingester import BODACCIngester
 from src.infrastructure.data_ingestion.dvf_ingester import DVFIngester
-from src.infrastructure.persistence.models.territorial_timeseries import IndicatorType
 
 
 @dataclass

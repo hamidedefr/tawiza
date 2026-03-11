@@ -14,18 +14,18 @@ from ..base import BaseCollector, CollectedSignal, CollectorConfig
 
 class GDELTCollector(BaseCollector):
     """Collect news signals from GDELT v2 Doc API.
-    
+
     Monitors French-language news articles for economic indicators:
     - Business closures and layoffs (negative signals)
     - Investments and new businesses (positive signals)
     """
 
     BASE_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
-    
+
     # Query definitions with signal types - simplified syntax without OR/spaces
     QUERIES = {
         "liquidation": "negatif",
-        "licenciement": "negatif", 
+        "licenciement": "negatif",
         "fermeture": "negatif",
         "investissement": "positif",
         "création": "positif",
@@ -50,10 +50,10 @@ class GDELTCollector(BaseCollector):
             since = date.today() - timedelta(days=7)
 
         signals = []
-        
+
         for query, signal_type in self.QUERIES.items():
             logger.info(f"[gdelt] Querying '{query}'")
-            
+
             params = {
                 "query": f'sourcelang:french {query}',
                 "mode": "artlist",
@@ -61,29 +61,29 @@ class GDELTCollector(BaseCollector):
                 "format": "json",
                 "timespan": "7d"
             }
-            
+
             response = await self._request_with_retry("GET", self.BASE_URL, params=params, timeout=30.0)
             if not response:
                 logger.warning(f"[gdelt] No response for query '{query}'")
                 continue
-                
+
             try:
                 data = response.json()
                 articles = data.get("articles", [])
-                
+
                 logger.info(f"[gdelt] Found {len(articles)} articles for '{query}'")
-                
+
                 for article in articles:
                     signal = await self._process_article(article, query, signal_type)
                     if signal:
                         signals.append(signal)
-                        
+
             except Exception as e:
                 logger.error(f"[gdelt] Error processing query '{query}': {e}")
-                
+
             # Rate limit: wait 5 seconds between requests
             await asyncio.sleep(5)
-            
+
         logger.info(f"[gdelt] Collected {len(signals)} total signals")
         return signals
 
@@ -93,13 +93,13 @@ class GDELTCollector(BaseCollector):
             title = article.get("title", "")
             url = article.get("url", "")
             domain = article.get("domain", "")
-            
+
             if not title or not url:
                 return None
-                
+
             # Extract department from title/domain
             dept_info = self._extract_department(title, domain)
-            
+
             # Build signal
             signal = CollectedSignal(
                 source="gdelt",
@@ -119,9 +119,9 @@ class GDELTCollector(BaseCollector):
                     "detected_location": dept_info.get("detected_location")
                 }
             )
-            
+
             return signal
-            
+
         except Exception as e:
             logger.warning(f"[gdelt] Error processing article: {e}")
             return None
@@ -135,10 +135,10 @@ class GDELTCollector(BaseCollector):
             r'\b([A-Z][a-z]+(?:-sur-[A-Z][a-z]+)?)\b',  # Cities with -sur-
             r'\b([A-Z][a-z]{3,})\b'  # General capitalized words (potential cities)
         ]
-        
+
         text_to_search = f"{title} {domain}"
         detected_location = None
-        
+
         for pattern in city_patterns:
             matches = re.finditer(pattern, text_to_search, re.IGNORECASE)
             for match in matches:
@@ -148,10 +148,10 @@ class GDELTCollector(BaseCollector):
                     break
             if detected_location:
                 break
-        
+
         if not detected_location:
             return {"code_dept": None, "code_commune": None, "detected_location": None}
-        
+
         # Try to resolve the detected city
         try:
             geo_info = resolve_commune(detected_location)

@@ -11,7 +11,7 @@ import asyncio
 import json
 import sys
 from dataclasses import dataclass
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from loguru import logger
@@ -20,6 +20,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from dotenv import load_dotenv
+
 load_dotenv(project_root / ".env")
 
 DB_URL = "postgresql://tawiza:tawiza2026@localhost:5433/tawiza"
@@ -108,7 +109,7 @@ def get_priority(metric: str) -> str:
 async def compute_baselines(conn, lookback_days: int = LOOKBACK_DAYS) -> dict:
     """Compute mean + stddev per (dept, metric) over the lookback window."""
     cutoff = date.today() - timedelta(days=lookback_days)
-    
+
     rows = await conn.fetch("""
         SELECT code_dept, metric_name,
                AVG(metric_value) as mean_val,
@@ -121,7 +122,7 @@ async def compute_baselines(conn, lookback_days: int = LOOKBACK_DAYS) -> dict:
         GROUP BY code_dept, metric_name
         HAVING COUNT(*) >= $3
     """, cutoff, ALL_METRICS, MIN_DATA_POINTS)
-    
+
     baselines = {}
     for r in rows:
         key = (r['code_dept'], r['metric_name'])
@@ -130,14 +131,14 @@ async def compute_baselines(conn, lookback_days: int = LOOKBACK_DAYS) -> dict:
             'std': float(r['std_val']) if r['std_val'] else 0.0,
             'count': r['cnt'],
         }
-    
+
     return baselines
 
 
 async def get_latest_values(conn, days: int = 7) -> list:
     """Get latest signal values per (dept, metric) from last N days."""
     cutoff = date.today() - timedelta(days=days)
-    
+
     rows = await conn.fetch("""
         SELECT DISTINCT ON (code_dept, metric_name)
                code_dept, metric_name, metric_value, event_date, collected_at
@@ -147,7 +148,7 @@ async def get_latest_values(conn, days: int = 7) -> list:
           AND metric_name = ANY($2)
         ORDER BY code_dept, metric_name, collected_at DESC
     """, cutoff, ALL_METRICS)
-    
+
     return rows
 
 
@@ -156,34 +157,34 @@ async def detect_alerts(conn) -> list[Alert]:
     logger.info("Computing baselines...")
     baselines = await compute_baselines(conn)
     logger.info(f"  {len(baselines)} baselines computed")
-    
+
     logger.info("Fetching latest values...")
     latest = await get_latest_values(conn)
     logger.info(f"  {len(latest)} recent values found")
-    
+
     alerts = []
     now = datetime.now()
-    
+
     for row in latest:
         dept = row['code_dept']
         metric = row['metric_name']
         value = float(row['metric_value'])
         key = (dept, metric)
-        
+
         if key not in baselines:
             continue
-        
+
         bl = baselines[key]
         if bl['std'] < 0.001:  # No variance = no anomaly possible
             continue
-        
+
         z = (value - bl['mean']) / bl['std']
-        
+
         if abs(z) >= Z_THRESHOLD:
             direction = "up" if z > 0 else "down"
             priority = get_priority(metric)
             pct_change = ((value - bl['mean']) / bl['mean'] * 100) if bl['mean'] != 0 else 0
-            
+
             metric_label = metric.replace('_', ' ').title()
             msg = (
                 f"Dept {dept}: {metric_label} "
@@ -191,7 +192,7 @@ async def detect_alerts(conn) -> list[Alert]:
                 f"({pct_change:+.1f}%, z={z:.1f}). "
                 f"Valeur: {value:.1f}, Moyenne: {bl['mean']:.1f}"
             )
-            
+
             alerts.append(Alert(
                 department=dept,
                 metric=metric,
@@ -204,11 +205,11 @@ async def detect_alerts(conn) -> list[Alert]:
                 message=msg,
                 detected_at=now,
             ))
-    
+
     # Sort by priority then z-score
     prio_order = {'high': 0, 'medium': 1, 'low': 2}
     alerts.sort(key=lambda a: (prio_order.get(a.priority, 3), -abs(a.z_score)))
-    
+
     return alerts
 
 
@@ -216,10 +217,10 @@ async def store_alerts(conn, alerts: list[Alert]) -> int:
     """Store new alerts, skip duplicates from last 24h."""
     if not alerts:
         return 0
-    
+
     cutoff = datetime.now() - timedelta(hours=24)
     stored = 0
-    
+
     for a in alerts:
         # Check for recent duplicate
         existing = await conn.fetchval("""
@@ -227,10 +228,10 @@ async def store_alerts(conn, alerts: list[Alert]) -> int:
             WHERE department = $1 AND metric = $2 AND detected_at > $3
             LIMIT 1
         """, a.department, a.metric, cutoff)
-        
+
         if existing:
             continue
-        
+
         await conn.execute("""
             INSERT INTO watcher_alerts (department, metric, priority, current_value,
                 baseline_mean, baseline_std, z_score, direction, message, detected_at)
@@ -239,7 +240,7 @@ async def store_alerts(conn, alerts: list[Alert]) -> int:
             a.baseline_mean, a.baseline_std, a.z_score, a.direction,
             a.message, a.detected_at)
         stored += 1
-    
+
     return stored
 
 
@@ -247,22 +248,22 @@ async def run_once():
     """Single watch cycle."""
     import asyncpg
     conn = await asyncpg.connect(DB_URL)
-    
+
     try:
         await ensure_table(conn)
         alerts = await detect_alerts(conn)
-        
+
         if alerts:
             stored = await store_alerts(conn, alerts)
             logger.info(f"  {len(alerts)} alertes detectees, {stored} nouvelles stockees")
-            
+
             # Log top alerts
             for a in alerts[:10]:
                 icon = "!!" if a.priority == "high" else "!" if a.priority == "medium" else "."
                 logger.info(f"  {icon} [{a.priority}] {a.message}")
         else:
             logger.info("  Aucune alerte detectee")
-        
+
         return alerts
     finally:
         await conn.close()
@@ -271,18 +272,18 @@ async def run_once():
 async def run_daemon():
     """Continuous watch loop."""
     logger.info(f"Watcher demarrage — intervalle {WATCH_INTERVAL_MINUTES} min, seuil z={Z_THRESHOLD}")
-    
+
     while True:
         try:
             logger.info(f"\n{'='*50}")
             logger.info(f"Cycle de surveillance — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
             logger.info(f"{'='*50}")
-            
+
             await run_once()
-            
+
         except Exception as e:
             logger.error(f"Erreur watcher: {e}")
-        
+
         logger.info(f"Prochain cycle dans {WATCH_INTERVAL_MINUTES} min...")
         await asyncio.sleep(WATCH_INTERVAL_MINUTES * 60)
 
@@ -294,10 +295,10 @@ if __name__ == "__main__":
     parser.add_argument("--interval", type=int, default=WATCH_INTERVAL_MINUTES, help="Interval in minutes")
     parser.add_argument("--threshold", type=float, default=Z_THRESHOLD, help="Z-score threshold")
     args = parser.parse_args()
-    
+
     WATCH_INTERVAL_MINUTES = args.interval
     Z_THRESHOLD = args.threshold
-    
+
     if args.once:
         asyncio.run(run_once())
     else:

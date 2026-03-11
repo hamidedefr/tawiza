@@ -93,15 +93,15 @@ async def fetch_dept_context(conn: asyncpg.Connection, dept: str) -> dict:
     """Fetch real signal data for a department."""
     # Signal counts by source
     by_source = await conn.fetch("""
-        SELECT source, count(*) as cnt 
-        FROM signals WHERE code_dept = $1 
+        SELECT source, count(*) as cnt
+        FROM signals WHERE code_dept = $1
         GROUP BY source ORDER BY cnt DESC
     """, dept)
 
     # Recent signals
     recent = await conn.fetch("""
         SELECT source, metric_name, metric_value, signal_type, event_date
-        FROM signals WHERE code_dept = $1 
+        FROM signals WHERE code_dept = $1
         ORDER BY collected_at DESC LIMIT 10
     """, dept)
 
@@ -204,9 +204,9 @@ async def main():
 
     # Get departments with data
     depts = await conn.fetch("""
-        SELECT code_dept, count(*) as cnt 
-        FROM signals WHERE code_dept IS NOT NULL 
-        GROUP BY code_dept HAVING count(*) > 50 
+        SELECT code_dept, count(*) as cnt
+        FROM signals WHERE code_dept IS NOT NULL
+        GROUP BY code_dept HAVING count(*) > 50
         ORDER BY cnt DESC
     """)
     dept_list = [r["code_dept"] for r in depts]
@@ -274,7 +274,7 @@ async def main():
                     f.write(json.dumps(entry, ensure_ascii=False) + "\n")
                 generated += 1
             else:
-                logger.warning(f"  Skipped (empty/short answer)")
+                logger.warning("  Skipped (empty/short answer)")
 
     await conn.close()
     logger.info(f"Done! Generated {generated}/{len(qa_pairs)} training samples -> {output_path}")

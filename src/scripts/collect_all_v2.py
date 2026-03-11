@@ -10,7 +10,7 @@ Sources :
   6. DVF (transactions immobilières via data.gouv.fr)
   7. Banque de France (défaillances)
   8. Presse locale (RSS)
-  
+
 Tout est inséré dans la table `signals` unifiée.
 """
 
@@ -21,7 +21,7 @@ import os
 import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +32,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from dotenv import load_dotenv
+
 load_dotenv(project_root / ".env")
 
 # Départements
@@ -53,7 +54,7 @@ class Signal:
     extracted_text: str | None = None
     entities: dict | None = None
 
-@dataclass 
+@dataclass
 class CollectStats:
     """Statistiques de collecte."""
     source: str
@@ -71,9 +72,9 @@ async def collect_bodacc(client: httpx.AsyncClient, depts: list[str], days_back:
     """Collecte BODACC via API bodacc-datadila."""
     stats = CollectStats(source="bodacc")
     signals = []
-    
+
     base_url = "https://bodacc-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/annonces-commerciales/records"
-    
+
     for dept in depts:
         try:
             for famille, signal_label in [
@@ -88,11 +89,11 @@ async def collect_bodacc(client: httpx.AsyncClient, depts: list[str], days_back:
                     "where": f"numerodepartement='{dept}' AND familleavis_lib='{famille}' AND dateparution >= date'{(datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')}'",
                     "order_by": "dateparution DESC",
                 })
-                
+
                 if resp.status_code == 200:
                     data = resp.json()
                     records = data.get("results", [])
-                    
+
                     for rec in records:
                         # Affiner le type pour les procédures collectives
                         contenu = str(rec.get("jugement", "") or "") + str(rec.get("acte", "") or "")
@@ -107,7 +108,7 @@ async def collect_bodacc(client: httpx.AsyncClient, depts: list[str], days_back:
                                 metric = "procedure_collective"
                         else:
                             metric = signal_label
-                        
+
                         signals.append(Signal(
                             source="bodacc",
                             metric_name=metric,
@@ -120,13 +121,13 @@ async def collect_bodacc(client: httpx.AsyncClient, depts: list[str], days_back:
                             extracted_text=contenu[:500],
                         ))
                         stats.collected += 1
-                    
+
                 await asyncio.sleep(0.2)
-                
+
         except Exception as e:
             logger.error(f"BODACC {dept}: {e}")
             stats.errors += 1
-    
+
     logger.info(f"📋 BODACC: {stats.collected} annonces, {stats.errors} erreurs")
     return signals, stats
 
@@ -142,7 +143,7 @@ async def get_ft_token(client: httpx.AsyncClient) -> str | None:
     if not client_id or not client_secret:
         logger.error("❌ Pas de credentials France Travail")
         return None
-    
+
     try:
         resp = await client.post(
             "https://entreprise.francetravail.fr/connexion/oauth2/access_token",
@@ -165,13 +166,13 @@ async def collect_france_travail(client: httpx.AsyncClient, depts: list[str], ma
     """Collecte offres France Travail."""
     stats = CollectStats(source="france_travail")
     signals = []
-    
+
     token = await get_ft_token(client)
     if not token:
         return signals, stats
-    
+
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
-    
+
     for dept in depts:
         try:
             resp = await client.get(
@@ -183,11 +184,11 @@ async def collect_france_travail(client: httpx.AsyncClient, depts: list[str], ma
                     "sort": 1,  # par date
                 },
             )
-            
+
             if resp.status_code in (200, 206):
                 data = resp.json()
                 offres = data.get("resultats", [])
-                
+
                 for offre in offres:
                     # Extraire le salaire
                     salaire = offre.get("salaire", {})
@@ -201,9 +202,9 @@ async def collect_france_travail(client: httpx.AsyncClient, depts: list[str], ma
                                 salaire_val = float(nums[0].replace(",", "."))
                         except Exception:
                             pass
-                    
+
                     type_contrat = offre.get("typeContrat", "")
-                    
+
                     signals.append(Signal(
                         source="france_travail",
                         metric_name=f"offre_emploi_{type_contrat.lower()}" if type_contrat else "offre_emploi",
@@ -224,20 +225,20 @@ async def collect_france_travail(client: httpx.AsyncClient, depts: list[str], ma
                         extracted_text=offre.get("intitule", ""),
                     ))
                     stats.collected += 1
-                
+
             elif resp.status_code == 429:
                 logger.warning(f"  FT {dept}: rate limited, pause...")
                 await asyncio.sleep(5)
             else:
                 logger.debug(f"  FT {dept}: HTTP {resp.status_code}")
                 stats.errors += 1
-            
+
             await asyncio.sleep(0.3)
-            
+
         except Exception as e:
             logger.error(f"FT {dept}: {e}")
             stats.errors += 1
-    
+
     logger.info(f"💼 France Travail: {stats.collected} offres, {stats.errors} erreurs")
     return signals, stats
 
@@ -250,9 +251,9 @@ async def collect_sirene(client: httpx.AsyncClient, depts: list[str], months_bac
     """Collecte créations via API SIRENE publique (recherche.entreprises.api.gouv.fr)."""
     stats = CollectStats(source="sirene")
     signals = []
-    
+
     date_min = (datetime.now() - timedelta(days=months_back * 30)).strftime("%Y-%m-%d")
-    
+
     for dept in depts:
         try:
             resp = await client.get(
@@ -265,12 +266,12 @@ async def collect_sirene(client: httpx.AsyncClient, depts: list[str], months_bac
                 },
                 timeout=15,
             )
-            
+
             if resp.status_code == 200:
                 data = resp.json()
                 total = data.get("total_results", 0)
                 results = data.get("results", [])
-                
+
                 # Signal agrégé : nombre de créations
                 signals.append(Signal(
                     source="sirene",
@@ -283,7 +284,7 @@ async def collect_sirene(client: httpx.AsyncClient, depts: list[str], months_bac
                     raw_data={"total": total, "date_min": date_min, "sample_size": len(results)},
                 ))
                 stats.collected += 1
-                
+
                 # Signaux individuels (échantillon)
                 for ent in results[:10]:
                     naf = ent.get("activite_principale", "")
@@ -306,13 +307,13 @@ async def collect_sirene(client: httpx.AsyncClient, depts: list[str], months_bac
             else:
                 logger.debug(f"  SIRENE {dept}: HTTP {resp.status_code}")
                 stats.errors += 1
-            
+
             await asyncio.sleep(0.3)
-            
+
         except Exception as e:
             logger.error(f"SIRENE {dept}: {e}")
             stats.errors += 1
-    
+
     logger.info(f"🏢 SIRENE: {stats.collected} signaux, {stats.errors} erreurs")
     return signals, stats
 
@@ -328,7 +329,7 @@ async def get_insee_token(client: httpx.AsyncClient) -> str | None:
     if not client_key or not client_secret:
         logger.warning("⚠️ Pas de credentials INSEE — utilisation geo.api uniquement")
         return None
-    
+
     try:
         credentials = base64.b64encode(f"{client_key}:{client_secret}".encode()).decode()
         resp = await client.post(
@@ -349,7 +350,7 @@ async def collect_insee(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
     """Collecte INSEE : population + chômage."""
     stats = CollectStats(source="insee")
     signals = []
-    
+
     # 1. Population via geo.api.gouv.fr (gratuit, pas d'auth)
     # L'API département ne retourne pas toujours 'population', on utilise les communes
     logger.info("  👥 Population via geo.api.gouv.fr")
@@ -365,7 +366,7 @@ async def collect_insee(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                 communes = resp.json()
                 total_pop = sum(c.get("population", 0) for c in communes if c.get("population"))
                 nb_communes = len(communes)
-                
+
                 if total_pop > 0:
                     signals.append(Signal(
                         source="insee",
@@ -378,7 +379,7 @@ async def collect_insee(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                         raw_data={"nb_communes": nb_communes, "total_population": total_pop},
                     ))
                     stats.collected += 1
-                    
+
                     # Aussi : densité de communes (indicateur d'urbanisation)
                     signals.append(Signal(
                         source="insee",
@@ -390,12 +391,12 @@ async def collect_insee(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                         confidence=0.99,
                     ))
                     stats.collected += 1
-                    
+
             await asyncio.sleep(0.1)
         except Exception as e:
             logger.debug(f"  Geo {dept}: {e}")
             stats.errors += 1
-    
+
     # 2. Chômage via INSEE BDM (si token dispo)
     token = await get_insee_token(client)
     if token:
@@ -442,7 +443,7 @@ async def collect_insee(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                 logger.warning(f"  INSEE BDM HTTP {resp.status_code}")
         except Exception as e:
             logger.warning(f"  INSEE BDM: {e}")
-    
+
     logger.info(f"📈 INSEE: {stats.collected} signaux, {stats.errors} erreurs")
     return signals, stats
 
@@ -455,17 +456,17 @@ async def collect_ofgl(client: httpx.AsyncClient, depts: list[str]) -> tuple[lis
     """Collecte OFGL : finances locales."""
     stats = CollectStats(source="ofgl")
     signals = []
-    
+
     # OFGL : dataset départements a des agrégats (Dépenses totales, Recettes totales, etc.)
     # Chaque ligne = 1 département × 1 agrégat. On récupère les agrégats clés.
     agregats_cles = [
         "Dépenses totales",
-        "Recettes totales", 
+        "Recettes totales",
         "Encours de dette au 31/12",
         "Capacité d'autofinancement brute",
         "Dépenses d'investissement hors remboursements",
     ]
-    
+
     for year in [2023, 2022]:
         found_data = False
         for agregat in agregats_cles:
@@ -481,23 +482,23 @@ async def collect_ofgl(client: httpx.AsyncClient, depts: list[str]) -> tuple[lis
                     },
                     timeout=30,
                 )
-                
+
                 if resp.status_code == 200:
                     data = resp.json()
                     records = data.get("results", [])
-                    
+
                     if records:
                         found_data = True
                         metric_name = agregat.lower().replace(" ", "_").replace("'", "").replace("/", "")
-                        
+
                         for rec in records:
                             dept_code = rec.get("dep_code", "")
                             if not dept_code or dept_code not in depts:
                                 continue
-                            
+
                             montant = rec.get("montant")
                             eur_hab = rec.get("euros_par_habitant")
-                            
+
                             if montant:
                                 signals.append(Signal(
                                     source="ofgl",
@@ -516,16 +517,16 @@ async def collect_ofgl(client: httpx.AsyncClient, depts: list[str]) -> tuple[lis
                                     },
                                 ))
                                 stats.collected += 1
-                        
+
                         logger.info(f"  ✅ OFGL {agregat} {year}: {len(records)} depts")
-                
+
             except Exception as e:
                 logger.error(f"  OFGL {agregat}: {e}")
                 stats.errors += 1
-        
+
         if found_data:
             break  # Got data for this year
-    
+
     logger.info(f"💰 OFGL: {stats.collected} signaux, {stats.errors} erreurs")
     return signals, stats
 
@@ -539,34 +540,34 @@ async def collect_dvf(client: httpx.AsyncClient, depts: list[str], year: int = 2
     import csv
     import gzip
     import io
-    
+
     stats = CollectStats(source="dvf")
     signals = []
-    
+
     for dept in depts:
         try:
             # Télécharger le CSV gzippé pour le département
             url = f"https://files.data.gouv.fr/geo-dvf/latest/csv/{year}/departements/{dept}.csv.gz"
             resp = await client.get(url, timeout=30)
-            
+
             if resp.status_code == 404 and year == 2024:
                 # Fallback année précédente
                 url = f"https://files.data.gouv.fr/geo-dvf/latest/csv/2023/departements/{dept}.csv.gz"
                 resp = await client.get(url, timeout=30)
-            
+
             if resp.status_code == 200:
                 # Décompresser et parser le CSV
                 raw = gzip.decompress(resp.content)
                 text = raw.decode("utf-8")
                 reader = csv.DictReader(io.StringIO(text))
-                
+
                 rows = []
                 for row in reader:
                     rows.append(row)
-                
+
                 # Prendre un échantillon des dernières transactions + stats agrégées
                 ventes = [r for r in rows if r.get("nature_mutation") == "Vente" and r.get("valeur_fonciere")]
-                
+
                 if ventes:
                     # Stats agrégées par département
                     prix_list = []
@@ -578,7 +579,7 @@ async def collect_dvf(client: httpx.AsyncClient, depts: list[str], year: int = 2
                                 prix_list.append(val / surf)
                         except (ValueError, ZeroDivisionError):
                             pass
-                    
+
                     if prix_list:
                         import statistics
                         signals.append(Signal(
@@ -599,7 +600,7 @@ async def collect_dvf(client: httpx.AsyncClient, depts: list[str], year: int = 2
                             },
                         ))
                         stats.collected += 1
-                    
+
                     # Signal nombre de transactions
                     signals.append(Signal(
                         source="dvf",
@@ -612,7 +613,7 @@ async def collect_dvf(client: httpx.AsyncClient, depts: list[str], year: int = 2
                         raw_data={"year": year, "total_rows": len(rows)},
                     ))
                     stats.collected += 1
-                    
+
                     # Dernières transactions individuelles (échantillon)
                     for v in ventes[-20:]:
                         try:
@@ -622,7 +623,7 @@ async def collect_dvf(client: httpx.AsyncClient, depts: list[str], year: int = 2
                         except (ValueError, ZeroDivisionError):
                             val = None
                             prix_m2 = None
-                        
+
                         signals.append(Signal(
                             source="dvf",
                             metric_name="transaction_immobiliere",
@@ -640,18 +641,18 @@ async def collect_dvf(client: httpx.AsyncClient, depts: list[str], year: int = 2
                             },
                         ))
                         stats.collected += 1
-                    
+
                     logger.info(f"  ✅ DVF {dept}: {len(ventes)} ventes, prix médian {round(statistics.median(prix_list), 0) if prix_list else '?'}€/m²")
             else:
                 logger.debug(f"  DVF {dept}: HTTP {resp.status_code}")
                 stats.skipped += 1
-            
+
             await asyncio.sleep(0.2)
-            
+
         except Exception as e:
             logger.error(f"  DVF {dept}: {e}")
             stats.errors += 1
-    
+
     logger.info(f"🏠 DVF: {stats.collected} signaux, {stats.errors} erreurs")
     return signals, stats
 
@@ -664,7 +665,7 @@ async def collect_banque_france(client: httpx.AsyncClient) -> tuple[list[Signal]
     """Collecte statistiques défaillances Banque de France via webstat API SDMX."""
     stats = CollectStats(source="banque_france")
     signals = []
-    
+
     # Webstat BdF — SDMX REST API
     # Défaillances d'entreprises : série ESANE
     urls_to_try = [
@@ -673,13 +674,13 @@ async def collect_banque_france(client: httpx.AsyncClient) -> tuple[list[Signal]
         # Alternative: open data BdF
         "https://www.banque-france.fr/sites/default/files/media/2024/defaillances-entreprises.json",
     ]
-    
+
     for url in urls_to_try:
         try:
             resp = await client.get(url, headers={"Accept": "application/json"}, timeout=15)
             if resp.status_code == 200:
                 data = resp.json()
-                
+
                 # Essayer de parser selon le format
                 if isinstance(data, list):
                     for item in data[-12:]:  # Derniers 12 mois
@@ -715,7 +716,7 @@ async def collect_banque_france(client: httpx.AsyncClient) -> tuple[list[Signal]
                                         raw_data={"series_key": key, "url": url},
                                     ))
                                     stats.collected += 1
-                
+
                 if stats.collected > 0:
                     logger.info(f"  ✅ BdF: {stats.collected} données depuis {url}")
                     break
@@ -723,10 +724,10 @@ async def collect_banque_france(client: httpx.AsyncClient) -> tuple[list[Signal]
                 logger.debug(f"  BdF {url}: HTTP {resp.status_code}")
         except Exception as e:
             logger.debug(f"  BdF {url}: {e}")
-    
+
     if stats.collected == 0:
         logger.warning("  ⚠️ Banque de France: aucune donnée récupérée (API instable)")
-    
+
     logger.info(f"🏦 Banque de France: {stats.collected} signaux")
     return signals, stats
 
@@ -763,14 +764,14 @@ async def collect_presse(client: httpx.AsyncClient) -> tuple[list[Signal], Colle
     """Collecte presse locale via RSS."""
     stats = CollectStats(source="presse_locale")
     signals = []
-    
+
     keywords_eco = [
         "entreprise", "emploi", "chômage", "licenciement", "embauche",
         "usine", "fermeture", "ouverture", "investissement", "start-up",
         "commerce", "immobilier", "construction", "logement", "économie",
         "défaillance", "liquidation", "redressement", "plan social",
     ]
-    
+
     for feed_name, feed_url in RSS_FEEDS.items():
         try:
             resp = await client.get(feed_url, timeout=10, follow_redirects=True)
@@ -778,31 +779,31 @@ async def collect_presse(client: httpx.AsyncClient) -> tuple[list[Signal], Colle
                 logger.debug(f"  RSS {feed_name}: HTTP {resp.status_code}")
                 stats.skipped += 1
                 continue
-            
+
             root = ET.fromstring(resp.text)
             items = root.findall(".//item") or root.findall(".//{http://www.w3.org/2005/Atom}entry")
-            
+
             for item in items[:50]:
                 title = item.findtext("title", "") or item.findtext("{http://www.w3.org/2005/Atom}title", "")
                 desc = item.findtext("description", "") or item.findtext("{http://www.w3.org/2005/Atom}summary", "")
                 link = item.findtext("link", "") or ""
                 pub_date = item.findtext("pubDate", "") or item.findtext("{http://www.w3.org/2005/Atom}published", "")
-                
+
                 text = f"{title} {desc}".lower()
-                
+
                 # Filtrer sur les mots-clés économiques
                 matching_kw = [kw for kw in keywords_eco if kw in text]
                 if not matching_kw:
                     continue
-                
+
                 # Détecter le sentiment
                 neg_words = ["fermeture", "licenciement", "liquidation", "défaillance", "plan social", "chômage", "déclin"]
                 pos_words = ["embauche", "ouverture", "investissement", "start-up", "croissance", "création"]
-                
+
                 neg_count = sum(1 for w in neg_words if w in text)
                 pos_count = sum(1 for w in pos_words if w in text)
                 sentiment = "negative" if neg_count > pos_count else "positive" if pos_count > neg_count else "neutral"
-                
+
                 signals.append(Signal(
                     source="presse_locale",
                     metric_name=f"article_{sentiment}",
@@ -815,14 +816,14 @@ async def collect_presse(client: httpx.AsyncClient) -> tuple[list[Signal], Colle
                     extracted_text=f"{title} — {desc[:300]}",
                 ))
                 stats.collected += 1
-                
+
         except ET.ParseError:
             logger.debug(f"  RSS {feed_name}: XML parse error")
             stats.errors += 1
         except Exception as e:
             logger.debug(f"  RSS {feed_name}: {e}")
             stats.errors += 1
-    
+
     logger.info(f"📰 Presse: {stats.collected} articles, {stats.errors} erreurs")
     return signals, stats
 
@@ -835,7 +836,7 @@ async def collect_urssaf(client: httpx.AsyncClient, depts: list[str]) -> tuple[l
     """Collecte données auto-entrepreneurs URSSAF (open data)."""
     stats = CollectStats(source="urssaf")
     signals = []
-    
+
     try:
         # Récupérer les derniers trimestres
         resp = await client.get(
@@ -847,25 +848,25 @@ async def collect_urssaf(client: httpx.AsyncClient, depts: list[str]) -> tuple[l
             },
             timeout=30,
         )
-        
+
         if resp.status_code == 200:
             data = resp.json()
             records = data.get("results", [])
-            
+
             for rec in records:
                 dept_code = str(rec.get("code_departement", "")).zfill(2)
                 if dept_code not in depts:
                     continue
-                
+
                 immat = rec.get("immatriculations")
                 rad = rec.get("radiations")
                 ca = rec.get("chiffres_d_affaires")
                 actifs = rec.get("economiquement_actifs")
-                
+
                 year = rec.get("annee", "")
                 trim = rec.get("trimestre", "")
                 period = f"{year}-T{trim}"
-                
+
                 if immat is not None:
                     signals.append(Signal(
                         source="urssaf", metric_name="ae_immatriculations",
@@ -875,7 +876,7 @@ async def collect_urssaf(client: httpx.AsyncClient, depts: list[str]) -> tuple[l
                         raw_data={"period": period, "departement": rec.get("departement")},
                     ))
                     stats.collected += 1
-                
+
                 if rad is not None:
                     signals.append(Signal(
                         source="urssaf", metric_name="ae_radiations",
@@ -884,7 +885,7 @@ async def collect_urssaf(client: httpx.AsyncClient, depts: list[str]) -> tuple[l
                         signal_type="metric", confidence=0.95,
                     ))
                     stats.collected += 1
-                
+
                 if ca is not None:
                     signals.append(Signal(
                         source="urssaf", metric_name="ae_chiffre_affaires",
@@ -893,7 +894,7 @@ async def collect_urssaf(client: httpx.AsyncClient, depts: list[str]) -> tuple[l
                         signal_type="metric", confidence=0.95,
                     ))
                     stats.collected += 1
-                
+
                 if actifs is not None:
                     signals.append(Signal(
                         source="urssaf", metric_name="ae_economiquement_actifs",
@@ -902,16 +903,16 @@ async def collect_urssaf(client: httpx.AsyncClient, depts: list[str]) -> tuple[l
                         signal_type="metric", confidence=0.95,
                     ))
                     stats.collected += 1
-            
+
             logger.info(f"  ✅ URSSAF: {len(records)} records")
         else:
             logger.warning(f"  URSSAF HTTP {resp.status_code}")
             stats.errors += 1
-            
+
     except Exception as e:
         logger.error(f"  URSSAF: {e}")
         stats.errors += 1
-    
+
     # Aussi : effectifs salariés par département
     try:
         resp2 = await client.get(
@@ -935,7 +936,7 @@ async def collect_urssaf(client: httpx.AsyncClient, depts: list[str]) -> tuple[l
                     stats.collected += 1
     except Exception as e:
         logger.debug(f"  URSSAF effectifs: {e}")
-    
+
     logger.info(f"📊 URSSAF: {stats.collected} signaux, {stats.errors} erreurs")
     return signals, stats
 
@@ -948,13 +949,13 @@ async def collect_google_trends(client: httpx.AsyncClient, depts: list[str]) -> 
     """Collecte Google Trends via pytrends (anciennes régions FR → départements)."""
     stats = CollectStats(source="google_trends")
     signals = []
-    
+
     try:
         from pytrends.request import TrendReq
     except ImportError:
         logger.warning("  ⚠️ pytrends non installé")
         return signals, stats
-    
+
     keywords = [
         "liquidation judiciaire",
         "pôle emploi",
@@ -962,7 +963,7 @@ async def collect_google_trends(client: httpx.AsyncClient, depts: list[str]) -> 
         "RSA",
         "immobilier achat",
     ]
-    
+
     # Google Trends retourne les anciennes régions FR (pré-2016)
     OLD_REGIONS_TO_DEPTS = {
         "Alsace": ["67", "68"],
@@ -988,21 +989,21 @@ async def collect_google_trends(client: httpx.AsyncClient, depts: list[str]) -> 
         "Rhône-Alpes": ["01", "07", "26", "38", "42", "69", "73", "74"],
         "Île-de-France": ["75", "77", "78", "91", "92", "93", "94", "95"],
     }
-    
+
     try:
         pytrends = TrendReq(hl='fr-FR', tz=60, timeout=(10, 25))
-        
+
         for kw in keywords:
             try:
                 pytrends.build_payload([kw], cat=0, timeframe='today 3-m', geo='FR')
                 interest = pytrends.interest_by_region(resolution='REGION', inc_low_vol=True)
-                
+
                 if not interest.empty:
                     for region_name, row in interest.iterrows():
                         val = row.get(kw, 0)
                         if val == 0:
                             continue
-                        
+
                         # Mapper la région aux départements
                         dept_list = OLD_REGIONS_TO_DEPTS.get(region_name, [])
                         for d in dept_list:
@@ -1018,18 +1019,18 @@ async def collect_google_trends(client: httpx.AsyncClient, depts: list[str]) -> 
                                     raw_data={"keyword": kw, "region": region_name},
                                 ))
                                 stats.collected += 1
-                
+
                 await asyncio.sleep(3)  # Rate limiting Google
-                
+
             except Exception as e:
                 logger.debug(f"  Trends '{kw}': {e}")
                 stats.errors += 1
                 await asyncio.sleep(5)
-        
+
     except Exception as e:
         logger.warning(f"  Google Trends global error: {e}")
         stats.errors += 1
-    
+
     logger.info(f"📈 Google Trends: {stats.collected} signaux, {stats.errors} erreurs")
     return signals, stats
 
@@ -1042,12 +1043,12 @@ async def store_signals(signals: list[Signal]) -> int:
     """Insère les signaux en base via asyncpg batch insert."""
     if not signals:
         return 0
-    
+
     import asyncpg
-    
+
     db_url = os.getenv("DATABASE_URL", "postgresql://localhost:5433/tawiza")
     conn = await asyncpg.connect(db_url)
-    
+
     try:
         # Batch insert
         records = [
@@ -1060,11 +1061,11 @@ async def store_signals(signals: list[Signal]) -> int:
             )
             for s in signals
         ]
-        
+
         # Séparer events (insert direct) et metrics (upsert)
         events = [r for r, s in zip(records, signals) if s.signal_type != "metric"]
         metrics = [r for r, s in zip(records, signals) if s.signal_type == "metric"]
-        
+
         if events:
             await conn.executemany("""
                 INSERT INTO signals (
@@ -1074,7 +1075,7 @@ async def store_signals(signals: list[Signal]) -> int:
                     confidence, raw_data, extracted_text, entities
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16::jsonb)
             """, events)
-        
+
         if metrics:
             await conn.executemany("""
                 INSERT INTO signals (
@@ -1083,11 +1084,11 @@ async def store_signals(signals: list[Signal]) -> int:
                     metric_name, metric_value, signal_type,
                     confidence, raw_data, extracted_text, entities
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16::jsonb)
-                ON CONFLICT (source, code_dept, metric_name, event_date) 
+                ON CONFLICT (source, code_dept, metric_name, event_date)
                 WHERE signal_type = 'metric'
                 DO UPDATE SET metric_value = EXCLUDED.metric_value, collected_at = EXCLUDED.collected_at, raw_data = EXCLUDED.raw_data
             """, metrics)
-        
+
         logger.info(f"💾 {len(records)} signaux insérés en base")
         return len(records)
     finally:
@@ -1105,18 +1106,18 @@ async def collect_sitadel(client: httpx.AsyncClient, depts: list[str]) -> tuple[
     """Collecte permis de construire Sitadel via SDES DiDo API."""
     import csv
     import io
-    
+
     stats = CollectStats(source="sitadel")
     signals = []
-    
+
     try:
         url = f"{DIDO_BASE}/datafiles/{LOGEMENTS_DEPT_RID}/csv?millesime=2026-02&withColumnName=true&withColumnDescription=false&withColumnUnit=false"
         resp = await client.get(url, timeout=60)
         resp.raise_for_status()
-        
+
         reader = csv.DictReader(io.StringIO(resp.text), delimiter=";")
         cutoff_year = datetime.now().year - 2
-        
+
         for row in reader:
             try:
                 year = int(row.get("ANNEE", "").strip('"'))
@@ -1124,12 +1125,12 @@ async def collect_sitadel(client: httpx.AsyncClient, depts: list[str]) -> tuple[
                     continue
                 month = int(row.get("MOIS", "").strip('"'))
                 dept = row.get("DEPARTEMENT_CODE", "").strip('"')
-                
+
                 if dept not in depts:
                     continue
-                
+
                 ev_date = date(year, month, 1)
-                
+
                 for field, metric in [("LOG_AUT", "logements_autorises"), ("LOG_COM", "logements_commences")]:
                     val_str = row.get(field, "").strip().strip('"')
                     if val_str and val_str not in ("", "s", "nd"):
@@ -1151,12 +1152,12 @@ async def collect_sitadel(client: httpx.AsyncClient, depts: list[str]) -> tuple[
                             pass
             except (ValueError, KeyError):
                 continue
-        
+
         logger.info(f"  Sitadel: {stats.collected} signaux collectés")
     except Exception as e:
         logger.error(f"  Sitadel error: {e}")
         stats.errors += 1
-    
+
     return signals, stats
 
 
@@ -1168,7 +1169,7 @@ async def collect_gdelt(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
     """Collecte événements GDELT géolocalisés en France via BigQuery API."""
     stats = CollectStats(source="gdelt")
     signals = []
-    
+
     # GDELT DOC API - search for French economic events
     keywords = [
         "liquidation entreprise france",
@@ -1177,7 +1178,7 @@ async def collect_gdelt(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
         "immobilier france prix",
         "industrie france fermeture",
     ]
-    
+
     for kw in keywords:
         try:
             url = "https://api.gdeltproject.org/api/v2/doc/doc"
@@ -1192,30 +1193,30 @@ async def collect_gdelt(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
             resp = await client.get(url, params=params, timeout=30)
             if resp.status_code != 200:
                 continue
-            
+
             data = resp.json()
             articles = data.get("articles", [])
-            
+
             for art in articles:
                 title = art.get("title", "")
                 url_art = art.get("url", "")
                 date_str = art.get("seendate", "")
-                
+
                 if not title or not date_str:
                     continue
-                
+
                 try:
                     ev_date = datetime.strptime(date_str[:8], "%Y%m%d").date()
                 except (ValueError, IndexError):
                     continue
-                
+
                 # Try to extract department from title/domain
                 dept_found = None
                 for d in depts[:20]:  # Check top departments
                     if d in title:
                         dept_found = d
                         break
-                
+
                 signals.append(Signal(
                     source="gdelt",
                     source_url=url_art,
@@ -1228,11 +1229,11 @@ async def collect_gdelt(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                     raw_data={"domain": art.get("domain", ""), "language": art.get("language", "")},
                 ))
                 stats.collected += 1
-                
+
         except Exception as e:
             logger.warning(f"  GDELT '{kw}': {e}")
             stats.errors += 1
-    
+
     logger.info(f"  GDELT: {stats.collected} signaux collectés")
     return signals, stats
 
@@ -1243,7 +1244,7 @@ async def collect_gdelt(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
 
 async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[list[Signal], CollectStats]:
     """Collecte DGFiP via data.economie.gouv.fr open data API.
-    
+
     2 datasets:
     - fiscalite-locale-des-entreprises: taux TFB/CFE/TEOM par commune (agrégé par dept)
     - comptes-individuels-des-departements 2023-2024: budget, dette, CAF, investissement
@@ -1252,7 +1253,7 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
     signals: list[Signal] = []
     base = "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets"
     today = date.today()
-    
+
     # --- 1. Fiscalité locale: taux moyens par département ---
     logger.info("  DGFiP: Collecte fiscalité locale (taux par département)...")
     try:
@@ -1274,19 +1275,19 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                     if resp.status_code != 200:
                         stats.skipped += 1
                         continue
-                
+
                 data = resp.json()
                 results = data.get("results", [])
                 if not results:
                     stats.skipped += 1
                     continue
-                
+
                 r = results[0]
                 avg_tfb = r.get("avg_tfb")
                 avg_cfe = r.get("avg_cfe")
                 avg_teom = r.get("avg_teom")
                 nb_communes = r.get("nb_communes", 0)
-                
+
                 if avg_tfb is not None:
                     signals.append(Signal(
                         source="dgfip", metric_name="taux_moyen_tfb",
@@ -1298,7 +1299,7 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                         raw_data={"avg_tfb": avg_tfb, "avg_cfe": avg_cfe, "avg_teom": avg_teom, "nb_communes": nb_communes},
                     ))
                     stats.collected += 1
-                
+
                 if avg_cfe is not None:
                     signals.append(Signal(
                         source="dgfip", metric_name="taux_moyen_cfe",
@@ -1310,7 +1311,7 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                         raw_data={"avg_cfe": avg_cfe, "dept": dept},
                     ))
                     stats.collected += 1
-                
+
                 if avg_teom is not None:
                     signals.append(Signal(
                         source="dgfip", metric_name="taux_moyen_teom",
@@ -1322,21 +1323,21 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                         raw_data={"avg_teom": avg_teom, "dept": dept},
                     ))
                     stats.collected += 1
-                    
+
             except Exception as e:
                 logger.debug(f"  DGFiP fiscalité dept {dept}: {e}")
                 stats.errors += 1
-                
+
     except Exception as e:
         logger.warning(f"  DGFiP fiscalité locale: {e}")
         stats.errors += 1
-    
+
     logger.info(f"  DGFiP fiscalité: {stats.collected} signaux")
-    
+
     # --- 2. Comptes départementaux 2023-2024 ---
     logger.info("  DGFiP: Collecte comptes départementaux...")
     dataset_id = "comptes-individuels-des-departements-et-des-collectivites-territoriales-uniques-fichier-global-2023-2024"
-    
+
     # Key financial indicators from comptes:
     # tpf = total produits de fonctionnement (recettes)
     # tcf = total charges de fonctionnement (dépenses)
@@ -1346,7 +1347,7 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
     # aid = aides versées (social)
     # fsh = frais de séjour et hébergement
     # tri = total recettes d'investissement
-    
+
     FINANCIAL_METRICS = {
         "tpf": ("recettes_fonctionnement", "Total produits de fonctionnement"),
         "tcf": ("charges_fonctionnement", "Total charges de fonctionnement"),
@@ -1357,7 +1358,7 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
         "dgf": ("dotation_globale", "Dotation globale de fonctionnement"),
         "tri": ("recettes_investissement", "Total recettes d'investissement"),
     }
-    
+
     try:
         for dept in depts:
             dept_code = dept.zfill(3) if len(dept) <= 2 else dept
@@ -1372,17 +1373,17 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                 if resp.status_code != 200:
                     stats.skipped += 1
                     continue
-                
+
                 data = resp.json()
                 results = data.get("results", [])
                 if not results:
                     stats.skipped += 1
                     continue
-                
+
                 r = results[0]
                 pop = r.get("mpoid_bp", 0)
                 lbudg = r.get("lbudg", "")
-                
+
                 for field_name, (metric_name, label) in FINANCIAL_METRICS.items():
                     val = r.get(field_name)
                     if val is not None:
@@ -1397,15 +1398,15 @@ async def collect_dgfip(client: httpx.AsyncClient, depts: list[str]) -> tuple[li
                             raw_data={"value_keur": val, "population": pop, "exercice": 2023, "field": field_name},
                         ))
                         stats.collected += 1
-                        
+
             except Exception as e:
                 logger.debug(f"  DGFiP comptes dept {dept}: {e}")
                 stats.errors += 1
-                
+
     except Exception as e:
         logger.warning(f"  DGFiP comptes départementaux: {e}")
         stats.errors += 1
-    
+
     logger.info(f"  DGFiP total: {stats.collected} signaux collectés")
     return signals, stats
 
@@ -1422,21 +1423,21 @@ async def run_full_collect(
     """Lance la collecte complète."""
     target_depts = depts or ALL_DEPTS
     target_sources = sources or ["bodacc", "france_travail", "sirene", "insee", "ofgl", "dvf", "urssaf", "banque_france", "presse_locale", "google_trends", "sitadel", "gdelt", "dgfip"]
-    
-    logger.info(f"🚀 COLLECTE Tawiza V2")
+
+    logger.info("🚀 COLLECTE Tawiza V2")
     logger.info(f"   Départements: {len(target_depts)}")
     logger.info(f"   Sources: {', '.join(target_sources)}")
     logger.info(f"   Lookback: {days_back} jours")
-    
+
     all_signals: list[Signal] = []
     all_stats: list[CollectStats] = []
-    
+
     async with httpx.AsyncClient(
         timeout=30,
         limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
         follow_redirects=True,
     ) as client:
-        
+
         collectors = {
             "bodacc": lambda: collect_bodacc(client, target_depts, days_back),
             "france_travail": lambda: collect_france_travail(client, target_depts),
@@ -1452,16 +1453,16 @@ async def run_full_collect(
             "gdelt": lambda: collect_gdelt(client, target_depts),
             "dgfip": lambda: collect_dgfip(client, target_depts),
         }
-        
+
         for src_name in target_sources:
             if src_name not in collectors:
                 logger.warning(f"  ⚠️ Source inconnue: {src_name}")
                 continue
-            
+
             logger.info(f"\n{'='*60}")
             logger.info(f"📡 {src_name.upper()}")
             logger.info(f"{'='*60}")
-            
+
             try:
                 signals, stats = await collectors[src_name]()
                 all_signals.extend(signals)
@@ -1469,29 +1470,29 @@ async def run_full_collect(
             except Exception as e:
                 logger.error(f"❌ {src_name}: {e}")
                 all_stats.append(CollectStats(source=src_name, errors=1))
-    
+
     # Stockage
     if all_signals:
         stored = await store_signals(all_signals)
     else:
         stored = 0
-    
+
     # Résumé
     logger.info(f"\n{'='*60}")
-    logger.info(f"📊 RÉSUMÉ COLLECTE Tawiza V2")
+    logger.info("📊 RÉSUMÉ COLLECTE Tawiza V2")
     logger.info(f"{'='*60}")
-    
+
     total_collected = 0
     total_errors = 0
     for s in all_stats:
         logger.info(f"  {s.source:20s} | {s.collected:6d} collectés | {s.errors:3d} erreurs")
         total_collected += s.collected
         total_errors += s.errors
-    
+
     logger.info(f"  {'─'*50}")
     logger.info(f"  {'TOTAL':20s} | {total_collected:6d} collectés | {total_errors:3d} erreurs")
     logger.info(f"  💾 {stored} signaux insérés en base")
-    
+
     return all_signals, all_stats
 
 
@@ -1501,15 +1502,15 @@ async def run_full_collect(
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Collecteur unifié Tawiza V2")
     parser.add_argument("--depts", nargs="+", help="Départements à collecter (ex: 75 93 35)")
     parser.add_argument("--sources", nargs="+", help="Sources (bodacc france_travail sirene insee ofgl dvf banque_france presse_locale)")
     parser.add_argument("--days", type=int, default=30, help="Lookback en jours (défaut: 30)")
     parser.add_argument("--all", action="store_true", help="Tous les 101 départements")
-    
+
     args = parser.parse_args()
-    
+
     depts = None
     if args.depts:
         depts = args.depts
@@ -1518,7 +1519,7 @@ if __name__ == "__main__":
         depts = ["75", "93", "92", "94", "91", "78", "95", "77",  # IDF
                  "13", "69", "31", "33", "59", "44", "35", "67",  # Grandes métropoles
                  "06", "34", "17", "15"]  # Mix
-    
+
     asyncio.run(run_full_collect(
         depts=depts,
         sources=args.sources,

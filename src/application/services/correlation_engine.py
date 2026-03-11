@@ -19,7 +19,6 @@ from loguru import logger
 from scipy import stats
 from scipy.signal import correlate
 from scipy.special import digamma
-
 from src.infrastructure.persistence.models.territorial_timeseries import (
     GranularityType,
     IndicatorType,

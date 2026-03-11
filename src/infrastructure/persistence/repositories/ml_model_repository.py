@@ -6,10 +6,10 @@ from uuid import UUID
 from loguru import logger
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.infrastructure.persistence.models.ml_model import MLModelDB
 
 from src.domain.entities.ml_model import DeploymentStrategy, MLModel, ModelMetrics, ModelStatus
 from src.domain.repositories.ml_repositories import IMLModelRepository
-from src.infrastructure.persistence.models.ml_model import MLModelDB
 
 
 class SQLAlchemyMLModelRepository(IMLModelRepository):

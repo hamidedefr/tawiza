@@ -52,22 +52,22 @@ class PredictiveSignal:
     territory_code: str
     territory_name: str
     detected_at: datetime
-    
+
     # Détails
     title: str
     description: str
     value: float  # Valeur du métrique déclencheur
     threshold: float  # Seuil dépassé
-    
+
     # Contexte
     sector: str | None = None  # Code NAF si applicable
     trend: str | None = None  # "rising", "falling", "stable"
     recommendation: str | None = None
-    
+
     # Metadata
     confidence: float = 0.8
     data_sources: list[str] = field(default_factory=list)
-    
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "type": self.signal_type.value,
@@ -90,11 +90,11 @@ class PredictiveSignal:
 class PredictiveSignalDetector:
     """
     Détecteur de signaux prédictifs pour l'analyse territoriale.
-    
+
     Analyse les métriques et tendances pour détecter des signaux
     d'alerte précoce ou d'opportunité.
     """
-    
+
     # Seuils de détection
     THRESHOLDS = {
         "stress_ratio": 3.0,           # modifications / créations
@@ -106,10 +106,10 @@ class PredictiveSignalDetector:
         "vitality_drop": 10.0,         # Chute de vitalité en 30j
         "dynamisme_exceptionnel": 70.0, # Vitalité exceptionnelle
     }
-    
+
     def __init__(self):
         self._history_store = None
-    
+
     @property
     def history_store(self):
         """Lazy loading du store d'historique."""
@@ -117,7 +117,7 @@ class PredictiveSignalDetector:
             from src.infrastructure.persistence.territorial_history import get_history_store
             self._history_store = get_history_store()
         return self._history_store
-    
+
     async def detect_signals(
         self,
         territory_code: str,
@@ -127,44 +127,44 @@ class PredictiveSignalDetector:
     ) -> list[PredictiveSignal]:
         """
         Détecte tous les signaux pour un territoire.
-        
+
         Args:
             territory_code: Code du département
             territory_name: Nom du territoire
             current_metrics: Métriques actuelles (du collector)
             sector_analysis: Analyse sectorielle optionnelle
-        
+
         Returns:
             Liste des signaux détectés
         """
         signals = []
         now = datetime.utcnow()
-        
+
         # Récupérer l'historique pour les tendances
         history = self.history_store.get_history(territory_code, days=90)
         trends = self.history_store.get_trends(territory_code, periods=[7, 30, 90])
-        
+
         # 1. Signal STRESS_ENTREPRISES
         signal = self._check_stress_entreprises(
             territory_code, territory_name, current_metrics, now
         )
         if signal:
             signals.append(signal)
-        
+
         # 2. Signal HEMORRAGIE
         signal = self._check_hemorragie(
             territory_code, territory_name, current_metrics, now
         )
         if signal:
             signals.append(signal)
-        
+
         # 3. Signal CHOMAGE_CRITIQUE
         signal = self._check_chomage_critique(
             territory_code, territory_name, current_metrics, now
         )
         if signal:
             signals.append(signal)
-        
+
         # 4. Signal ACCELERATION_NEGATIVE (si historique disponible)
         if trends:
             signal = self._check_acceleration_negative(
@@ -172,21 +172,21 @@ class PredictiveSignalDetector:
             )
             if signal:
                 signals.append(signal)
-        
+
         # 5. Signal DYNAMISME_EXCEPTIONNEL (positif)
         signal = self._check_dynamisme_exceptionnel(
             territory_code, territory_name, current_metrics, now
         )
         if signal:
             signals.append(signal)
-        
+
         # 6. Signaux sectoriels
         if sector_analysis:
             sector_signals = self._check_sector_signals(
                 territory_code, territory_name, sector_analysis, now
             )
             signals.extend(sector_signals)
-        
+
         # Trier par sévérité
         severity_order = {
             SignalSeverity.CRITICAL: 0,
@@ -195,23 +195,23 @@ class PredictiveSignalDetector:
             SignalSeverity.INFO: 3,
         }
         signals.sort(key=lambda s: severity_order[s.severity])
-        
+
         logger.info(f"Detected {len(signals)} signals for {territory_name}")
         return signals
-    
+
     def _check_stress_entreprises(
         self, code: str, name: str, metrics: dict, now: datetime
     ) -> PredictiveSignal | None:
         """Vérifie le stress des entreprises (trop de modifications vs créations)."""
         creations = metrics.get("creations_count", 0) or metrics.get("creations", 0)
         modifications = metrics.get("modifications_count", 0) or metrics.get("modifications", 0)
-        
+
         if creations == 0:
             return None
-        
+
         ratio = modifications / creations
         threshold = self.THRESHOLDS["stress_ratio"]
-        
+
         if ratio >= threshold:
             severity = SignalSeverity.ALERT if ratio >= threshold * 1.5 else SignalSeverity.WARNING
             return PredictiveSignal(
@@ -229,24 +229,24 @@ class PredictiveSignalDetector:
                 data_sources=["BODACC"],
             )
         return None
-    
+
     def _check_hemorragie(
         self, code: str, name: str, metrics: dict, now: datetime
     ) -> PredictiveSignal | None:
         """Vérifie si les fermetures dépassent les créations."""
         creations = metrics.get("creations_count", 0) or metrics.get("creations", 0)
         closures = metrics.get("closures_count", 0) or metrics.get("closures", 0)
-        
+
         if creations == 0 and closures == 0:
             return None
-        
+
         if creations == 0:
             ratio = float('inf')
         else:
             ratio = closures / creations
-        
+
         threshold = self.THRESHOLDS["hemorragie_ratio"]
-        
+
         if ratio >= threshold:
             severity = SignalSeverity.CRITICAL if ratio >= 2.0 else SignalSeverity.ALERT
             return PredictiveSignal(
@@ -265,14 +265,14 @@ class PredictiveSignalDetector:
                 data_sources=["BODACC", "SIRENE"],
             )
         return None
-    
+
     def _check_chomage_critique(
         self, code: str, name: str, metrics: dict, now: datetime
     ) -> PredictiveSignal | None:
         """Vérifie si le taux de chômage est critique."""
         unemployment = metrics.get("unemployment_rate", 0)
         threshold = self.THRESHOLDS["chomage_critique"]
-        
+
         if unemployment >= threshold:
             return PredictiveSignal(
                 signal_type=SignalType.CHOMAGE_CRITIQUE,
@@ -289,7 +289,7 @@ class PredictiveSignalDetector:
                 data_sources=["INSEE"],
             )
         return None
-    
+
     def _check_acceleration_negative(
         self, code: str, name: str, trends: dict, now: datetime
     ) -> PredictiveSignal | None:
@@ -297,7 +297,7 @@ class PredictiveSignalDetector:
         trend_30d = trends.get("30d", {})
         vitality_change = trend_30d.get("vitality_change", 0)
         threshold = -self.THRESHOLDS["vitality_drop"]
-        
+
         if vitality_change <= threshold:
             return PredictiveSignal(
                 signal_type=SignalType.ACCELERATION_NEGATIVE,
@@ -315,14 +315,14 @@ class PredictiveSignalDetector:
                 data_sources=["Historique interne"],
             )
         return None
-    
+
     def _check_dynamisme_exceptionnel(
         self, code: str, name: str, metrics: dict, now: datetime
     ) -> PredictiveSignal | None:
         """Vérifie si le territoire est exceptionnellement dynamique (signal positif)."""
         vitality = metrics.get("vitality_index", 50)
         threshold = self.THRESHOLDS["dynamisme_exceptionnel"]
-        
+
         if vitality >= threshold:
             return PredictiveSignal(
                 signal_type=SignalType.DYNAMISME_EXCEPTIONNEL,
@@ -340,13 +340,13 @@ class PredictiveSignalDetector:
                 data_sources=["Multi-sources"],
             )
         return None
-    
+
     def _check_sector_signals(
         self, code: str, name: str, sector_analysis: dict, now: datetime
     ) -> list[PredictiveSignal]:
         """Génère des signaux basés sur l'analyse sectorielle."""
         signals = []
-        
+
         # Secteurs en crise
         in_crisis = sector_analysis.get("summary", {}).get("in_crisis", [])
         for sector in in_crisis:
@@ -367,7 +367,7 @@ class PredictiveSignalDetector:
                     recommendation=f"Analyser les causes spécifiques au secteur {sector['short_name']}",
                     data_sources=["BODACC"],
                 ))
-        
+
         # Secteurs émergents (beaucoup de créations, peu de fermetures)
         top_creators = sector_analysis.get("summary", {}).get("top_creators", [])
         for sector in top_creators[:2]:  # Top 2
@@ -388,7 +388,7 @@ class PredictiveSignalDetector:
                     recommendation=f"Opportunité : accompagner le développement du secteur {sector['short_name']}",
                     data_sources=["BODACC"],
                 ))
-        
+
         return signals
 
 

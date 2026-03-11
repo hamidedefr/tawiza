@@ -201,11 +201,7 @@ class CrossSourceDetector:
                 z = zscores[key]
                 min_z = cond["min_zscore"]
 
-                if cond["direction"] == "up" and z >= min_z:
-                    matched_conditions.append(cond)
-                    matched_sources.add(cond["source"])
-                    matched_metrics[cond["metric"]] = round(z, 2)
-                elif cond["direction"] == "down" and z <= min_z:
+                if cond["direction"] == "up" and z >= min_z or cond["direction"] == "down" and z <= min_z:
                     matched_conditions.append(cond)
                     matched_sources.add(cond["source"])
                     matched_metrics[cond["metric"]] = round(z, 2)
@@ -352,7 +348,7 @@ class SpatialDetector:
         # Build micro-signals for departments with cross-source convergence
         results: list[MicroSignal] = []
         for dept, anomalies in dept_anomalies.items():
-            sources = set(a["source"] for a in anomalies)
+            sources = {a["source"] for a in anomalies}
             if len(sources) < 2:
                 continue
 

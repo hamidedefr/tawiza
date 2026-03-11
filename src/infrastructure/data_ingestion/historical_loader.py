@@ -16,6 +16,10 @@ from typing import Any
 
 import numpy as np
 from loguru import logger
+from src.infrastructure.persistence.models.territorial_timeseries import (
+    GranularityType,
+    IndicatorType,
+)
 
 from src.application.services.correlation_engine import (
     AnomalyResult,
@@ -24,10 +28,6 @@ from src.application.services.correlation_engine import (
     get_correlation_engine,
 )
 from src.infrastructure.data_ingestion.dvf_ingester import DVFIngester
-from src.infrastructure.persistence.models.territorial_timeseries import (
-    GranularityType,
-    IndicatorType,
-)
 
 
 @dataclass

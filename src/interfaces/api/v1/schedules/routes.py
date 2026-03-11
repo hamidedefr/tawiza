@@ -8,10 +8,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.infrastructure.persistence.models.scheduled_analysis_model import ScheduleFrequency
 
 from src.application.services.tajine_scheduler import get_tajine_scheduler
 from src.infrastructure.persistence.database import get_db_session
-from src.infrastructure.persistence.models.scheduled_analysis_model import ScheduleFrequency
 from src.infrastructure.security.auth import User as AuthUser
 from src.infrastructure.security.auth import get_current_user
 

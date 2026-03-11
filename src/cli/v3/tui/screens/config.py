@@ -602,6 +602,7 @@ class ConfigScreen(Container):
         """Check database connection."""
         try:
             import asyncpg
+
             # Get database URL from .env
             from src.cli.constants import PROJECT_ROOT
             env_path = PROJECT_ROOT / ".env"

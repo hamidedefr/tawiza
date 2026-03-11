@@ -23,11 +23,11 @@ Usage:
 
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 
-class SpikeSeverity(str, Enum):
+class SpikeSeverity(StrEnum):
     """Spike severity levels based on z-score thresholds."""
 
     NONE = "none"

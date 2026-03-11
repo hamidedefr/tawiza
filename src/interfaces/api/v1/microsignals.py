@@ -5,7 +5,7 @@ Extends the basic microsignals endpoint in signals.py with management features.
 
 import asyncio
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -50,7 +50,7 @@ async def _run_detection():
             cwd=str(PROJECT_ROOT),
         )
         stdout, stderr = await proc.communicate()
-        _detection_state["last_run"] = datetime.now(timezone.utc).isoformat()
+        _detection_state["last_run"] = datetime.now(UTC).isoformat()
         if proc.returncode == 0:
             # Try to parse count from output
             output = stdout.decode()

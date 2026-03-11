@@ -188,7 +188,7 @@ def with_retry(config: RetryConfig | None = None):
     return decorator
 
 
-async def retry_async(
+async def retry_async[**P, T](
     func: Callable[P, T],
     *args: P.args,
     config: RetryConfig | None = None,

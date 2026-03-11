@@ -9,7 +9,7 @@ import asyncio
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, TypeVar
 
 from loguru import logger
@@ -17,7 +17,7 @@ from loguru import logger
 T = TypeVar("T")
 
 
-class BreakerState(str, Enum):
+class BreakerState(StrEnum):
     """Circuit breaker states."""
 
     CLOSED = "closed"  # Normal operation

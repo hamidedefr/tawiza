@@ -62,7 +62,7 @@ class DVFAdapter(BaseAdapter):
         super().__init__(config)
         # Geo API for commune lookup (to convert dept to INSEE codes)
         self._geo_url = "https://geo.api.gouv.fr"
-        
+
         # Local cache for fast queries on big departments
         self._use_local_cache = use_local_cache
         self._local_cache = None
@@ -104,10 +104,10 @@ class DVFAdapter(BaseAdapter):
                     type_local=query.get("type_local"),
                     limit=query.get("limit", 50),
                 )
-        
+
         # Fallback to Cerema API
         return await self._search_cerema(query)
-    
+
     def _get_department_from_query(self, query: dict[str, Any]) -> str | None:
         """Extract department code from query."""
         if dept := query.get("code_departement"):
@@ -251,7 +251,7 @@ class DVFAdapter(BaseAdapter):
             if self._local_cache.is_cached(dept):
                 logger.debug(f"Using local cache for stats {code_insee}")
                 return self._local_cache.get_stats(code_insee, annee)
-        
+
         query: dict[str, Any] = {"code_insee": code_insee, "limit": 1000}
         if annee:
             query["annee_min"] = annee

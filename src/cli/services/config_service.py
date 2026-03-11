@@ -22,7 +22,6 @@ from loguru import logger
 # ==============================================================================
 # CONSTANTES
 # ==============================================================================
-
 from src.cli.constants import PROJECT_ROOT
 
 CONFIG_DIR = PROJECT_ROOT / "configs"

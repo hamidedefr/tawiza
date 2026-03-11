@@ -167,7 +167,7 @@ async def get_signal_detail(signal_id: int):
         if not r:
             from fastapi import HTTPException
             raise HTTPException(status_code=404, detail="Signal non trouvé")
-        
+
         return {
             "id": r["id"],
             "source": r["source"],
@@ -558,14 +558,14 @@ async def get_predictions(
     limit: int = Query(50, ge=1, le=200),
 ):
     """Predictions temporelles via Facebook Prophet.
-    
+
     Retourne les previsions a 3 mois avec intervalles de confiance.
     """
     pool = await get_pool()
     async with pool.acquire() as conn:
         if dept:
             rows = await conn.fetch("""
-                SELECT department, source, metric, metric_label, 
+                SELECT department, source, metric, metric_label,
                        trend_direction, trend_change_pct, changepoints,
                        forecast, last_actual, data_points, prediction_date
                 FROM predictions_prophet
@@ -576,7 +576,7 @@ async def get_predictions(
             """, dept, limit)
         elif metric:
             rows = await conn.fetch("""
-                SELECT DISTINCT ON (department) 
+                SELECT DISTINCT ON (department)
                        department, source, metric, metric_label,
                        trend_direction, trend_change_pct, changepoints,
                        forecast, last_actual, data_points, prediction_date
@@ -595,7 +595,7 @@ async def get_predictions(
                 ORDER BY ABS(trend_change_pct) DESC
                 LIMIT $1
             """, limit)
-        
+
         return {
             "count": len(rows),
             "predictions": [

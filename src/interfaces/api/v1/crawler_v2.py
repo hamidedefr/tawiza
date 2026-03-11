@@ -7,7 +7,7 @@ import asyncio
 import os
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -76,7 +76,7 @@ async def _run_collection(source: str | None, departments: list[str] | None, day
     global _state
     _state["is_running"] = True
     _state["current_source"] = source or "all"
-    _state["started_at"] = datetime.now(timezone.utc).isoformat()
+    _state["started_at"] = datetime.now(UTC).isoformat()
     _state["error"] = None
 
     try:
@@ -96,7 +96,7 @@ async def _run_collection(source: str | None, departments: list[str] | None, day
         )
         stdout, stderr = await proc.communicate()
 
-        _state["last_run"] = datetime.now(timezone.utc).isoformat()
+        _state["last_run"] = datetime.now(UTC).isoformat()
         if proc.returncode == 0:
             _state["last_run_stats"] = {"status": "success", "output": stdout.decode()[-500:]}
         else:
@@ -203,7 +203,7 @@ async def collection_history(limit: int = 20):
     conn = await _get_db()
     try:
         rows = await conn.fetch("""
-            SELECT 
+            SELECT
                 source,
                 date_trunc('hour', collected_at) as batch_time,
                 count(*) as count,

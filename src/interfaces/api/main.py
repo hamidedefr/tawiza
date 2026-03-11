@@ -7,8 +7,10 @@ from fastapi import FastAPI, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from loguru import logger
-from src.core.telemetry import capture_startup, shutdown as telemetry_shutdown
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest
+
+from src.core.telemetry import capture_startup
+from src.core.telemetry import shutdown as telemetry_shutdown
 
 # Monitoring & error handling middlewares
 from src.infrastructure.monitoring.middleware import PrometheusMiddleware

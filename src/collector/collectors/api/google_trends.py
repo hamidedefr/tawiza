@@ -12,7 +12,7 @@ from ..base import BaseCollector, CollectedSignal, CollectorConfig
 
 class GoogleTrendsCollector(BaseCollector):
     """Collect search trends data from Google Trends.
-    
+
     Monitors search interest for economic keywords across French regions,
     providing early indicators of economic sentiment and job market stress.
     """
@@ -21,7 +21,7 @@ class GoogleTrendsCollector(BaseCollector):
     KEYWORDS = [
         "liquidation judiciaire",  # Business liquidation (negative)
         "pôle emploi",            # Job center (negative/neutral)
-        "RSA",                    # Social assistance (negative)  
+        "RSA",                    # Social assistance (negative)
         "chômage partiel",        # Partial unemployment (negative)
         "plan social"             # Social plan/layoffs (negative)
     ]
@@ -61,7 +61,7 @@ class GoogleTrendsCollector(BaseCollector):
             since = date.today() - timedelta(days=7)
 
         signals = []
-        
+
         # Create pytrends instance
         try:
             pytrends = TrendReq(hl='fr-FR', tz=360)
@@ -71,7 +71,7 @@ class GoogleTrendsCollector(BaseCollector):
 
         for keyword in self.KEYWORDS:
             logger.info(f"[google_trends] Fetching data for '{keyword}'")
-            
+
             try:
                 # Get interest by region for France
                 pytrends.build_payload(
@@ -80,31 +80,31 @@ class GoogleTrendsCollector(BaseCollector):
                     timeframe='now 7-d',
                     geo='FR'
                 )
-                
+
                 # Get regional data
                 interest_data = pytrends.interest_by_region(
                     resolution='REGION',
                     inc_low_vol=True,
                     inc_geo_code=False
                 )
-                
+
                 if interest_data.empty:
                     logger.warning(f"[google_trends] No data for '{keyword}'")
                     await asyncio.sleep(2)
                     continue
-                
+
                 # Process each region's data
                 for region_name, interest_value in interest_data[keyword].items():
                     if interest_value == 0:
                         continue
-                        
+
                     # Map region to departments
                     departments = self._map_region_to_departments(region_name)
-                    
+
                     for dept_code in departments:
                         if code_dept and dept_code != code_dept:
                             continue
-                            
+
                         signal = CollectedSignal(
                             source="google_trends",
                             source_url=f"trends:FR:{keyword}:{region_name}",
@@ -122,15 +122,15 @@ class GoogleTrendsCollector(BaseCollector):
                             }
                         )
                         signals.append(signal)
-                
+
                 logger.info(f"[google_trends] Processed '{keyword}': {len([s for s in signals if s.raw_data.get('keyword') == keyword])} signals")
-                
+
             except Exception as e:
                 logger.warning(f"[google_trends] Error fetching '{keyword}': {e}")
-                
+
             # Rate limit to avoid 429 errors
             await asyncio.sleep(2)
-        
+
         logger.info(f"[google_trends] Collected {len(signals)} total signals")
         return signals
 
@@ -141,7 +141,7 @@ class GoogleTrendsCollector(BaseCollector):
             region_short = code.split('-')[1]  # Extract ARA, BFC, etc.
             if region_short.lower() in region_name.lower():
                 return depts
-        
+
         # Fallback: try to match by region name
         region_mapping = {
             "auvergne": self.REGION_TO_DEPT["FR-ARA"],
@@ -163,11 +163,11 @@ class GoogleTrendsCollector(BaseCollector):
             "provence": self.REGION_TO_DEPT["FR-PAC"],
             "côte": self.REGION_TO_DEPT["FR-PAC"]
         }
-        
+
         for name_part, depts in region_mapping.items():
             if name_part.lower() in region_name.lower():
                 return depts
-        
+
         # If no match found, log and return empty list
         logger.debug(f"[google_trends] Could not map region '{region_name}' to departments")
         return []
@@ -176,14 +176,14 @@ class GoogleTrendsCollector(BaseCollector):
         """Determine signal type based on keyword and interest level."""
         negative_keywords = ["liquidation", "chômage", "plan social"]
         neutral_keywords = ["pôle emploi"]
-        
+
         for neg_kw in negative_keywords:
             if neg_kw in keyword.lower():
                 return "negatif" if interest_value > 50 else "neutre"
-        
+
         for neut_kw in neutral_keywords:
             if neut_kw in keyword.lower():
                 return "neutre"
-                
+
         # Default for other keywords like RSA
         return "negatif" if interest_value > 70 else "neutre"

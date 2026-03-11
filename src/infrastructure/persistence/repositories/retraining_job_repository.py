@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.infrastructure.persistence.models.retraining_job_model import RetrainingJobDB
 
 from src.domain.entities.retraining_job import (
     RetrainingJob,
@@ -12,7 +13,6 @@ from src.domain.entities.retraining_job import (
     RetrainingTriggerReason,
 )
 from src.domain.repositories.ml_repositories import IRetrainingJobRepository
-from src.infrastructure.persistence.models.retraining_job_model import RetrainingJobDB
 
 
 class SQLAlchemyRetrainingJobRepository(IRetrainingJobRepository):

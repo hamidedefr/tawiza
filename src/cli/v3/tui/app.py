@@ -218,6 +218,7 @@ class TawizaApp(App):
         use set_theme_by_name() which runs I/O in a thread pool.
         """
         import json
+
         from src.cli.constants import PROJECT_ROOT
         prefs_file = PROJECT_ROOT / ".tui_preferences.json"
         try:

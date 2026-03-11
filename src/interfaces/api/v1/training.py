@@ -7,7 +7,7 @@ and management of training data files.
 import asyncio
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -56,7 +56,7 @@ async def _run_generation(count: int, output_name: str):
             cwd=str(PROJECT_ROOT),
         )
         stdout, stderr = await proc.communicate()
-        _gen_state["last_run"] = datetime.now(timezone.utc).isoformat()
+        _gen_state["last_run"] = datetime.now(UTC).isoformat()
         if proc.returncode != 0:
             _gen_state["error"] = stderr.decode()[-300:]
     except Exception as e:
@@ -79,7 +79,7 @@ async def list_datasets():
             "name": f.name,
             "size_bytes": stat.st_size,
             "samples": line_count,
-            "created_at": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat(),
+            "created_at": datetime.fromtimestamp(stat.st_mtime, tz=UTC).isoformat(),
         })
     return {"datasets": datasets, "total": len(datasets)}
 

@@ -144,7 +144,7 @@ async def tool_department_profile(args: dict) -> str:
         total = sum(r['cnt'] for r in counts)
         lines = [
             f"Dept {dept} — {total} signaux totaux, {ms_count} micro-signaux actifs",
-            f"  Sources: " + ", ".join(f"{r['source']}={r['cnt']}" for r in counts),
+            "  Sources: " + ", ".join(f"{r['source']}={r['cnt']}" for r in counts),
         ]
 
         if metrics:

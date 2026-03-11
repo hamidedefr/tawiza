@@ -10,14 +10,15 @@ from typing import Any
 from loguru import logger
 
 from src.infrastructure.datasources.adapters.commoncrawl import (
-    CommonCrawlAdapter,
     CdxRecord,
+    CommonCrawlAdapter,
     WebPageContent,
 )
 from src.infrastructure.datasources.analyzers.crawl_intel import (
     CrawlIntelAnalyzer,
     WebSnapshot,
 )
+
 from ..base import BaseCollector, CollectedSignal, CollectorConfig
 
 
@@ -265,12 +266,12 @@ class CommonCrawlCollector(BaseCollector):
         """Persist snapshots and signals to database (best effort)."""
         try:
             from sqlalchemy.dialects.postgresql import insert as pg_insert
-
-            from src.infrastructure.persistence.database import get_session
             from src.infrastructure.persistence.models.web_snapshot_model import (
                 CrawlIntelSignalDB,
                 WebSnapshotDB,
             )
+
+            from src.infrastructure.persistence.database import get_session
 
             async with get_session() as session:
                 # Upsert snapshots (skip duplicates)
@@ -384,8 +385,9 @@ class CommonCrawlCollector(BaseCollector):
         self, code_dept: str | None
     ) -> list[dict[str, Any]]:
         """Get enterprises with recent BODACC signals that have websites."""
-        from src.infrastructure.persistence.database import get_session
         from sqlalchemy import text
+
+        from src.infrastructure.persistence.database import get_session
 
         enterprises = []
         async with get_session() as session:

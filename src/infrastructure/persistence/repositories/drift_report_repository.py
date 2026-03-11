@@ -5,10 +5,10 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.infrastructure.persistence.models.drift_report_model import DriftReportDB
 
 from src.domain.entities.drift_report import DriftReport, DriftSeverity, DriftType
 from src.domain.repositories.ml_repositories import IDriftReportRepository
-from src.infrastructure.persistence.models.drift_report_model import DriftReportDB
 
 
 class SQLAlchemyDriftReportRepository(IDriftReportRepository):

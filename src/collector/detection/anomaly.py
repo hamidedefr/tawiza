@@ -128,7 +128,7 @@ def cross_source_detection(
     # Find communes with anomalies from multiple sources
     micro_signals = []
     for commune, entries in commune_anomalies.items():
-        sources = list(set(src for src, _ in entries))
+        sources = list({src for src, _ in entries})
         if len(sources) >= min_sources:
             # Calculate convergence score
             avg_score = np.mean([a.score for _, a in entries])

@@ -515,6 +515,25 @@ SECRET_KEY=CHANGEZ_MOI_EN_PRODUCTION     # Obligatoire
 
 ---
 
+## 📡 Télémétrie
+
+Tawiza collecte des données de télémétrie **anonymes** via [PostHog](https://posthog.com/) (hébergé en EU) pour améliorer la plateforme. C'est **opt-out** — vous pouvez désactiver à tout moment.
+
+**Ce qui est collecté :** version de Tawiza, OS, fonctionnalités utilisées, sources de données interrogées, durée des requêtes agents.
+
+**Ce qui n'est PAS collecté :** aucune adresse IP, email, nom, contenu de chat, donnée d'entreprise ou territoriale, token ou clé API.
+
+**Identification :** un hash SHA-256 aléatoire de 16 caractères, généré localement, sans aucune information personnelle.
+
+```bash
+# Désactiver la télémétrie
+TELEMETRY_ENABLED=false  # dans .env
+```
+
+> Le code de télémétrie est 100% transparent : [`src/core/telemetry.py`](src/core/telemetry.py). Voir [docs/telemetry.md](docs/telemetry.md) pour les détails complets.
+
+---
+
 ## 📚 Documentation
 
 | Document | Description |

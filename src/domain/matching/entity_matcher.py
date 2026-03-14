@@ -85,6 +85,11 @@ class EntityMatcher:
         elif siret_score == self.SIREN_MATCH_CONFIDENCE:
             reasons.append("siren")
 
+        # Check if both entities have SIRET but they differ (explicit mismatch)
+        has_siret_a = bool(entity_a.get("siret") or entity_a.get("siren"))
+        has_siret_b = bool(entity_b.get("siret") or entity_b.get("siren"))
+        siret_mismatch = has_siret_a and has_siret_b and siret_score == 0
+
         # 2. Check fuzzy name match
         name_score = self._match_name(entity_a, entity_b)
         if name_score >= self.NAME_MATCH_THRESHOLD:
@@ -102,7 +107,12 @@ class EntityMatcher:
         elif siret_score > 0:
             confidence = siret_score * self.siret_weight
         elif name_score > 0:
-            confidence = name_score * self.name_weight
+            if siret_mismatch:
+                # Different SIRETs penalize heavily — name alone is not reliable
+                confidence = name_score * self.name_weight
+            else:
+                # No SIRET info at all — rely on name match directly
+                confidence = name_score
         else:
             confidence = 0
 

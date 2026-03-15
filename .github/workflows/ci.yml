@@ -69,12 +69,13 @@ jobs:
             exit 1
           fi
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        if: github.event_name == 'push'
-        with:
-          file: ./coverage.xml
-          flags: unittests
+      - name: Coverage summary
+        if: always()
+        run: |
+          if [ -f pytest-output.txt ]; then
+            echo "### Test Results" >> "$GITHUB_STEP_SUMMARY"
+            tail -5 pytest-output.txt >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   docker:
     name: Docker Build

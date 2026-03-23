@@ -1,6 +1,6 @@
 # Module Décisions
 
-Module de gestion des décisions stratégiques et des parties prenantes (stakeholders) pour l'intelligence territoriale. Permet de structurer les décisions, d'identifier les acteurs impliqués et de modéliser leurs relations.
+Gestion des decisions strategiques et des parties prenantes (stakeholders). CRUD decisions, acteurs, matrice RACI, graphe de relations.
 
 ## Architecture
 

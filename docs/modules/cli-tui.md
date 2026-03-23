@@ -57,7 +57,7 @@ src/cli/v2/
 
 ## TUI v3 (Textual)
 
-Interface textuelle complète construite avec [Textual](https://textual.textualize.io/), offrant une expérience proche d'une application graphique dans le terminal.
+Interface textuelle construite avec [Textual](https://textual.textualize.io/). Rendu quasi-graphique dans le terminal.
 
 ### Écrans
 

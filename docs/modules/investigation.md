@@ -1,6 +1,6 @@
 # Investigation & Risk
 
-Module d'investigation approfondie et d'évaluation de risque pour les entreprises. Combine raisonnement bayésien, extraction de signaux multi-sources et scoring ML pour produire des évaluations de risque détaillées.
+Investigation d'entreprises et evaluation de risque. Raisonnement bayesien + extraction de signaux multi-sources + scoring XGBoost.
 
 ## Architecture
 

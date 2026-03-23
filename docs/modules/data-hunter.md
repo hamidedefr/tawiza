@@ -1,6 +1,6 @@
 # Data Hunter
 
-Module de collecte proactive de données pour l'agent TAJINE. Le Data Hunter orchestre l'interrogation intelligente de multiples sources de données avec des stratégies adaptatives.
+Collecte de donnees multi-sources pour l'agent TAJINE. Interroge les APIs avec 4 strategies adaptatives.
 
 ## Architecture
 
@@ -43,7 +43,7 @@ Exploration automatique de patterns dans les données collectées. Détecte des 
 
 ## Version résiliente
 
-Le `ResilientDataHunter` ajoute des mécanismes de robustesse :
+Le `ResilientDataHunter` ajoute :
 
 | Mécanisme | Description | Fichier |
 |-----------|-------------|---------|

@@ -1,6 +1,6 @@
 # Signaux & Anomalies
 
-Module de détection de micro-signaux économiques territoriaux. Identifie des tendances et anomalies **avant** qu'elles soient visibles dans les statistiques officielles, en croisant de multiples sources de données.
+Detection de micro-signaux economiques territoriaux. Croise plusieurs sources (SIRENE, BODACC, DVF, France Travail) pour reperer des tendances avant les stats officielles.
 
 ## Architecture
 

@@ -1,6 +1,6 @@
 # Agent TAJINE
 
-Agent cognitif central de Tawiza. TAJINE orchestre l'ensemble du raisonnement et de la collecte de données pour l'intelligence territoriale.
+Agent central de Tawiza. Orchestre le raisonnement et la collecte de donnees.
 
 ## Architecture  -  Cycle PPDSL
 

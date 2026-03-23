@@ -1,6 +1,6 @@
 # Knowledge Graph
 
-Module de graphe de connaissances basé sur Neo4j pour la modélisation des relations entre entités économiques (entreprises, établissements, territoires, dirigeants).
+Graphe de connaissances Neo4j. Modelise les relations entre entreprises, etablissements, territoires et dirigeants.
 
 ## Architecture
 

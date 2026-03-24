@@ -1,8 +1,8 @@
-# Tawiza-V2 Test Suite
+# Tests Tawiza
 
-Suite complète de tests d'intégration pour le pipeline ML Tawiza-V2.
+Tests d'integration pour le pipeline ML.
 
-## Architecture de Tests
+## Structure
 
 ```
 tests/

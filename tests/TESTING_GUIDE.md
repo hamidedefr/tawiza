@@ -1,6 +1,6 @@
-# Testing Guide for Tawiza-V2 Phase 3 Refactoring
+# Guide de tests - refactoring services
 
-This guide explains the testing strategy for the refactored service-oriented architecture.
+Strategie de test pour l'architecture orientee services.
 
 ## Test Structure
 
@@ -26,11 +26,11 @@ Unit tests test individual components in isolation using mocking for dependencie
 **Coverage:** 100+ test cases
 
 Tests include:
-- ✅ Python version verification (success, failure, specific versions)
-- ✅ Docker verification (installed, not installed, daemon not running, timeout)
-- ✅ GPU verification (available, not available, command failures)
-- ✅ verify_all orchestration (all pass, some fail, critical failures)
-- ✅ Concurrent verification performance
+- Python version verification (success, failure, specific versions)
+- Docker verification (installed, not installed, daemon not running, timeout)
+- GPU verification (available, not available, command failures)
+- verify_all orchestration (all pass, some fail, critical failures)
+- Concurrent verification performance
 
 **Key Test Examples:**
 ```python
@@ -50,12 +50,12 @@ async def test_verify_docker_success(self, verification_service):
 **Coverage:** 80+ test cases
 
 Tests include:
-- ✅ CPU health (normal, warning, critical levels)
-- ✅ Memory health (normal, warning, critical levels)
-- ✅ Disk health (normal, warning, critical levels)
-- ✅ Service checks (Docker, GPU, system state)
-- ✅ Health score calculation
-- ✅ Recommendation generation
+- CPU health (normal, warning, critical levels)
+- Memory health (normal, warning, critical levels)
+- Disk health (normal, warning, critical levels)
+- Service checks (Docker, GPU, system state)
+- Health score calculation
+- Recommendation generation
 
 **Key Test Examples:**
 ```python
@@ -74,14 +74,14 @@ async def test_check_cpu_health_critical(self, health_service):
 **Coverage:** 60+ test cases
 
 Tests include:
-- ✅ Single directory creation
-- ✅ Multiple directories creation
-- ✅ Nested directory structures
-- ✅ Directory already exists handling
-- ✅ Directory existence checking
-- ✅ Directory deletion (empty, with contents, nested)
-- ✅ Error handling (permission denied, disk full)
-- ✅ Edge cases (special characters, whitespace, empty lists)
+- Single directory creation
+- Multiple directories creation
+- Nested directory structures
+- Directory already exists handling
+- Directory existence checking
+- Directory deletion (empty, with contents, nested)
+- Error handling (permission denied, disk full)
+- Edge cases (special characters, whitespace, empty lists)
 
 **Key Test Examples:**
 ```python
@@ -100,16 +100,16 @@ def test_create_nested_directories(self, directory_manager, temp_base_path):
 **Coverage:** 100+ test cases
 
 Tests include:
-- ✅ Successful initialization
-- ✅ Already initialized (with/without force)
-- ✅ Verification failures
-- ✅ Directory creation failures
-- ✅ Configuration adjustment based on verification
-- ✅ System shutdown (success, with monitoring, with agents)
-- ✅ System restart (with config, using existing config, not initialized)
-- ✅ Private helper methods
-- ✅ Error scenarios (partial failures, save config failure)
-- ✅ Integration-style lifecycle tests
+- Successful initialization
+- Already initialized (with/without force)
+- Verification failures
+- Directory creation failures
+- Configuration adjustment based on verification
+- System shutdown (success, with monitoring, with agents)
+- System restart (with config, using existing config, not initialized)
+- Private helper methods
+- Error scenarios (partial failures, save config failure)
+- Integration-style lifecycle tests
 
 **Key Test Examples:**
 ```python
@@ -277,11 +277,11 @@ pytest tests/unit/ -m "not slow"
 
 | Component | Target Coverage | Current |
 |-----------|----------------|---------|
-| SystemVerificationService | 95%+ | ✅ 98% |
-| HealthCheckService | 90%+ | ✅ 95% |
-| DirectoryManagerService | 90%+ | ✅ 92% |
-| SystemInitializationService | 90%+ | ✅ 94% |
-| **Overall** | **90%+** | **✅ 95%** |
+| SystemVerificationService | 95%+ | 98% |
+| HealthCheckService | 90%+ | 95% |
+| DirectoryManagerService | 90%+ | 92% |
+| SystemInitializationService | 90%+ | 94% |
+| **Overall** | **90%+** | **95%** |
 
 View coverage report:
 ```bash
@@ -400,11 +400,11 @@ def my_fixture():
 
 ## Next Steps
 
-1. ✅ Complete unit tests for all services
-2. ⏳ Create integration tests
-3. ⏳ Add end-to-end tests
-4. ⏳ Setup CI/CD pipeline
-5. ⏳ Measure and improve coverage
+1. [x] Complete unit tests for all services
+2. [ ] Create integration tests
+3. [ ] Add end-to-end tests
+4. [ ] Setup CI/CD pipeline
+5. [ ] Measure and improve coverage
 
 ## Resources
 
@@ -413,8 +413,3 @@ def my_fixture():
 - [unittest.mock](https://docs.python.org/3/library/unittest.mock.html)
 - [Testing Best Practices](https://testdriven.io/blog/testing-best-practices/)
 
----
-
-**Generated:** Phase 3 Refactoring
-**Version:** 2.0.3
-**Coverage:** 95%+ for all services

@@ -400,10 +400,7 @@ def demo_data_analysis(duration: int, auto: bool):
             f"  • Dataset créé: {len(demo_data)} colonnes, {len(demo_data['temperature'])} lignes"
         )
 
-        # Appeler la commande d'analyse
-        from src.cli.commands.agents_advanced import analyze_data
-
-        analyze_data(dataset=dataset_path, output="demo_analysis.json", detailed=True, wait=True)
+        console.print("[yellow]Demo analysis not yet implemented (agents_advanced module pending)[/yellow]")
 
     finally:
         Path(dataset_path).unlink()
@@ -417,18 +414,7 @@ def demo_code_generation(duration: int, auto: bool):
 
     description = "Créer une fonction qui calcule la moyenne mobile d'une série temporelle avec gestion des valeurs manquantes"
 
-    # Appeler la commande de génération
-    from src.cli.commands.agents_advanced import generate_code
-
-    generate_code(
-        description=description,
-        language="python",
-        output="demo_generated_code.py",
-        framework=None,
-        requirements=["Gestion des valeurs manquantes", "Optimisation des performances"],
-        tests=True,
-        documentation=True,
-    )
+    console.print("[yellow]Demo code generation not yet implemented (agents_advanced module pending)[/yellow]")
 
 
 def demo_gpu_optimization(duration: int, auto: bool):
@@ -437,10 +423,7 @@ def demo_gpu_optimization(duration: int, auto: bool):
         f"\n[bold {THEME_DICT['info_color']}]🎮 Démonstration: Optimisation GPU[/bold {THEME_DICT['info_color']}]"
     )
 
-    # Appeler la commande d'optimisation
-    from src.cli.commands.agents_advanced import gpu_optimize
-
-    gpu_optimize(model="qwen3.5:27b", benchmark=True, verbose=False)
+    console.print("[yellow]Demo GPU optimization not yet implemented (agents_advanced module pending)[/yellow]")
 
 
 def demo_real_time_monitoring(duration: int, auto: bool):

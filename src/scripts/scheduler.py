@@ -49,19 +49,29 @@ async def job_collect_weekly():
 
 async def job_detect():
     """Détection micro-signaux + temporel + alertes."""
-    from src.scripts.detect_microsignals_v2 import run_detection
-    from src.scripts.detect_temporal import detect_temporal_signals
+    try:
+        from src.scripts.detect_microsignals_v2 import run_detection
 
-    logger.info("⏰ [SCHEDULER] Détection micro-signaux")
-    await run_detection(days_back=180, save=True)
+        logger.info("⏰ [SCHEDULER] Détection micro-signaux")
+        await run_detection(days_back=180, save=True)
+    except ImportError:
+        logger.warning("[SCHEDULER] detect_microsignals_v2 not available, skipping")
 
-    logger.info("⏰ [SCHEDULER] Détection temporelle")
-    await detect_temporal_signals()
+    try:
+        from src.scripts.detect_temporal import detect_temporal_signals
 
-    logger.info("⏰ [SCHEDULER] Vérification alertes")
-    from src.scripts.alert_telegram import send_alert
+        logger.info("⏰ [SCHEDULER] Détection temporelle")
+        await detect_temporal_signals()
+    except ImportError:
+        logger.warning("[SCHEDULER] detect_temporal not available, skipping")
 
-    await send_alert()
+    try:
+        from src.scripts.alert_telegram import send_alert
+
+        logger.info("⏰ [SCHEDULER] Vérification alertes")
+        await send_alert()
+    except ImportError:
+        logger.warning("[SCHEDULER] alert_telegram not available, skipping")
 
 
 def setup_scheduler():

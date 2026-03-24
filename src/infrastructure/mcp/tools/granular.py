@@ -80,9 +80,9 @@ def register_granular_tools(mcp: FastMCP) -> None:
         Returns:
             Liste d'annonces légales
         """
-        from src.infrastructure.datasources.bodacc import BodaccDataSource
+        from src.infrastructure.datasources.adapters.bodacc import BodaccAdapter
 
-        datasource = BodaccDataSource()
+        datasource = BodaccAdapter()
         results = await datasource.search(query=query, limit=limit)
 
         return json.dumps(
@@ -114,9 +114,9 @@ def register_granular_tools(mcp: FastMCP) -> None:
         Returns:
             Liste de marchés publics
         """
-        from src.infrastructure.datasources.boamp import BoampDataSource
+        from src.infrastructure.datasources.adapters.boamp import BoampAdapter
 
-        datasource = BoampDataSource()
+        datasource = BoampAdapter()
         results = await datasource.search(query=query, limit=limit)
 
         return json.dumps(
@@ -307,9 +307,9 @@ def register_granular_tools(mcp: FastMCP) -> None:
         Returns:
             Liste d'articles
         """
-        from src.infrastructure.datasources.gdelt import GdeltDataSource
+        from src.infrastructure.datasources.adapters.gdelt import GdeltAdapter
 
-        datasource = GdeltDataSource()
+        datasource = GdeltAdapter()
         results = await datasource.search(query=query, limit=limit)
 
         return json.dumps(
@@ -339,9 +339,9 @@ def register_granular_tools(mcp: FastMCP) -> None:
         Returns:
             Liste de subventions
         """
-        from src.infrastructure.datasources.subventions import SubventionsDataSource
+        from src.infrastructure.datasources.adapters.subventions import SubventionsAdapter
 
-        datasource = SubventionsDataSource()
+        datasource = SubventionsAdapter()
         results = await datasource.search(query=query, limit=limit)
 
         return json.dumps(

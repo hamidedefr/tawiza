@@ -28,14 +28,14 @@ class TestEmbeddingsService:
             mock_client_class.return_value.__aenter__.return_value = mock_client
 
             mock_response = MagicMock()
-            mock_response.json.return_value = {"embedding": [0.1] * 768}
+            mock_response.json.return_value = {"embeddings": [[0.1] * 1024]}
             mock_response.raise_for_status = MagicMock()
             mock_client.post.return_value = mock_response
 
             service = EmbeddingsService()
             embedding = await service.embed("test text")
 
-            assert len(embedding) == 768
+            assert len(embedding) == 1024
             assert all(isinstance(x, float) for x in embedding)
             mock_client.post.assert_called_once()
 
@@ -48,11 +48,11 @@ class TestEmbeddingsService:
 
             # Mock multiple responses
             mock_response1 = MagicMock()
-            mock_response1.json.return_value = {"embedding": [0.1] * 768}
+            mock_response1.json.return_value = {"embeddings": [[0.1] * 1024]}
             mock_response1.raise_for_status = MagicMock()
 
             mock_response2 = MagicMock()
-            mock_response2.json.return_value = {"embedding": [0.2] * 768}
+            mock_response2.json.return_value = {"embeddings": [[0.2] * 1024]}
             mock_response2.raise_for_status = MagicMock()
 
             mock_client.post.side_effect = [mock_response1, mock_response2]
@@ -61,8 +61,8 @@ class TestEmbeddingsService:
             embeddings = await service.embed_batch(["text1", "text2"])
 
             assert len(embeddings) == 2
-            assert len(embeddings[0]) == 768
-            assert len(embeddings[1]) == 768
+            assert len(embeddings[0]) == 1024
+            assert len(embeddings[1]) == 1024
 
     @pytest.mark.asyncio
     async def test_custom_config(self):

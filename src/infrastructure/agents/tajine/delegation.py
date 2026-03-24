@@ -162,7 +162,7 @@ async def execute_browser_action(agent: TAJINEAgent, subtask: dict[str, Any]) ->
     Returns:
         Browser action result
     """
-    from src.infrastructure.agents.tajine.callbacks import TAJINECallback, TAJINEEvent
+    from src.infrastructure.agents.tajine.events import TAJINECallback, TAJINEEvent
     from src.infrastructure.agents.tajine.tools.browser_tools import BrowserActionTool
 
     params = subtask.get("params", {})
@@ -282,7 +282,7 @@ async def run_data_hunt(
     Returns:
         Dict with hunt results and metrics
     """
-    from src.infrastructure.agents.tajine.callbacks import TAJINECallback, TAJINEEvent
+    from src.infrastructure.agents.tajine.events import TAJINECallback, TAJINEEvent
     from src.infrastructure.agents.tajine.core.types import HuntContext
 
     territory = perception.get("territory", "France")
@@ -458,7 +458,7 @@ async def bridge_relations_discover(
     analyzed.  Runs as a fire-and-forget ``asyncio.Task`` so it never blocks
     the main PPDSL pipeline.
     """
-    from src.infrastructure.agents.tajine.callbacks import TAJINECallback, TAJINEEvent
+    from src.infrastructure.agents.tajine.events import TAJINECallback, TAJINEEvent
 
     try:
         from src.application.services.relation_service import RelationService

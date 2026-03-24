@@ -16,7 +16,7 @@ class TestQdrantConfig:
         assert config.host == "localhost"
         assert config.port == 6333
         assert config.collection_name == "tawiza_documents"
-        assert config.vector_size == 768
+        assert config.vector_size == 1024
 
 
 class TestQdrantClient:

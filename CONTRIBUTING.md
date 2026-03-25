@@ -213,7 +213,7 @@ tawiza/
 │   │   └── knowledge_graph/# Neo4j client
 │   └── interfaces/api/     # FastAPI routes + WebSocket
 ├── frontend/               # Next.js 14
-│   ├── app/dashboard/      # Pages du dashboard (22)
+│   ├── app/dashboard/      # Pages du dashboard (7)
 │   ├── components/         # Composants React (shadcn/ui)
 │   └── hooks/              # Hooks SWR + custom
 ├── tests/                  # Tests (unit, integration, e2e)

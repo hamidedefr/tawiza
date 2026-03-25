@@ -22,7 +22,7 @@ from typing import TypeVar
 
 from loguru import logger
 
-_REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6380/0")
+_REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 K = TypeVar("K")
 V = TypeVar("V")

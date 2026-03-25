@@ -11,7 +11,7 @@ from loguru import logger
 
 DB_DSN = os.getenv(
     "COLLECTOR_DATABASE_URL",
-    "postgresql+asyncpg://localhost:5433/tawiza",
+    "postgresql+asyncpg://localhost:5432/tawiza",
 )
 
 _pool: asyncpg.Pool | None = None

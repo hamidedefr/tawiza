@@ -21,7 +21,7 @@ from loguru import logger
 
 DB_DSN = os.getenv(
     "COLLECTOR_DATABASE_URL",
-    "postgresql://localhost:5433/tawiza",
+    "postgresql://localhost:5432/tawiza",
 ).replace("+asyncpg", "")
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")

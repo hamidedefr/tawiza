@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ecosystem scoring et investigation UI avec cascade graph
 - Fine-tuning pipeline avec LLM-as-Judge et gestion de datasets
 - Web crawling adaptatif avec stealth pool et circuit breakers
-- Dashboard Next.js 14 avec 15+ pages (chat, cockpit territorial, analytics, investigation, signaux, etc.)
+- Dashboard Next.js 14 avec 7 pages (chat IA, cockpit territorial, analytics, departements, sources, parametres)
 - Backend FastAPI avec endpoints OpenAI-compatible (intégration LobeChat/Open-WebUI)
 - Infrastructure PostgreSQL + pgvector + Redis
 - Support Ollama local avec ROCm (AMD) et CUDA (NVIDIA)

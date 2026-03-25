@@ -51,7 +51,7 @@ class PGVectorAdapter(VectorStoreProtocol):
 
         dsn = self.dsn or getattr(settings, "vectordb_url", None)
         if not dsn:
-            dsn = os.getenv("DATABASE_URL", "postgresql://localhost:5433/tawiza")
+            dsn = os.getenv("DATABASE_URL", "postgresql://localhost:5432/tawiza")
             logger.warning(f"No vectordb_url in settings, using default: {dsn}")
 
         self._client = PGVectorClient(dsn, self.embedding_dim)

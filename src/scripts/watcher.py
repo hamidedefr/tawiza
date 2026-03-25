@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv(project_root / ".env")
 
-DB_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost:5433/tawiza")
+DB_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost:5432/tawiza")
 
 # ─── Configuration ────────────────────────────────────────────
 

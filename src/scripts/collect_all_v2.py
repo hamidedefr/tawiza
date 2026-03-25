@@ -1251,7 +1251,7 @@ async def store_signals(signals: list[Signal]) -> int:
 
     import asyncpg
 
-    db_url = os.getenv("DATABASE_URL", "postgresql://localhost:5433/tawiza")
+    db_url = os.getenv("DATABASE_URL", "postgresql://localhost:5432/tawiza")
     conn = await asyncpg.connect(db_url)
 
     try:

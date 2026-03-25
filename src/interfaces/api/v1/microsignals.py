@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/v1/microsignals", tags=["Micro-Signals"])
 
 DB_DSN = os.getenv(
     "COLLECTOR_DATABASE_URL",
-    "postgresql://localhost:5433/tawiza",
+    "postgresql://localhost:5432/tawiza",
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent

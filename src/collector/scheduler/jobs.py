@@ -89,7 +89,7 @@ class CollectorScheduler:
     def __init__(self, database_url: str | None = None) -> None:
         self._db_url = database_url or os.getenv(
             "COLLECTOR_DATABASE_URL",
-            "postgresql+asyncpg://localhost:5433/tawiza",
+            "postgresql+asyncpg://localhost:5432/tawiza",
         )
         self._scheduler = AsyncIOScheduler()
         self._repo = SignalRepository(self._db_url)

@@ -34,7 +34,7 @@ load_dotenv(project_root / ".env")
 # DB URL from environment
 _RAW_DB_URL = os.getenv(
     "COLLECTOR_DATABASE_URL",
-    "postgresql+asyncpg://localhost:5433/tawiza",
+    "postgresql+asyncpg://localhost:5432/tawiza",
 ).replace("+asyncpg", "")
 
 # Department names for save_scores

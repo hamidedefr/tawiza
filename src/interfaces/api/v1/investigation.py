@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/v1/investigation", tags=["Investigation"])
 
 DB_DSN = os.getenv(
     "COLLECTOR_DATABASE_URL",
-    "postgresql://localhost:5433/tawiza",
+    "postgresql://localhost:5432/tawiza",
 )
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")

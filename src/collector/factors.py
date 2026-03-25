@@ -91,7 +91,7 @@ class PostgreSQLDataCollector:
     def __init__(self):
         self.conn_params = {
             "host": "localhost",
-            "port": 5433,
+            "port": 5432,
             "database": os.getenv("SIGNALS_DB_NAME", "tawiza_signals"),
             "user": os.getenv("DATABASE_USER", "tawiza"),
             "password": os.getenv("DATABASE_PASSWORD", ""),

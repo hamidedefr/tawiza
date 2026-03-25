@@ -38,7 +38,7 @@ from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-DB_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5433/tawiza")
+DB_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5432/tawiza")
 
 # Source reliability weights (higher = more reliable)
 SOURCE_WEIGHTS = {

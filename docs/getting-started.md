@@ -33,8 +33,8 @@ docker compose ps
 Services disponibles :
 - **Backend API** : http://localhost:8000 (docs: http://localhost:8000/docs)
 - **Frontend** : http://localhost:3000
-- **PostgreSQL** : localhost:5433
-- **Redis** : localhost:6380
+- **PostgreSQL** : localhost:5432
+- **Redis** : localhost:6379
 
 ## Installation manuelle
 
@@ -122,10 +122,10 @@ Voir [configuration.md](configuration.md) pour la référence complète des vari
 
 ```bash
 # Base de données
-DATABASE_URL=postgresql+asyncpg://tawiza:changeme@localhost:5433/tawiza
+DATABASE_URL=postgresql+asyncpg://tawiza:changeme@localhost:5432/tawiza
 
 # Redis
-REDIS_URL=redis://localhost:6380/0
+REDIS_URL=redis://localhost:6379/0
 
 # LLM (optionnel)
 OLLAMA_BASE_URL=http://localhost:11434

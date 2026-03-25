@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/v1/training", tags=["Training Data"])
 
 DB_DSN = os.getenv(
     "COLLECTOR_DATABASE_URL",
-    "postgresql://localhost:5433/tawiza",
+    "postgresql://localhost:5432/tawiza",
 ).replace("+asyncpg", "")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent

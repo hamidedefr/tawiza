@@ -1,9 +1,15 @@
 # Roadmap Tawiza
 
+## Fait
+
+- [x] Reduction du dashboard (19 pages -> 7 pages essentielles)
+- [x] Pipeline de securite CI (CodeQL, Gitleaks, Bandit, Trojan Source)
+- [x] Dependabot + Dependency Review sur les PRs
+- [x] Scan automatique de securite sur chaque PR
+
 ## En cours
 
 - [ ] Stabilisation de l'agent TAJINE (niveaux Causal et Scenario)
-- [ ] Reduction du dashboard (19 pages -> 7 pages essentielles)
 - [ ] Tests end-to-end des adaptateurs de sources
 - [ ] Stabilisation du crawler adaptatif
 - [ ] Finalisation CLI / TUI (fusion v2/v3)
@@ -13,7 +19,6 @@
 - [ ] Fine-tuning LoRA sur des cas d'usage territoriaux
 - [ ] Investigation bayesienne complete
 - [ ] Extension du Knowledge Graph (Neo4j)
-- [ ] Systeme multi-agents (CAMEL) - a valider si pertinent
 - [ ] Internationalisation (i18n) du frontend
 - [ ] Mode offline avec cache local des APIs
 - [ ] Plugin system pour les sources de donnees communautaires

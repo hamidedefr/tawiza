@@ -32,7 +32,7 @@ class MLDetection:
     """
 
     def __init__(
-        self, db_url: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost:5433/tawiza")
+        self, db_url: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost:5432/tawiza")
     ):
         self.db_url = db_url
         self.engine = create_async_engine(db_url)

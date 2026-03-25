@@ -27,7 +27,7 @@ from src.infrastructure.agents.tools.registry import (
 
 # DB connection string
 DB_URL = (
-    os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5433/tawiza")
+    os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5432/tawiza")
     .replace("postgresql+asyncpg://", "postgresql://")
     .replace("postgresql://", "postgres://")
 )

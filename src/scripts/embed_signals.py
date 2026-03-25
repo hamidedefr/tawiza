@@ -16,7 +16,7 @@ from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-DB_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5433/tawiza")
+DB_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5432/tawiza")
 OLLAMA_URL = "http://localhost:11434"
 EMBED_MODEL = "nomic-embed-text"
 BATCH_SIZE = 50  # signals per batch

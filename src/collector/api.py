@@ -28,7 +28,7 @@ def get_repo() -> SignalRepository:
     if _repo is None:
         db_url = os.getenv(
             "COLLECTOR_DATABASE_URL",
-            "postgresql+asyncpg://localhost:5433/tawiza",
+            "postgresql+asyncpg://localhost:5432/tawiza",
         )
         _repo = SignalRepository(db_url)
     return _repo
@@ -1321,7 +1321,7 @@ async def compute_alpha_features(
 
         # Create data handler
         config = DataHandlerConfig(
-            db_url=os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5433/tawiza"),
+            db_url=os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5432/tawiza"),
             territories=dept_list,
             start_date=str(start_date),
             end_date=str(end_date),
@@ -1395,7 +1395,7 @@ async def detect_qlib_anomalies(
 
         # Set up data handler
         config = DataHandlerConfig(
-            db_url=os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5433/tawiza"),
+            db_url=os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5432/tawiza"),
             territories=dept_list,
         )
 

@@ -20,7 +20,7 @@ Tawiza se configure entièrement via des variables d'environnement. Copiez `.env
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DATABASE_URL` | `postgresql+asyncpg://tawiza:changeme@localhost:5433/tawiza` | URL de connexion PostgreSQL |
+| `DATABASE_URL` | `postgresql+asyncpg://tawiza:changeme@localhost:5432/tawiza` | URL de connexion PostgreSQL |
 | `DATABASE_POOL_SIZE` | `10` | Taille du pool de connexions |
 | `DATABASE_MAX_OVERFLOW` | `20` | Connexions supplémentaires max |
 
@@ -28,7 +28,7 @@ Tawiza se configure entièrement via des variables d'environnement. Copiez `.env
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `REDIS_URL` | `redis://localhost:6380/0` | URL de connexion Redis |
+| `REDIS_URL` | `redis://localhost:6379/0` | URL de connexion Redis |
 
 ### LLM (Ollama)
 
@@ -87,8 +87,8 @@ Variables du frontend (dans `frontend/.env.local`) :
 
 Le `docker-compose.yml` utilise les variables de `.env` automatiquement. Les ports par défaut sont volontairement non-standard pour éviter les conflits :
 
-- PostgreSQL : **5433** (pas 5432)
-- Redis : **6380** (pas 6379)
+- PostgreSQL : **5432** (standard)
+- Redis : **6379** (standard)
 - Grafana : **3003** (pas 3000)
 
 ## Production

@@ -31,7 +31,7 @@ def _find_project_root() -> Path:
 _PROJECT_ROOT = _find_project_root()
 
 DB_URL = (
-    os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5433/tawiza")
+    os.getenv("COLLECTOR_DATABASE_URL", "postgresql://localhost:5432/tawiza")
     .replace("postgresql+asyncpg://", "postgresql://")
     .replace("postgresql://", "postgres://")
 )

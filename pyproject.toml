@@ -94,10 +94,9 @@ dependencies = [
     "e2b-code-interpreter>=2.3.0",
     # Knowledge Graph
     "neo4j>=5.0.0",
-    # Playwright for basic browser automation (without browser-use)
+    # Playwright for basic browser automation
     "playwright>=1.56.0",
     "textual-plotext>=1.0.1",
-    "browser-use>=0.9.5",
     "langchain-ollama>=0.3.10",
 ]
 

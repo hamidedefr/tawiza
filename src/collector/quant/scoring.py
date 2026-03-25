@@ -264,7 +264,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         database_url = sys.argv[1]
     else:
-        database_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost:5433/tawiza")
+        database_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost:5432/tawiza")
 
     # Test the scoring system
     scores = asyncio.run(compute_territorial_scores(database_url))

@@ -301,7 +301,7 @@ if __name__ == "__main__":
         database_url = sys.argv[1]
     else:
         database_url = os.getenv(
-            "DATABASE_URL", "postgresql+asyncpg://localhost:5433/tawiza_signals"
+            "DATABASE_URL", "postgresql+asyncpg://localhost:5432/tawiza_signals"
         )
 
     # Test the factors calculation

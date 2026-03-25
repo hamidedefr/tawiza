@@ -119,7 +119,7 @@ Système d'adaptateurs avec :
 |---------|------|------|
 | Backend API | 8000 | FastAPI |
 | Frontend | 3000 | Next.js |
-| PostgreSQL | 5433 | Pas 5432 (éviter conflits) |
-| Redis | 6380 | Pas 6379 (éviter conflits) |
+| PostgreSQL | 5432 | Base de donnees |
+| Redis | 6379 | Cache et files de messages |
 | Ollama | 11434 | LLM local |
 | Grafana | 3003 | Monitoring |

@@ -282,8 +282,8 @@ async def run_data_hunt(
     Returns:
         Dict with hunt results and metrics
     """
-    from src.infrastructure.agents.tajine.events import TAJINECallback, TAJINEEvent
     from src.infrastructure.agents.tajine.core.types import HuntContext
+    from src.infrastructure.agents.tajine.events import TAJINECallback, TAJINEEvent
 
     territory = perception.get("territory", "France")
     query = perception.get("query", "")

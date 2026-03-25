@@ -72,6 +72,9 @@ credentials/
 *.key
 *.crt
 
+# Linting
+.ruff_cache/
+
 # Type checking
 .mypy_cache/
 

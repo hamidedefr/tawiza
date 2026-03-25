@@ -13,7 +13,7 @@ router = APIRouter()
 # Use environment variable, fallback to default
 _DB_URL = os.getenv(
     "COLLECTOR_DATABASE_URL",
-    "postgresql+asyncpg://localhost:5433/tawiza",
+    "postgresql+asyncpg://localhost:5432/tawiza",
 ).replace("+asyncpg", "")  # asyncpg.create_pool needs raw postgresql:// URL
 
 # Connection pool (created lazily)

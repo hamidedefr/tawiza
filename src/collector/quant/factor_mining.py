@@ -32,7 +32,7 @@ class FactorMining:
     def __init__(
         self,
         db_url: str = os.getenv(
-            "DATABASE_URL", "postgresql+asyncpg://localhost:5433/tawiza_signals"
+            "DATABASE_URL", "postgresql+asyncpg://localhost:5432/tawiza_signals"
         ),
         ollama_url: str = "http://localhost:11434",
     ):

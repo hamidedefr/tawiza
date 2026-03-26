@@ -14,11 +14,11 @@ import os
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, (np.integer,)):
+        if isinstance(obj, np.integer):
             return int(obj)
-        if isinstance(obj, (np.floating,)):
+        if isinstance(obj, np.floating):
             return float(obj)
-        if isinstance(obj, (np.bool_,)):
+        if isinstance(obj, np.bool_):
             return bool(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()

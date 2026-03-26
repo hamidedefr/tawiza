@@ -139,7 +139,7 @@ def export_csv(
             flat_row = {}
             for key in headers:
                 value = row.get(key, "")
-                if isinstance(value, (dict, list)):
+                if isinstance(value, dict | list):
                     value = json.dumps(value, ensure_ascii=False)
                 flat_row[key] = value
             writer.writerow(flat_row)

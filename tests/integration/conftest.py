@@ -60,15 +60,7 @@ _minio_available = _is_service_available("http://localhost:9000/minio/health/liv
 _cli_available = _is_cli_available("tawiza")
 
 # Skip reasons
-skip_no_ollama = pytest.mark.skipif(
-    not _ollama_available, reason="Ollama service not available"
-)
-skip_no_api = pytest.mark.skipif(
-    not _api_available, reason="API server not running"
-)
-skip_no_minio = pytest.mark.skipif(
-    not _minio_available, reason="MinIO service not available"
-)
-skip_no_cli = pytest.mark.skipif(
-    not _cli_available, reason="tawiza CLI not installed"
-)
+skip_no_ollama = pytest.mark.skipif(not _ollama_available, reason="Ollama service not available")
+skip_no_api = pytest.mark.skipif(not _api_available, reason="API server not running")
+skip_no_minio = pytest.mark.skipif(not _minio_available, reason="MinIO service not available")
+skip_no_cli = pytest.mark.skipif(not _cli_available, reason="tawiza CLI not installed")

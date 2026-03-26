@@ -341,7 +341,7 @@ class TestTajineToolExecution:
         assert tool is not None
 
         # Tool should have execute method
-        assert hasattr(tool, "execute") or hasattr(tool, "__call__")
+        assert hasattr(tool, "execute") or callable(tool)
 
     @pytest.mark.asyncio
     async def test_territorial_analysis_tool(self):

@@ -138,7 +138,7 @@ class TestAgentInitialization:
 
         # Second call should return existing agents (possibly subset)
         # All agents from second call should be in first call
-        for key in results2.keys():
+        for key in results2:
             assert key in results1
 
 

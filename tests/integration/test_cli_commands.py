@@ -14,9 +14,7 @@ import httpx
 import pytest
 
 # Skip all tests in this module if tawiza CLI is not installed
-pytestmark = pytest.mark.skipif(
-    not shutil.which("tawiza"), reason="tawiza CLI not installed"
-)
+pytestmark = pytest.mark.skipif(not shutil.which("tawiza"), reason="tawiza CLI not installed")
 
 
 def _check_api_available() -> bool:
@@ -169,9 +167,7 @@ class TestAnnotateCommands:
             ["tawiza", "annotate", "list"], capture_output=True, text=True, timeout=15
         )
         assert (
-            "project" in result.stdout.lower()
-            or "No" in result.stdout
-            or "Error" in result.stdout
+            "project" in result.stdout.lower() or "No" in result.stdout or "Error" in result.stdout
         )
 
 

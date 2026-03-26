@@ -463,7 +463,7 @@ class MLEngineerAgent:
                 # Suggérer des hyperparamètres
                 params = {}
                 for param_name, param_values in param_grids.items():
-                    if all(isinstance(v, (int, float)) for v in param_values):
+                    if all(isinstance(v, int | float) for v in param_values):
                         # Paramètres numériques continus
                         if len(param_values) == 2:
                             params[param_name] = trial.suggest_float(

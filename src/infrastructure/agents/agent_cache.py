@@ -197,7 +197,7 @@ class AgentResultCache:
                 return False
 
         # Don't cache empty results
-        return not (isinstance(result, (list, dict, str)) and len(result) == 0)
+        return not (isinstance(result, list | dict | str) and len(result) == 0)
 
     def _get_agent_type(self, agent_name: str) -> str:
         """

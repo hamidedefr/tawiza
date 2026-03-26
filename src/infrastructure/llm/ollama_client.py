@@ -567,8 +567,7 @@ Return the extracted data as JSON."""
         # Filter out embedding models (typically small and not for generation)
         embedding_keywords = ["embed", "nomic", "bge", "e5"]
         generation_models = [
-            m for m in models
-            if not any(kw in m["name"].lower() for kw in embedding_keywords)
+            m for m in models if not any(kw in m["name"].lower() for kw in embedding_keywords)
         ]
 
         if generation_models:

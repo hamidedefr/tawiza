@@ -260,7 +260,7 @@ class DiscoveryLevel(BaseCognitiveLevel, ReflectionMixin):
 
         # 3. Check for explicit growth indicator
         if growth := data.get("growth"):
-            if isinstance(growth, (int, float)) and growth > 0.05:
+            if isinstance(growth, int | float) and growth > 0.05:
                 signals.append(
                     Signal(
                         type="growth",

@@ -400,7 +400,9 @@ def demo_data_analysis(duration: int, auto: bool):
             f"  • Dataset créé: {len(demo_data)} colonnes, {len(demo_data['temperature'])} lignes"
         )
 
-        console.print("[yellow]Demo analysis not yet implemented (agents_advanced module pending)[/yellow]")
+        console.print(
+            "[yellow]Demo analysis not yet implemented (agents_advanced module pending)[/yellow]"
+        )
 
     finally:
         Path(dataset_path).unlink()
@@ -414,7 +416,9 @@ def demo_code_generation(duration: int, auto: bool):
 
     description = "Créer une fonction qui calcule la moyenne mobile d'une série temporelle avec gestion des valeurs manquantes"
 
-    console.print("[yellow]Demo code generation not yet implemented (agents_advanced module pending)[/yellow]")
+    console.print(
+        "[yellow]Demo code generation not yet implemented (agents_advanced module pending)[/yellow]"
+    )
 
 
 def demo_gpu_optimization(duration: int, auto: bool):
@@ -423,7 +427,9 @@ def demo_gpu_optimization(duration: int, auto: bool):
         f"\n[bold {THEME_DICT['info_color']}]🎮 Démonstration: Optimisation GPU[/bold {THEME_DICT['info_color']}]"
     )
 
-    console.print("[yellow]Demo GPU optimization not yet implemented (agents_advanced module pending)[/yellow]")
+    console.print(
+        "[yellow]Demo GPU optimization not yet implemented (agents_advanced module pending)[/yellow]"
+    )
 
 
 def demo_real_time_monitoring(duration: int, auto: bool):

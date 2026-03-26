@@ -42,7 +42,7 @@ class PrometheusExporter:
                     lines.append(f"# TYPE {prom_name} {metric_type}")
 
                     # Add metric value
-                    if isinstance(point.value, (int, float)):
+                    if isinstance(point.value, int | float):
                         lines.append(f"{prom_name} {point.value}")
 
         return "\n".join(lines)

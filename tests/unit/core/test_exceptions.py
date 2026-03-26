@@ -42,11 +42,6 @@ from src.core.exceptions import (
     ModelError,
     ModelLoadError,
     ModelNotFoundError,
-    TawizaConfigurationError,
-    # Base
-    TawizaException,
-    TawizaResourceError,
-    TawizaValidationError,
     OllamaServiceError,
     PathTraversalError,
     PythonVersionError,
@@ -69,6 +64,11 @@ from src.core.exceptions import (
     TaskNotCancellableError,
     TaskNotCompletedError,
     TaskNotFoundError,
+    TawizaConfigurationError,
+    # Base
+    TawizaException,
+    TawizaResourceError,
+    TawizaValidationError,
     require_debugger_started,
     # Convenience
     require_system_initialized,

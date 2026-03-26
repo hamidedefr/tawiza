@@ -136,10 +136,7 @@ class DVFAdapter(BaseAdapter):
 
         if code_insee:
             # Check if this is a commune with arrondissements
-            if code_insee in self._ARRONDISSEMENTS:
-                codes_to_query = self._ARRONDISSEMENTS[code_insee]
-            else:
-                codes_to_query = [code_insee]
+            codes_to_query = self._ARRONDISSEMENTS.get(code_insee, [code_insee])
         elif code_dept:
             # Check if department is Paris (special case)
             if code_dept in self._ARRONDISSEMENTS:

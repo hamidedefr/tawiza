@@ -85,7 +85,7 @@ class CommandHistory:
 
         # Track argument frequencies
         for arg_name, arg_value in (args or {}).items():
-            if isinstance(arg_value, (str, int, float, bool)):
+            if isinstance(arg_value, str | int | float | bool):
                 if arg_name not in pattern["common_args"]:
                     pattern["common_args"][arg_name] = {}
                 val_key = str(arg_value)

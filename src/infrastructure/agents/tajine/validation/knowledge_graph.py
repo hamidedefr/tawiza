@@ -326,7 +326,7 @@ class KnowledgeGraph:
             return self._normalize_string(known) == self._normalize_string(claimed)
 
         # Numeric comparison with tolerance
-        if isinstance(known, (int, float)) and isinstance(claimed, (int, float)):
+        if isinstance(known, int | float) and isinstance(claimed, int | float):
             if tolerance > 0 and known != 0:
                 diff = abs(known - claimed) / abs(known)
                 return diff <= tolerance

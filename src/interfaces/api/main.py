@@ -129,8 +129,7 @@ async def lifespan(app: FastAPI):
         )
     else:
         logger.warning(
-            "AgentOrchestrator ready but NO Ollama model available — "
-            "LLM features will be degraded"
+            "AgentOrchestrator ready but NO Ollama model available — LLM features will be degraded"
         )
 
     # Initialize WebSocket

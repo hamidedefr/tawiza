@@ -184,7 +184,8 @@ class TestFranceMapPNG:
         """FranceMapPNG initializes with default values."""
         widget = FranceMapPNG()
         assert (
-            widget.geojson_path == Path.home() / ".cache" / "tawiza" / "geo" / "departements.geojson"
+            widget.geojson_path
+            == Path.home() / ".cache" / "tawiza" / "geo" / "departements.geojson"
         )
         assert isinstance(widget.config, MapConfig)
         assert widget._department_data == {}

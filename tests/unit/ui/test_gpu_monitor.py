@@ -20,7 +20,7 @@ def test_gpu_status_creation():
 
 def test_gpu_not_available():
     status = GPUStatus(available=False, location=GPULocation.NONE)
-    assert status.available == False
+    assert status.available is False
     assert status.memory_percent == 0
 
 
@@ -51,7 +51,7 @@ GPU[0]        : Temperature (c): 65.0c
 """
     status = monitor._parse_rocm_output(rocm_output)
     assert status is not None
-    assert status.available == True
+    assert status.available is True
     assert status.memory_used == 4096
     assert status.memory_total == 24576
     assert status.temperature == 65
@@ -64,7 +64,7 @@ def test_gpu_monitor_parse_invalid_output():
     status = monitor._parse_rocm_output("")
     # Parser returns a status but with zero values when parsing fails gracefully
     assert status is not None
-    assert status.available == True  # Still marked as available
+    assert status.available is True  # Still marked as available
     assert status.memory_total == 0  # But no data parsed
 
 
@@ -80,7 +80,7 @@ def test_check_host_gpu_success(mock_run):
     status = monitor.check_host_gpu()
 
     assert status is not None
-    assert status.available == True
+    assert status.available is True
     mock_run.assert_called_once()
 
 
@@ -110,7 +110,7 @@ def test_get_status_host_priority(mock_run):
     monitor = GPUMonitor()
     status = monitor.get_status()
 
-    assert status.available == True
+    assert status.available is True
     assert status.location == GPULocation.HOST
 
 

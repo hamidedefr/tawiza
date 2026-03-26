@@ -1,10 +1,11 @@
 """Tests for multi-dimensional reward computation (reward.py)."""
+
 import pytest
 
 from src.infrastructure.agents.tajine.hunter.reward import (
+    _WEIGHTS,
     FetchSignals,
     RewardResult,
-    _WEIGHTS,
     compute_reward,
 )
 
@@ -34,8 +35,11 @@ class TestComputeReward:
         assert result.is_external_failure is False
         # All five dimensions should be present
         assert set(result.components.keys()) == {
-            "item_count", "data_richness", "freshness",
-            "response_time", "success",
+            "item_count",
+            "data_richness",
+            "freshness",
+            "response_time",
+            "success",
         }
 
     def test_rich_data(self):

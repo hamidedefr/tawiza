@@ -378,7 +378,7 @@ class TestParseMessage:
 
     def test_parse_unknown_type_raises(self):
         """Unknown types raise validation error since MessageType is a strict enum."""
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, KeyError)):
             parse_message({"type": "unknown.type"})
 
     def test_parse_tajine_perceive(self):

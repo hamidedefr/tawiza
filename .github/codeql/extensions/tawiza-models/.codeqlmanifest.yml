@@ -1,6 +1,0 @@
-name: tawiza/custom-models
-version: 1.0.0
-extensionTargets:
-  codeql/python-queries: "*"
-dataExtensions:
-  - models/**/*.yml

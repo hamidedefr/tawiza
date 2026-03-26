@@ -113,9 +113,7 @@ class TestGeoCache:
         cache = GeoCache(config)
 
         async def mock_download(url, filepath):
-            if "departements" in str(filepath):
-                return True
-            return False
+            return "departements" in str(filepath)
 
         with patch.object(cache, "_download_file", side_effect=mock_download):
             result = await cache.ensure_cache()

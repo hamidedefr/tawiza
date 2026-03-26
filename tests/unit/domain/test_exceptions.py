@@ -37,10 +37,10 @@ from src.domain.exceptions import (
     MLError,
     ModelLoadError,
     ModelNotFoundError,
-    # Base
-    TawizaError,
     NotFoundError,
     RateLimitError,
+    # Base
+    TawizaError,
     TimeoutError,
     TrainingError,
     UseCaseError,

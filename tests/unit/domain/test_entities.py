@@ -98,7 +98,7 @@ class TestEntity:
 
         assert entity != "not an entity"
         assert entity != 123
-        assert entity != None
+        assert entity is not None
 
     def test_entity_touch_updates_timestamp(self):
         """_touch() should update updated_at timestamp."""
@@ -236,7 +236,7 @@ class TestModelMetrics:
         """ModelMetrics should be immutable."""
         metrics = ModelMetrics(accuracy=0.90)
 
-        with pytest.raises(Exception):  # FrozenInstanceError
+        with pytest.raises(AttributeError):
             metrics.accuracy = 0.95
 
 
@@ -662,7 +662,7 @@ class TestDatasetMetadata:
         """DatasetMetadata should be immutable."""
         metadata = DatasetMetadata(size=100, source="test", format="jsonl")
 
-        with pytest.raises(Exception):
+        with pytest.raises(AttributeError):
             metadata.size = 200
 
 

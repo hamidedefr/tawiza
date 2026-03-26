@@ -248,22 +248,18 @@ class AgentOrchestrator:
 
         # Log available models with sizes
         model_list = ", ".join(
-            f"{m['name']} ({self.ollama_client.format_model_size(m['size'])})"
-            for m in models
+            f"{m['name']} ({self.ollama_client.format_model_size(m['size'])})" for m in models
         )
         logger.info(f"Ollama models available: {model_list}")
 
         # Auto-select best model
-        selected = await self.ollama_client.select_best_model(
-            preferred_model=configured_model
-        )
+        selected = await self.ollama_client.select_best_model(preferred_model=configured_model)
 
         if selected == configured_model:
             logger.info(f"Using configured Ollama model: {selected}")
         else:
             logger.warning(
-                f"Configured model '{configured_model}' not found, "
-                f"using '{selected}' instead"
+                f"Configured model '{configured_model}' not found, using '{selected}' instead"
             )
 
         # Update the client's model

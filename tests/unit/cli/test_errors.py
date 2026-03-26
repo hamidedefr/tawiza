@@ -30,14 +30,14 @@ from src.cli.errors import (
     GPUError,
     GPUNotAvailableError,
     InvalidPathError,
-    # Exception hierarchy
-    TawizaError,
     NetworkError,
     PathTraversalError,
     ServiceUnavailableError,
     SystemAlreadyInitializedError,
     SystemError,
     SystemNotInitializedError,
+    # Exception hierarchy
+    TawizaError,
     get_error_handler,
     # Decorators
     handle_errors,

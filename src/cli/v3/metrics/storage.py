@@ -133,7 +133,7 @@ class MetricsStorage:
             for category, values in metrics.items():
                 cat = MetricCategory(category) if isinstance(category, str) else category
                 for name, value in values.items():
-                    if isinstance(value, (int, float)):
+                    if isinstance(value, int | float):
                         cursor.execute(
                             """
                             INSERT INTO metrics_raw (timestamp, category, name, value)

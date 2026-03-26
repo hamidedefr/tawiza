@@ -400,7 +400,7 @@ class TestHybridRouterFallback:
         ) as mock_powerful:
             mock_powerful.side_effect = Exception("Model unavailable")
 
-            with pytest.raises(Exception):
+            with pytest.raises(RuntimeError):
                 await router.generate(
                     prompt="Task",
                     trust_score=0.1,  # Low trust forces powerful model

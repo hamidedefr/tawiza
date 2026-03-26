@@ -274,4 +274,3 @@ diagnose:
 	@./scripts/check-ports.sh --conflicts
 	@echo ""
 	@./scripts/health-check.sh || true
-

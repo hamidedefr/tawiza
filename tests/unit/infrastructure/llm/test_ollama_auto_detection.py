@@ -48,9 +48,7 @@ class TestDiscoverModels:
     async def test_discover_models_empty_when_unreachable(self, ollama_client):
         """Should return empty list when Ollama is unreachable."""
         ollama_client.client = AsyncMock()
-        ollama_client.client.get = AsyncMock(
-            side_effect=httpx.ConnectError("Connection refused")
-        )
+        ollama_client.client.get = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
 
         models = await ollama_client.discover_models()
         assert models == []
@@ -100,9 +98,7 @@ class TestSelectBestModel:
             ]
         )
 
-        result = await ollama_client.select_best_model(
-            preferred_model="llama3:70b"
-        )
+        result = await ollama_client.select_best_model(preferred_model="llama3:70b")
         assert result == "qwen3.5:27b"
 
     @pytest.mark.asyncio
@@ -190,9 +186,7 @@ class TestProbeOllamaModels:
                 {"name": "qwen2.5:7b", "size": 4_700_000_000},
             ]
         )
-        orchestrator.ollama_client.select_best_model = AsyncMock(
-            return_value="qwen2.5:7b"
-        )
+        orchestrator.ollama_client.select_best_model = AsyncMock(return_value="qwen2.5:7b")
 
         with patch.dict("os.environ", {"OLLAMA_MODEL": "qwen2.5:7b"}):
             result = await orchestrator.probe_ollama_models()

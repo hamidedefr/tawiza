@@ -133,6 +133,4 @@ async def test_agents_have_system_prompts():
             or "identité" in prompt_lower
             or any(c in agent_class.SYSTEM_PROMPT for c in "éèêàùç")
         )
-        assert has_french, (
-            f"{agent_class.__name__} SYSTEM_PROMPT should be in French"
-        )
+        assert has_french, f"{agent_class.__name__} SYSTEM_PROMPT should be in French"

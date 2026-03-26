@@ -177,7 +177,7 @@ class MarginSamplingStrategy(ISamplingStrategy):
         for fb in feedbacks:
             # Get prediction probabilities
             probabilities = fb.output_data.get("probabilities") or fb.metadata.get("probabilities")
-            if probabilities and isinstance(probabilities, (list, np.ndarray)):
+            if probabilities and isinstance(probabilities, list | np.ndarray):
                 probs = sorted(probabilities, reverse=True)
                 if len(probs) >= 2:
                     # Margin = difference between top 2 predictions
@@ -299,7 +299,7 @@ class EntropySamplingStrategy(ISamplingStrategy):
         candidates: list[SampleScore] = []
         for fb in feedbacks:
             probabilities = fb.output_data.get("probabilities") or fb.metadata.get("probabilities")
-            if probabilities and isinstance(probabilities, (list, np.ndarray)):
+            if probabilities and isinstance(probabilities, list | np.ndarray):
                 entropy = self._calculate_entropy(probabilities)
                 confidence = max(probabilities) if probabilities else 0.0
 
@@ -418,7 +418,7 @@ class DiversitySamplingStrategy(ISamplingStrategy):
         feedback_map = {}
         for fb in feedbacks:
             embedding = fb.output_data.get("embedding") or fb.metadata.get("embedding")
-            if embedding and isinstance(embedding, (list, np.ndarray)):
+            if embedding and isinstance(embedding, list | np.ndarray):
                 embeddings_list.append(embedding)
                 feedback_map[len(embeddings_list) - 1] = fb
 

@@ -135,7 +135,7 @@ class ScenarioLevel(BaseCognitiveLevel):
             # Check for explicit growth rate
             if "growth" in data:
                 val = data["growth"]
-                if isinstance(val, (int, float)):
+                if isinstance(val, int | float):
                     return float(val)
 
             # Compute from year-over-year

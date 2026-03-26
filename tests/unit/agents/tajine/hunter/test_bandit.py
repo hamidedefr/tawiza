@@ -49,5 +49,3 @@ class TestSourceBandit:
         selections = [bandit.select(n=1)[0] for _ in range(100)]
         sirene_count = selections.count("sirene")
         assert sirene_count > 70  # Should select sirene most often
-
-

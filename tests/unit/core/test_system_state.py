@@ -73,7 +73,7 @@ class TestInitializationConfig:
             monitoring_enabled=True,
         )
 
-        with pytest.raises(Exception):  # FrozenInstanceError
+        with pytest.raises(AttributeError):
             config.gpu_enabled = False
 
 
@@ -151,7 +151,7 @@ class TestSystemState:
         """State should be immutable (frozen)."""
         state = SystemState(active_tasks=5)
 
-        with pytest.raises(Exception):  # FrozenInstanceError
+        with pytest.raises(AttributeError):
             state.active_tasks = 10
 
 

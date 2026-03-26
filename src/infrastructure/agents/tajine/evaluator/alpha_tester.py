@@ -23,7 +23,7 @@ def _get_content_text(data: RawData) -> str:
         for _key, value in data.content.items():
             if isinstance(value, str):
                 parts.append(value)
-            elif isinstance(value, (list, tuple)):
+            elif isinstance(value, list | tuple):
                 parts.extend(str(v) for v in value)
             else:
                 parts.append(str(value))

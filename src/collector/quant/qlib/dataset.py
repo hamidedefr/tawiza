@@ -36,7 +36,6 @@ class TerritorialDataset:
         labels_df: pd.DataFrame | None = None,
         metadata: dict[str, Any] | None = None,
     ):
-
         self.features = features_df.copy()
         self.labels = labels_df.copy() if labels_df is not None else None
         self.metadata = metadata or {}
@@ -114,7 +113,7 @@ class TerritorialDataset:
 
     def __getitem__(self, key) -> "TerritorialDataset":
         """Subset the dataset."""
-        if isinstance(key, (slice, list, np.ndarray)):
+        if isinstance(key, slice | list | np.ndarray):
             features_subset = self.features.iloc[key]
             labels_subset = self.labels.iloc[key] if self.labels is not None else None
         else:

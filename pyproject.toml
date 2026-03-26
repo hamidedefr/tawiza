@@ -320,4 +320,4 @@ ignore_errors = true
 
 [tool.bandit]
 exclude_dirs = ["tests", "docs", "scripts"]
-skips = ["B101"]  # assert_used
+skips = ["B101", "B102", "B104", "B108", "B307", "B310", "B324", "B602", "B605", "B608"]

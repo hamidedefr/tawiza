@@ -625,7 +625,7 @@ class TestTemperatureValidation:
 
     def test_temperature_below_minimum(self):
         """Temperature below 0 should fail validation."""
-        with pytest.raises(Exception):  # Pydantic ValidationError
+        with pytest.raises(ValueError):
             ChatRequest(
                 messages=[Message(role="user", content="Hi")],
                 temperature=-0.1,
@@ -633,7 +633,7 @@ class TestTemperatureValidation:
 
     def test_temperature_above_maximum(self):
         """Temperature above 2.0 should fail validation."""
-        with pytest.raises(Exception):  # Pydantic ValidationError
+        with pytest.raises(ValueError):
             ChatRequest(
                 messages=[Message(role="user", content="Hi")],
                 temperature=2.1,
@@ -655,10 +655,10 @@ class TestMaxTokensValidation:
 
     def test_max_tokens_below_minimum(self):
         """Max tokens below 1 should fail validation."""
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             CompletionRequest(prompt="Hi", max_tokens=0)
 
     def test_max_tokens_above_maximum(self):
         """Max tokens above 4096 should fail validation."""
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             CompletionRequest(prompt="Hi", max_tokens=5000)

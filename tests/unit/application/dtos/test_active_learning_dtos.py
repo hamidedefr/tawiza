@@ -44,7 +44,7 @@ class TestSelectSamplesRequest:
             assert req.strategy_type == strategy
 
     def test_invalid_strategy(self):
-        with pytest.raises(Exception):  # ValidationError
+        with pytest.raises(ValueError):
             SelectSamplesRequest(
                 model_name="m",
                 model_version="1",
@@ -53,7 +53,7 @@ class TestSelectSamplesRequest:
             )
 
     def test_sample_count_must_be_positive(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             SelectSamplesRequest(
                 model_name="m",
                 model_version="1",
@@ -62,7 +62,7 @@ class TestSelectSamplesRequest:
             )
 
     def test_sample_count_max(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             SelectSamplesRequest(
                 model_name="m",
                 model_version="1",
@@ -81,7 +81,7 @@ class TestSelectSamplesRequest:
         assert req.threshold == 0.5
 
     def test_threshold_out_of_range(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             SelectSamplesRequest(
                 model_name="m",
                 model_version="1",
@@ -146,7 +146,7 @@ class TestDetectDriftRequest:
             assert req.drift_type == dt
 
     def test_invalid_type(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             DetectDriftRequest(model_name="m", model_version="1", drift_type="invalid")
 
     def test_with_window(self):

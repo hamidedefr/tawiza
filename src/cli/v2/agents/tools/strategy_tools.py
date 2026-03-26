@@ -173,7 +173,7 @@ def register_strategy_tools(registry: ToolRegistry) -> None:
                 if v1 is None or v2 is None:
                     continue
 
-                if isinstance(v1, (int, float)) and isinstance(v2, (int, float)):
+                if isinstance(v1, int | float) and isinstance(v2, int | float):
                     diff = v1 - v2
                     diff_pct = round((diff / v2 * 100) if v2 != 0 else 0, 1)
                     winner = r1_name if v1 > v2 else r2_name if v2 > v1 else "tie"

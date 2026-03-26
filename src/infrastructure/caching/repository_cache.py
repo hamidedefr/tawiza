@@ -142,7 +142,7 @@ class CacheKeyBuilder:
             self._parts.append(str(value))
         elif isinstance(value, datetime):
             self._parts.append(value.isoformat())
-        elif isinstance(value, (dict, list)):
+        elif isinstance(value, dict | list):
             # Hash complex structures
             self._parts.append(
                 hashlib.sha256(json.dumps(value, sort_keys=True, default=str).encode()).hexdigest()[

@@ -20,7 +20,7 @@
 *.pem
 .supabase/seed.sql
 supabase/seed.sql
-supabase/migrations 
+supabase/migrations
 
 # debug
 npm-debug.log*
@@ -50,4 +50,4 @@ package-lock.json
 yarn.lock
 
 # editors
-.vscode 
+.vscode

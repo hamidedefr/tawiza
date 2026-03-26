@@ -75,7 +75,7 @@ class UnifiedSynthesis:
             if isinstance(val, dict):
                 # Convert dict to a readable summary
                 return ", ".join(f"{k}: {v}" for k, v in val.items() if v)
-            if isinstance(val, (list, tuple)):
+            if isinstance(val, list | tuple):
                 return ", ".join(_ensure_str(v) for v in val)
             return str(val)
 

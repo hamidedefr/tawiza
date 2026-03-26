@@ -74,7 +74,7 @@ class TestValidationEngine:
         # Claim without supporting data
         result = await engine.validate({"claim": "Growth rate is 500%", "source": None, "data": {}})
 
-        assert result["is_valid"] == False
+        assert result["is_valid"] is False
         assert "hallucination" in result.get("flags", [])
 
     @pytest.mark.asyncio

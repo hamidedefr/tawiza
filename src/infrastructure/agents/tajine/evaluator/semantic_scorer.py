@@ -216,7 +216,7 @@ class SemanticCoherenceScorer:
             for _key, value in data.content.items():
                 if isinstance(value, str):
                     parts.append(value)
-                elif isinstance(value, (list, tuple)):
+                elif isinstance(value, list | tuple):
                     parts.extend(str(v) for v in value if v)
             return " ".join(parts)
 

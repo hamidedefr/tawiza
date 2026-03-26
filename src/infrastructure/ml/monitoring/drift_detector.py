@@ -112,7 +112,7 @@ class DriftDetector:
 
             # Extract numeric values
             for _key, value in sample.items():
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     feature_vector.append(value)
 
             if feature_vector:

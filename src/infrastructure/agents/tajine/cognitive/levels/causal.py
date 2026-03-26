@@ -207,7 +207,7 @@ class CausalLevel(BaseCognitiveLevel):
 
             # Also extract single values as repeated series (for testing)
             for key in ["companies", "growth", "unemployment_rate"]:
-                if key in data and isinstance(data[key], (int, float)):
+                if key in data and isinstance(data[key], int | float):
                     # Convert single value to short series
                     time_series[key] = [float(data[key])] * 6
 

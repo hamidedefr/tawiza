@@ -14,6 +14,7 @@ from .conversation_memory import (
     PersonalizationEngine,
     ShortTermMemory,
 )
+from .data_analyst_agent import DataAnalystAgent
 from .deep_research_agent import (
     DeepResearchAgent,
     ResearchQuery,
@@ -21,12 +22,6 @@ from .deep_research_agent import (
     create_research_agent,
 )
 from .gpu_optimizer import GPUOptimizer, create_gpu_optimizer
-from .data_analyst_agent import DataAnalystAgent
-
-try:
-    from .ml_engineer_agent import MLEngineerAgent
-except ImportError:
-    MLEngineerAgent = None  # type: ignore[assignment,misc]  # optuna is optional
 from .multi_agent_system import (
     AgentCoordinator,
     AgentMetrics,
@@ -38,6 +33,11 @@ from .multi_agent_system import (
 )
 from .s3_storage_agent import S3StorageAgent, get_s3_agent
 from .web_crawler_agent import CrawlConfig, WebCrawlerAgent, create_crawler
+
+try:
+    from .ml_engineer_agent import MLEngineerAgent
+except ImportError:
+    MLEngineerAgent = None  # type: ignore[assignment,misc]  # optuna is optional
 
 __all__ = [
     # Multi-agent system

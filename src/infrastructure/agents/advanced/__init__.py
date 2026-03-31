@@ -22,12 +22,12 @@ from .deep_research_agent import (
 )
 from .gpu_optimizer import GPUOptimizer, create_gpu_optimizer
 
+from .data_analyst_agent import DataAnalystAgent
+
 try:
-    from .data_analyst_agent import DataAnalystAgent
     from .ml_engineer_agent import MLEngineerAgent
 except ImportError:
-    DataAnalystAgent = None  # type: ignore[assignment,misc]
-    MLEngineerAgent = None  # type: ignore[assignment,misc]
+    MLEngineerAgent = None  # type: ignore[assignment,misc]  # optuna is optional
 from .multi_agent_system import (
     AgentCoordinator,
     AgentMetrics,

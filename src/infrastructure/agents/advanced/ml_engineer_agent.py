@@ -255,7 +255,7 @@ class MLEngineerAgent:
             elif config.optimization_method == "bayesian":
                 return await self._bayesian_optimization(X, y, config, param_grids)
             elif config.optimization_method == "optuna":
-                return await self._optuna_optimization(X, y, config, param_grids)
+                return await self._bayesian_optimization(X, y, config, param_grids)
             else:
                 raise ValueError(
                     f"Méthode d'optimisation non supportée: {config.optimization_method}"

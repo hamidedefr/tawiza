@@ -14,7 +14,6 @@ from .conversation_memory import (
     PersonalizationEngine,
     ShortTermMemory,
 )
-from .data_analyst_agent import DataAnalystAgent
 from .deep_research_agent import (
     DeepResearchAgent,
     ResearchQuery,
@@ -22,7 +21,13 @@ from .deep_research_agent import (
     create_research_agent,
 )
 from .gpu_optimizer import GPUOptimizer, create_gpu_optimizer
-from .ml_engineer_agent import MLEngineerAgent
+
+try:
+    from .data_analyst_agent import DataAnalystAgent
+    from .ml_engineer_agent import MLEngineerAgent
+except ImportError:
+    DataAnalystAgent = None  # type: ignore[assignment,misc]
+    MLEngineerAgent = None  # type: ignore[assignment,misc]
 from .multi_agent_system import (
     AgentCoordinator,
     AgentMetrics,

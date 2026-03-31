@@ -10,8 +10,12 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import optuna  # Required for hyperparameter optimization
 import pandas as pd
+
+try:
+    import optuna
+except ImportError:
+    optuna = None  # Optional: hyperparameter optimization
 from loguru import logger
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, cross_val_score
@@ -450,10 +454,11 @@ class MLEngineerAgent:
         param_grids: dict[str, list[Any]],
     ) -> tuple[dict[str, Any], HyperparameterOptimizationResult]:
         """Optimisation bayésienne avec Optuna"""
+        if optuna is None:
+            raise ImportError("optuna is required for Bayesian optimization: pip install optuna")
         logger.info("🔧 Optimisation bayésienne avec Optuna...")
 
         try:
-            # import optuna  # Temporairement commenté
 
             optimization_history = []
             best_params = None

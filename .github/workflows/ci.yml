@@ -101,7 +101,7 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             git add -A
             git commit -m "auto-fix: nettoyage typographique"
-            git push
+            git push || echo "::notice::Push failed (branch protection), skipping auto-fix commit"
           fi
 
   humanize:
@@ -205,6 +205,32 @@ jobs:
             echo "### Test Results" >> "$GITHUB_STEP_SUMMARY"
             tail -5 pytest-output.txt >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Coverage badge
+        if: github.ref == 'refs/heads/main' && hashFiles('coverage.xml') != ''
+        run: |
+          COV=$(python3 -c "
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('coverage.xml')
+          rate = float(tree.getroot().attrib['line-rate'])
+          print(f'{rate*100:.1f}')
+          ")
+          echo "Coverage: ${COV}%"
+          if (( $(echo "$COV >= 80" | bc -l) )); then COLOR=brightgreen
+          elif (( $(echo "$COV >= 60" | bc -l) )); then COLOR=green
+          elif (( $(echo "$COV >= 40" | bc -l) )); then COLOR=yellowgreen
+          elif (( $(echo "$COV >= 20" | bc -l) )); then COLOR=yellow
+          else COLOR=red; fi
+          echo "{\"schemaVersion\":1,\"label\":\"coverage\",\"message\":\"${COV}%\",\"color\":\"${COLOR}\"}" > coverage-badge.json
+          if [ -n "$GIST_TOKEN" ]; then
+            curl -s -X PATCH \
+              -H "Authorization: token $GIST_TOKEN" \
+              -d "{\"files\":{\"tawiza-coverage.json\":{\"content\":$(cat coverage-badge.json | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')}}}" \
+              "https://api.github.com/gists/$GIST_ID" > /dev/null
+          fi
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.COVERAGE_GIST_ID }}
 
   docker:
     name: Docker Build

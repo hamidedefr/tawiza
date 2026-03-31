@@ -26,6 +26,7 @@
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![CI](https://img.shields.io/github/actions/workflow/status/tawiza/tawiza/ci.yml?style=flat-square&label=CI)](https://github.com/tawiza/tawiza/actions)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/hamidedefr/f740b4f620f275d4cfe294d018e4e944/raw/tawiza-coverage.json&style=flat-square)](https://github.com/tawiza/tawiza/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/tawiza/tawiza/blob/main/CONTRIBUTING.md)
 [![Good First Issues](https://img.shields.io/github/issues/tawiza/tawiza/good%20first%20issue?style=flat-square&label=good%20first%20issues&color=7057ff)](https://github.com/tawiza/tawiza/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 

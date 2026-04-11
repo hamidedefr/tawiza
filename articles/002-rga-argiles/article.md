@@ -122,7 +122,7 @@ Les maires ne sont pas méchants. Ils sont seuls, pas formés, pas sanctionnés,
 
 ## Le patrimoine qui fond
 
-On a croisé deux bases de données que personne ne croise : les zones RGA (GASPAR) et les prix immobiliers (DVF 2024, data.gouv.fr).
+On a croisé deux bases publiques rarement réunies : les zones RGA (GASPAR) et les prix immobiliers (DVF 2024, data.gouv.fr). Le code et les données du croisement sont ouverts sur [GitHub](https://github.com/tawiza/tawiza/tree/main/articles/002-rga-argiles), avec la documentation complète et les scripts Python pour reproduire l'analyse.
 
 Le résultat est un graphique qui parle tout seul.
 
